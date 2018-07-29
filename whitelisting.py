@@ -231,13 +231,6 @@ class Whitelist:
             for file in self.secondary_whitelist_file:
                 data.extend(file.read().splitlines())
 
-        # if self.secondary_whitelist_file and path.isfile(self.secondary_whitelist_file):
-        #     secondary_data = Helpers.File(self.secondary_whitelist_file).to_list()
-
-        #     data.extend(secondary_data)
-
-        #     data = Helpers.List(data).format()
-
         if data:
 
             list(map(self.whitelist_parser, data))
@@ -430,7 +423,6 @@ class Helpers:  # pylint: disable=too-few-public-methods
                 "group": 0,
                 "occurences": 0,
                 "rematch": False,
-                "replace_with": None,
                 "return_data": True,
             }
 
@@ -443,30 +435,6 @@ class Helpers:  # pylint: disable=too-few-public-methods
                 self.regex = escape(regex)
             else:
                 self.regex = regex
-
-        def not_matching_list(self):
-            """
-            This method return a list of string which don't match the
-            given regex.
-            """
-
-            pre_result = comp(self.regex)
-
-            return list(
-                filter(lambda element: not pre_result.search(str(element)), self.data)
-            )
-
-        def matching_list(self):
-            """
-            This method return a list of the string which match the given
-            regex.
-            """
-
-            pre_result = comp(self.regex)
-
-            return list(
-                filter(lambda element: pre_result.search(str(element)), self.data)
-            )
 
         def match(self):
             """
@@ -508,21 +476,6 @@ class Helpers:  # pylint: disable=too-few-public-methods
                 return True
 
             return False
-
-        def replace(self):
-            """
-            Used to replace a matched string with another.
-            """
-
-            if self.replace_with:  # pylint: disable=no-member
-                return substrings(
-                    self.regex,
-                    self.replace_with,  # pylint: disable=no-member
-                    self.data,
-                    self.occurences,  # pylint: disable=no-member
-                )
-
-            return self.data
 
 
 if __name__ == "__main__":
