@@ -45,6 +45,12 @@ class Settings:  # pylint: disable=too-few-public-methods
     # Note: DO NOT TOUCH UNLESS YOU KNOW WHAT IT MEANS!
     whitelist_all_marker = "ALL "
 
+    # This variable is used to set the marker that will allow a more permissive
+    # regex check.
+    #
+    # Note: DO NOT TOUCH UNLESS YOU KNOW WHAT IT MEANS!
+    whitelist_full_regex_marker = "REG "
+
     # This variable save the list of all whitelisted domain in regex format.
     #
     # Note: DO NOT TOUCH UNLESS YOU KNOW WHAT IT MEANS!
@@ -102,7 +108,7 @@ class Whitelist:
         if self.output_file:
             Helpers.File(self.output_file).write(line + "\n", overwrite=False)
         else:
-            print(line + "\n")
+            print(line)
 
     @classmethod
     def _format_line(cls, line):
@@ -187,6 +193,10 @@ class Whitelist:
             if line.startswith(Settings.whitelist_all_marker):
                 to_check = line.split(Settings.whitelist_all_marker)[1].strip()
                 regex_whitelist = escape(to_check) + "$"
+            elif line.startswith(Settings.whitelist_full_regex_marker):
+                regex_whitelist = line.split(Settings.whitelist_full_regex_marker)[
+                    1
+                ].strip()
             else:
                 to_check = line.strip()
 
