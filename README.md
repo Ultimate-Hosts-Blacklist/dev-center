@@ -2,18 +2,54 @@
 
 This branch will help you clean your list or host file with the whitelist list which is used by the [Ultimate Hosts Blacklist](https://github.com/mitchellkrogza/Ultimate.Hosts.Blacklist) infrastructure.
 
+## Requirements
 
-## Procedure for whitelisting
+If you want to use the script, please take the time to clone this branch and install the requirements with:
 
-### Clone and run
+    pip3 install --user -r requirements.txt
 
-If you want to run a test locally simply install the requirements with
+## Complementary whitelist
 
-    pip3 install -r requirements.txt
+Our script allow us to link a file to the system which will be used in complementary of our whitelist list.
 
-and use the script!
+### `ALL ` as special marker
 
-#### Usage of the script
+If you already used a whitelist list you already know that we generaly only list all domains we want to whitelist one by one.
+
+ It's also possible to do that with our whitelisting system but we can do more.
+Indeed we also can use the `ALL ` which will tell the system to regex check againt what follows.
+
+### Understanding what we actually do
+
+If we have the following secondary whitelist list:
+
+```
+facebook.com
+ALL .gov
+```
+
+our system actually create a one line regular expression which will be checked against every line. At the end on the system side for the given whitelist list we generate the following regular expression.
+
+```re
+^facebook\.com$|^www\.facebook\.com|\.gov$
+```
+
+Which actually means that we whitelist:
+
+* `facebook.com` and `www.facebook.com`
+* all domains which ends with `.gov`
+
+### INVALID characters
+
+#### When the `ALL ` marker is used
+
+* `$`
+    * As we automatically append `$` to the end, you should not use this character.
+
+* `\`
+    * As we automatically escape the given expression, you should not explicitly escape your regular expression when declaring an `ALL ` marker.
+
+## Usage of the script
 
     usage: whitelisting.py [-h] [-f FILE] [-w WHITELIST] [-o OUTPUT]
 
