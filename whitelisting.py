@@ -225,12 +225,18 @@ class Whitelist:
             Helpers.Download(Settings.whitelist_permanent_list, None).link().split("\n")
         )
 
-        if self.secondary_whitelist_file and path.isfile(self.secondary_whitelist_file):
-            secondary_data = Helpers.File(self.secondary_whitelist_file).to_list()
+        if self.secondary_whitelist_file and isinstance(
+            self.secondary_whitelist_file, list
+        ):
+            for file in self.secondary_whitelist_file:
+                data.extend(file.read().splitlines())
 
-            data.extend(secondary_data)
+        # if self.secondary_whitelist_file and path.isfile(self.secondary_whitelist_file):
+        #     secondary_data = Helpers.File(self.secondary_whitelist_file).to_list()
 
-            data = Helpers.List(data).format()
+        #     data.extend(secondary_data)
+
+        #     data = Helpers.List(data).format()
 
         if data:
 
@@ -541,7 +547,8 @@ if __name__ == "__main__":
     PARSER.add_argument(
         "-w",
         "--whitelist",
-        type=str,
+        type=argparse.FileType("r"),
+        nargs="+",
         help="Read the given file and append its data to the our whitelist list.",
     )
 

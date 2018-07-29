@@ -68,7 +68,8 @@ Which actually means that we whitelist:
 
 ## Usage of the script
 
-    usage: whitelisting.py [-h] [-f FILE] [-w WHITELIST] [-o OUTPUT]
+    usage: whitelisting.py [-h] [-f FILE] [-w WHITELIST [WHITELIST ...]]
+                        [-o OUTPUT]
 
     The tool to whitelist a list or a hosts file with the Ultimate Hosts Blacklist
     infrastructure.
@@ -77,7 +78,7 @@ Which actually means that we whitelist:
     -h, --help            show this help message and exit
     -f FILE, --file FILE  Read the given file and remove all element to
                             whitelist.
-    -w WHITELIST, --whitelist WHITELIST
+    -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
                             Read the given file and append its data to the our
                             whitelist list.
     -o OUTPUT, --output OUTPUT
