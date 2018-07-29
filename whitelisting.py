@@ -17,7 +17,7 @@ Contributors:
 import argparse
 from os import path
 from re import compile as comp
-from re import escape, sub as substrings
+from re import escape
 
 from colorama import Fore, Style
 from colorama import init as initiate
@@ -111,7 +111,7 @@ class Whitelist:
             print(line)
 
     @classmethod
-    def _format_line(cls, line):
+    def _format_line(cls, line):  # pylint: disable=too-many-branches
         """
         This method will format the given line.
 
@@ -128,6 +128,9 @@ class Whitelist:
         element = ""
         tabs = "\t"
         space = " "
+
+        if Helpers.Regex(line, regex_delete, return_data=True).match():
+            return line
 
         tabs_position, space_position = (line.find(tabs), line.find(space))
 
@@ -191,11 +194,11 @@ class Whitelist:
 
         if line and not line.startswith("#"):
             if line.startswith(Settings.whitelist_all_marker):
-                to_check = line.split(Settings.whitelist_all_marker)[1].strip()
+                to_check = line.split(Settings.whitelist_all_marker)[-1].strip()
                 regex_whitelist = escape(to_check) + "$"
             elif line.startswith(Settings.whitelist_full_regex_marker):
                 regex_whitelist = line.split(Settings.whitelist_full_regex_marker)[
-                    1
+                    -1
                 ].strip()
             else:
                 to_check = line.strip()
