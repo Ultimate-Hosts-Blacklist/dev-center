@@ -10,7 +10,7 @@ If you want to use the script, please take the time to clone this branch and ins
 
 ## Complementary whitelist
 
-Our script allow us to link a file to the system which will be used in complementary of our whitelist list.
+Our script allow us to link one or more file(s) to the system which will be used in complementary of our whitelist list.
 
 ### Special markers
 
