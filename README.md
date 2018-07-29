@@ -12,12 +12,27 @@ If you want to use the script, please take the time to clone this branch and ins
 
 Our script allow us to link a file to the system which will be used in complementary of our whitelist list.
 
-### `ALL ` as special marker
+### Special markers
 
 If you already used a whitelist list you already know that we generaly only list all domains we want to whitelist one by one.
 
  It's also possible to do that with our whitelisting system but we can do more.
-Indeed we also can use the `ALL ` which will tell the system to regex check againt what follows.
+#### `ALL ` 
+
+We also can use the `ALL ` marker which will tell the system to escape and regex check againt what follows.
+
+##### INVALID characters
+
+* `$`
+    * As we automatically append `$` to the end, you should not use this character.
+
+* `\`
+    * As we automatically escape the given expression, you should not explicitly escape your regular expression when declaring an `ALL ` marker.
+
+
+#### `REG ` 
+
+We also can use the `REG ` marker which will tell the system to explicitly check for the given regex which follows the marker.
 
 ### Understanding what we actually do
 
@@ -26,18 +41,20 @@ If we have the following secondary whitelist list:
 ```
 facebook.com
 ALL .gov
+REG face
 ```
 
 our system actually create a one line regular expression which will be checked against every line. At the end on the system side for the given whitelist list we generate the following regular expression.
 
 ```re
-^facebook\.com$|^www\.facebook\.com|\.gov$
+^facebook\.com$|^www\.facebook\.com|\.gov$|face
 ```
 
 Which actually means that we whitelist:
 
 * `facebook.com` and `www.facebook.com`
-* all domains which ends with `.gov`
+* all elements which ends with `.gov`
+* all elements which contain the word `face`
 
 ### INVALID characters
 
