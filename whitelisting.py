@@ -82,27 +82,22 @@ class Whitelist:
             if self.output_file:
                 Helpers.File(self.output_file).write("", overwrite=True)
 
-            for line in file_content:
-                if line.startswith("#"):
-                    self._print_or_write(line)
-                    continue
+            to_remove = set(Settings.whitelist)
+            whitelisted = [x for x in file_content if x not in to_remove]
 
-                formated_line = self._format_line(line)
-
-                if isinstance(formated_line, tuple):
-                    to_check, to_parse = formated_line
-                else:
-                    to_check = to_parse = formated_line
-
-                if not Helpers.Regex(
-                    to_check, Settings.regex_whitelist, return_data=False
-                ).match():
-                    self._print_or_write(to_parse)
+            self._print_or_write(
+                Helpers.Regex(
+                    whitelisted, Settings.regex_whitelist, return_data=False
+                ).not_matching_list()
+            )
 
     def _print_or_write(self, line):
         """
         This method will print on screen or write to the output file.
         """
+
+        if isinstance(line, list):
+            line = "\n".join(line)
 
         if self.output_file:
             Helpers.File(self.output_file).write(line + "\n", overwrite=False)
@@ -194,29 +189,41 @@ class Whitelist:
         if line and not line.startswith("#"):
             if line.startswith(Settings.whitelist_all_marker):
                 to_check = line.split(Settings.whitelist_all_marker)[-1].strip()
-                regex_whitelist = escape(to_check) + "$"
+                whitelist_element = (
+                    Settings.whitelist_all_marker + escape(to_check) + "$"
+                )
             elif line.startswith(Settings.whitelist_full_regex_marker):
-                regex_whitelist = line.split(Settings.whitelist_full_regex_marker)[
-                    -1
-                ].strip()
+                whitelist_element = (
+                    Settings.whitelist_full_regex_marker
+                    + line.split(Settings.whitelist_full_regex_marker)[-1].strip()
+                )
             else:
                 to_check = line.strip()
 
                 if not to_check.startswith("www."):
-                    regex_whitelist = [
-                        "^%s$" % escape(to_check),
-                        "^%s$" % escape("www." + to_check),
-                    ]
+                    whitelist_element = [to_check, "www." + to_check]
                 else:
-                    regex_whitelist = [
-                        "^%s$" % escape(to_check),
-                        "^%s$" % escape(".".join(to_check.split(".")[1:])),
-                    ]
+                    whitelist_element = [to_check, ".".join(to_check.split(".")[1:])]
 
-            if isinstance(regex_whitelist, list):
-                Settings.whitelist.extend(regex_whitelist)
+            if isinstance(whitelist_element, list):
+                Settings.whitelist.extend(whitelist_element)
             else:
-                Settings.whitelist.append(regex_whitelist)
+                Settings.whitelist.append(whitelist_element)
+
+    @classmethod
+    def _remove_marker(cls, element):
+        """
+        This method will remove the marker from the given element.
+        """
+
+        if Settings.whitelist_full_regex_marker in element:
+            to_split = Settings.whitelist_full_regex_marker
+        elif Settings.whitelist_all_marker in element:
+            to_split = Settings.whitelist_all_marker
+        else:
+            return element
+
+        return element.split(to_split)[-1]
 
     def get_whitelist(self):
         """
@@ -235,9 +242,29 @@ class Whitelist:
 
         if data:
 
-            list(map(self.whitelist_parser, data))
+            list(map(self.whitelist_parser, Helpers.List(data).format()))
 
-            Settings.regex_whitelist = "|".join(Settings.whitelist)
+            bare_whitelist = list(
+                filter(
+                    lambda x: Settings.whitelist_all_marker not in x
+                    and Settings.whitelist_full_regex_marker not in x,
+                    Settings.whitelist,
+                )
+            )
+
+            specials_whitelist = list(
+                filter(
+                    lambda x: Settings.whitelist_all_marker in x
+                    or Settings.whitelist_full_regex_marker in x,
+                    Settings.whitelist,
+                )
+            )
+
+            Settings.whitelist = bare_whitelist
+
+            if specials_whitelist:
+                specials_whitelist = list(map(self._remove_marker, specials_whitelist))
+                Settings.regex_whitelist = "|".join(specials_whitelist)
 
 
 class Helpers:  # pylint: disable=too-few-public-methods
@@ -478,6 +505,30 @@ class Helpers:  # pylint: disable=too-few-public-methods
                 return True
 
             return False
+
+        def not_matching_list(self):
+            """
+            This method return a list of string which don't match the
+            given regex.
+            """
+
+            pre_result = comp(self.regex)
+
+            return list(
+                filter(lambda element: not pre_result.search(str(element)), self.data)
+            )
+
+        def matching_list(self):
+            """
+            This method return a list of the string which match the given
+            regex.
+            """
+
+            pre_result = comp(self.regex)
+
+            return list(
+                filter(lambda element: pre_result.search(str(element)), self.data)
+            )
 
 
 if __name__ == "__main__":
