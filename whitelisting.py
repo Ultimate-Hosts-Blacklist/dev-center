@@ -90,8 +90,7 @@ class Whitelist:
                 formated_line = self._format_line(line)
 
                 if isinstance(formated_line, tuple):
-                    to_check = formated_line[0]
-                    to_parse = formated_line[1]
+                    to_check, to_parse = formated_line
                 else:
                     to_check = to_parse = formated_line
 
