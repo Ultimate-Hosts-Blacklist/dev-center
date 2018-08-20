@@ -57,6 +57,12 @@ class Settings:  # pylint: disable=too-few-public-methods
     # Note: This variable is auto updated by Initiate()
     regex_whitelist = ""
 
+    # This variable is used to know if we are allowed to use the official
+    # Ultimate Hosts Blacklist whitelist list.
+    #
+    # Note: DO NOT TOUCH UNLESS YOU KNOW WHAT IT MEANS!
+    without_core = False
+
 
 class Whitelist:
     """
@@ -230,9 +236,14 @@ class Whitelist:
         This method will get the list of whitelisted domain.
         """
 
-        data = (
-            Helpers.Download(Settings.whitelist_permanent_list, None).link().split("\n")
-        )
+        if not Settings.without_core:
+            data = (
+                Helpers.Download(Settings.whitelist_permanent_list, None)
+                .link()
+                .split("\n")
+            )
+        else:
+            data = []
 
         if self.secondary_whitelist_file and isinstance(
             self.secondary_whitelist_file, list
@@ -241,7 +252,6 @@ class Whitelist:
                 data.extend(file.read().splitlines())
 
         if data:
-
             list(map(self.whitelist_parser, Helpers.List(data).format()))
 
             bare_whitelist = list(
@@ -559,6 +569,13 @@ if __name__ == "__main__":
     )
 
     PARSER.add_argument(
+        "-wc",
+        "--without-core",
+        action="store_true",
+        help="Disable the usage of the Ultimate Hosts Blacklist whitelist list.",
+    )
+
+    PARSER.add_argument(
         "-o",
         "--output",
         type=str,
@@ -566,6 +583,9 @@ if __name__ == "__main__":
     )
 
     ARGS = PARSER.parse_args()
+
+    if ARGS.without_core:
+        Settings.without_core = ARGS.without_core
 
     Whitelist(
         file=ARGS.file, output=ARGS.output, secondary_whitelist=ARGS.whitelist
