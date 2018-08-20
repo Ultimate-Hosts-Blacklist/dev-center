@@ -16,7 +16,8 @@ Our script allow us to link one or more file(s) to the system which will be used
 
 If you already used a whitelist list you already know that we generaly only list all domains we want to whitelist one by one.
 
- It's also possible to do that with our whitelisting system but we can do more.
+It's also possible to do that with our whitelisting system but we can do more.
+
 #### `ALL ` 
 
 We also can use the `ALL ` marker which will tell the system to escape and regex check againt what follows.
@@ -56,19 +57,9 @@ Which actually means that we whitelist:
 * all elements which ends with `.gov`
 * all elements which contain the word `face`
 
-### INVALID characters
-
-#### When the `ALL ` marker is used
-
-* `$`
-    * As we automatically append `$` to the end, you should not use this character.
-
-* `\`
-    * As we automatically escape the given expression, you should not explicitly escape your regular expression when declaring an `ALL ` marker.
-
 ## Usage of the script
 
-    usage: whitelisting.py [-h] [-f FILE] [-w WHITELIST [WHITELIST ...]]
+    usage: whitelisting.py [-h] [-f FILE] [-w WHITELIST [WHITELIST ...]] [-wc]
                         [-o OUTPUT]
 
     The tool to whitelist a list or a hosts file with the Ultimate Hosts Blacklist
@@ -81,8 +72,10 @@ Which actually means that we whitelist:
     -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
                             Read the given file and append its data to the our
                             whitelist list.
+    -wc, --without-core   Disable the usage of the Ultimate Hosts Blacklist
+                            whitelist list.
     -o OUTPUT, --output OUTPUT
                             Save the result to the given filename or path.
 
-    Crafted with ♥ by Nissar Chababy (Funilrys)
+    Crafted with ♥ by Nissar Chababy (Funilrys) 
 
