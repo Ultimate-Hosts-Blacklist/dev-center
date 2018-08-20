@@ -45,17 +45,23 @@ ALL .gov
 REG face
 ```
 
-our system actually create a one line regular expression which will be checked against every line. At the end on the system side for the given whitelist list we generate the following regular expression.
+our system will actually :
+
+* Remove every line which match `facebook.com` and `www.facebook.com`
+* In complementary convert all lines with `ALL ` or `REG` to the right format.
+* Check every line again the regular expression.
+* Print or save on screen the results.
+
+The genereated regular expression will be in this example:
 
 ```re
-^facebook\.com$|^www\.facebook\.com|\.gov$|face
+\.gov$|face
 ```
 
 Which actually means that we whitelist:
 
-* `facebook.com` and `www.facebook.com`
-* all elements which ends with `.gov`
-* all elements which contain the word `face`
+* all elements/lines which ends with `.gov`
+* all elements/lines which contain the word `face`
 
 ## Usage of the script
 
@@ -77,5 +83,5 @@ Which actually means that we whitelist:
     -o OUTPUT, --output OUTPUT
                             Save the result to the given filename or path.
 
-    Crafted with ♥ by Nissar Chababy (Funilrys) 
+    Crafted with ♥ by Nissar Chababy (Funilrys)
 
