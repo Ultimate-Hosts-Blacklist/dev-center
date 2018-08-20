@@ -66,36 +66,55 @@ class Settings:  # pylint: disable=too-few-public-methods
 
 class Whitelist:
     """
-    This class will initiate and execute out logic.
+    This class will initiate and execute our logic.
+
+    Arguments:
+        - file: str
+            A path to a file to read and to whitelist.
+        - string: str
+            A string of `\n` separated element to whitelist.
+        - output: str
+            A path to a file we have to write our non whitelisted content to.
+        - secondary_whitelist: list
+            List of `open()` instances. Those `open()` instances should link to
+            a whitelist file to apply to the current process/session.
     """
 
-    def __init__(self, file=None, output=None, secondary_whitelist=None):
+    def __init__(self, file=None, string=None, output=None, secondary_whitelist=None):
         self.secondary_whitelist_file = secondary_whitelist
 
         self.file = file
         self.output_file = output
         self.get_whitelist()
+        self.string = string
 
-    def get(self):
+    def get(self):  # pylint:disable=inconsistent-return-statements
         """
         This method will put everything together!
         """
 
+        content = []
+
         if self.file:
+            content.extend(Helpers.File(self.file).to_list())
+        elif self.string:
+            content.extend(self.string.split("\n"))
 
-            file_content = Helpers.File(self.file).to_list()
-
+        if content:
             if self.output_file:
                 Helpers.File(self.output_file).write("", overwrite=True)
 
             to_remove = set(Settings.whitelist)
-            whitelisted = [x for x in file_content if x not in to_remove]
+            whitelisted = [line for line in content if line not in to_remove]
 
-            self._print_or_write(
+            printed_or_written = self._print_or_write(
                 Helpers.Regex(
                     whitelisted, Settings.regex_whitelist, return_data=False
                 ).not_matching_list()
             )
+
+            if __name__ != "__main__":
+                return printed_or_written
 
     def _print_or_write(self, line):
         """
@@ -107,8 +126,13 @@ class Whitelist:
 
         if self.output_file:
             Helpers.File(self.output_file).write(line + "\n", overwrite=False)
-        else:
+            return None
+
+        if __name__ == "__main__":
             print(line)
+            return None
+
+        return line
 
     @classmethod
     def _format_line(cls, line):  # pylint: disable=too-many-branches
