@@ -34,7 +34,7 @@ from colorama import init as initiate
 from requests import get
 
 
-class Settings(object):  # pylint: disable=too-few-public-methods
+class Settings:  # pylint: disable=too-few-public-methods
     """
     This class will save all data that can be called from anywhere in the code.
     """
@@ -153,7 +153,7 @@ class Settings(object):  # pylint: disable=too-few-public-methods
     error = Fore.RED + Style.BRIGHT + "✘"
 
 
-class Initiate(object):
+class Initiate:
     """
     This class is used as the main entry of the script.
     Please note that this class also initiate several actions before being
@@ -195,7 +195,7 @@ class Initiate(object):
         if not line.startswith("#"):
 
             if "#" in line:
-                line = line[:line.find("#")].strip()
+                line = line[: line.find("#")].strip()
 
             if " " in line or "\t" in line:
                 splited_line = line.split()
@@ -228,11 +228,14 @@ class Initiate(object):
 
         print("Download of upstream data", end=" ")
 
-        if Helpers.Download(
-            link_to_download_domains, destination_domains, convert_to_idna=False
-        ).link() and Helpers.Download(
-            link_to_download_ips, destination_ips, convert_to_idna=False
-        ).link():
+        if (
+            Helpers.Download(
+                link_to_download_domains, destination_domains, convert_to_idna=False
+            ).link()
+            and Helpers.Download(
+                link_to_download_ips, destination_ips, convert_to_idna=False
+            ).link()
+        ):
             if not path.isdir("temp"):
                 mkdir(temp_dir)
 
@@ -274,12 +277,12 @@ class Initiate(object):
                 to_check = line
                 regex_whitelist = "^%s$" % escape(line)
 
-            if Helpers.Regex(
-                to_check, Settings.regex_ip4, return_data=False
-            ).match() or Helpers.Regex(
-                to_check, Settings.regex_domain, return_data=False
-            ).match() or line.startswith(
-                Settings.whitelist_all_marker
+            if (
+                Helpers.Regex(to_check, Settings.regex_ip4, return_data=False).match()
+                or Helpers.Regex(
+                    to_check, Settings.regex_domain, return_data=False
+                ).match()
+                or line.startswith(Settings.whitelist_all_marker)
             ):
 
                 Settings.whitelist.append(regex_whitelist)
@@ -325,12 +328,9 @@ class Initiate(object):
             if Helpers.Regex(line, Settings.regex_ip4, return_data=False).match():
 
                 type_of_extracted = "ips"
-                # print("\rParsing %s" % Style.BRIGHT + line, end="")
-
                 if not return_data:
                     Settings.ips.append(line)
             elif Helpers.Regex(line, Settings.regex_domain, return_data=False).match():
-                # print("\rParsing %s" % Style.BRIGHT + line, end="")
                 type_of_extracted = "domains"
 
                 if not return_data:
@@ -341,13 +341,13 @@ class Initiate(object):
         if return_data and type_of_extracted:
             return [line, type_of_extracted]
 
-        elif return_data:
+        if return_data:
             return "well what so say ..."
 
         return ""
 
 
-class Compare(object):  # pylint: disable=too-many-instance-attributes
+class Compare:  # pylint: disable=too-many-instance-attributes
     """
     This class compare a list with our core list.
     """
@@ -422,9 +422,10 @@ class Compare(object):  # pylint: disable=too-many-instance-attributes
         """
 
         downloaded_destination = Settings.link.split("/")[-1]
-        if Settings.link and Helpers.Download(
-            Settings.link, downloaded_destination, True
-        ).link():
+        if (
+            Settings.link
+            and Helpers.Download(Settings.link, downloaded_destination, True).link()
+        ):
             data = Helpers.File(downloaded_destination).to_list()
 
             Helpers.File(downloaded_destination).delete()
@@ -497,12 +498,12 @@ class Compare(object):  # pylint: disable=too-many-instance-attributes
         )
 
 
-class Helpers(object):  # pylint: disable=too-few-public-methods
+class Helpers:  # pylint: disable=too-few-public-methods
     """
     Well, thanks to those helpers :-)
     """
 
-    class Download(object):  # pylint: disable=too-few-public-methods
+    class Download:  # pylint: disable=too-few-public-methods
         """
         This class will initiate a download of the desired link.
 
@@ -575,7 +576,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
 
             return False
 
-    class List(object):  # pylint: disable=too-few-public-methods
+    class List:  # pylint: disable=too-few-public-methods
         """
         List manipulation.
         """
@@ -597,7 +598,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
             except TypeError:
                 return self.main_list
 
-    class Dict(object):
+    class Dict:
         """
         Dictionary manipulations.
 
@@ -648,7 +649,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
             except decoder.JSONDecodeError:
                 return {}
 
-    class File(object):  # pylint: disable=too-few-public-methods
+    class File:  # pylint: disable=too-few-public-methods
         """
         File treatment/manipulations.
 
@@ -720,7 +721,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
             except OSError:
                 pass
 
-    class Directory(object):  # pylint: disable=too-few-public-methods
+    class Directory:  # pylint: disable=too-few-public-methods
         """
         Directory treatment/manipulations.
 
@@ -742,7 +743,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
             except FileNotFoundError:
                 pass
 
-    class Regex(object):  # pylint: disable=too-few-public-methods
+    class Regex:  # pylint: disable=too-few-public-methods
 
         """A simple implementation ot the python.re package
 
@@ -816,7 +817,10 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
 
                 return result
 
-            elif not self.return_data and pre_result is not None:  # pylint: disable=no-member
+            elif (
+                not self.return_data  # pylint: disable=no-member
+                and pre_result is not None
+            ):
                 return True
 
             return False
@@ -846,7 +850,7 @@ class Helpers(object):  # pylint: disable=too-few-public-methods
 
             return self.data
 
-    class Command(object):
+    class Command:
         """
         Shell command execution.
 
