@@ -274,11 +274,13 @@ class Whitelist:
 
                 if to_check.endswith("."):
                     to_check = to_check[:-1]
+                
+                to_check = escape(to_check)
 
                 if not to_check.startswith("www."):
                     whitelist_element = [
-                        "^{}{}$".format(escape(to_check), Settings.rzd_regex),
-                        "^www.{}{}$".format(escape(to_check), Settings.rzd_regex),
+                        "^{}{}$".format(to_check, Settings.rzd_regex),
+                        "^www.{}{}$".format(to_check, Settings.rzd_regex),
                     ]
                 else:
                     whitelist_element = [
@@ -288,7 +290,7 @@ class Whitelist:
                         ),
                     ]
             else:
-                to_check = line.strip()
+                to_check = escape(line.strip())
 
                 if not to_check.startswith("www."):
                     whitelist_element = [
