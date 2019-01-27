@@ -20,7 +20,7 @@ It's also possible to do that with our whitelisting system but we can do more.
 
 #### `ALL ` 
 
-We also can use the `ALL ` marker which will tell the system to escape and regex check againt what follows.
+The `ALL ` marker will tell the system to escape and regex check againt what follows.
 
 ##### INVALID characters
 
@@ -33,7 +33,11 @@ We also can use the `ALL ` marker which will tell the system to escape and regex
 
 #### `REG ` 
 
-We also can use the `REG ` marker which will tell the system to explicitly check for the given regex which follows the marker.
+The `REG ` marker will tell the system to explicitly check for the given regex which follows the marker.
+
+#### `RZD `
+
+The `RZD ` marker will tell the system to explicitly check for the given string plus all possible TDL.
 
 ### Understanding what we actually do
 
@@ -43,11 +47,13 @@ If we have the following secondary whitelist list:
 facebook.com
 ALL .gov
 REG face
+RZD ebay
 ```
 
 our system will actually :
 
 * Remove every line which match `facebook.com` and `www.facebook.com`
+* Remove everyline which match `ebay.*`
 * In complementary convert all lines with `ALL ` or `REG` to the right format.
 * Check every line again the regular expression.
 * Print or save on screen the results.
@@ -55,8 +61,10 @@ our system will actually :
 The genereated regular expression will be in this example:
 
 ```re
-\.gov$|face
+\.gov$|face|ebay(.*)
 ```
+
+**NOTE: The ebay group is much longer as we construct the list of TDL based on the Root Zone Database of the IANA and the Public Suffix List project.**
 
 Which actually means that we whitelist:
 
