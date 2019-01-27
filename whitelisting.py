@@ -333,8 +333,6 @@ class Whitelist:
 
             Settings.regex_whitelist = "|".join(Settings.whitelist)
 
-            del Settings.whitelist
-
 
 class Helpers:  # pylint: disable=too-few-public-methods
     """
