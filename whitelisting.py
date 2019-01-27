@@ -43,7 +43,7 @@ class Settings:  # pylint: disable=too-few-public-methods
     # This variable will tell us where we are looking for the Public Suffix Database.
     #
     # Note: DO NOT TOUCH UNLESS YOU KNOW WHAT IT MEANS!
-    public_suffix_database = "https://raw.githubusercontent.com/funilrys/PyFunceble/master/public-suffix.json"
+    public_suffix_database = "https://raw.githubusercontent.com/funilrys/PyFunceble/master/public-suffix.json"  # pylint: disable=line-too-long
 
     # This variable will save all elements from our whitelist list.
     #
@@ -274,7 +274,7 @@ class Whitelist:
 
                 if to_check.endswith("."):
                     to_check = to_check[:-1]
-                
+
                 to_check = escape(to_check)
 
                 if not to_check.startswith("www."):
