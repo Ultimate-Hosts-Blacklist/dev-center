@@ -58,7 +58,7 @@ class Core:
         self.cache = use_cache
 
         if self.verbose:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(format="%(asctime)s: %(levelname)s - %(message)s", level=logging.INFO)
         else:
             logging.basicConfig()
 
