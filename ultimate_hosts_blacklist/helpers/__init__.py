@@ -32,9 +32,10 @@ License:
     SOFTWARE.
 """
 
+from ultimate_hosts_blacklist.helpers.dict import Dict
 from ultimate_hosts_blacklist.helpers.download import Download
 from ultimate_hosts_blacklist.helpers.file import File
 from ultimate_hosts_blacklist.helpers.list import List
 from ultimate_hosts_blacklist.helpers.regex import Regex
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
