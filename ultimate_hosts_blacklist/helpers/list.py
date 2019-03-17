@@ -47,12 +47,19 @@ class List:  # pylint: disable=too-few-public-methods
         else:
             self.main_list = main_list
 
-    def format(self):
+    def format(self, delete_empty=False):
         """
         Return a well formated list. Basicaly, it's sort a list and remove duplicate.
+
+        :param delete_empty: Tell us if we have to remove all empty element of the list.
+        :type delte_empty: bool
         """
 
         try:
-            return sorted(list(set(self.main_list)), key=str.lower)
+            formatted = sorted(list(set(self.main_list)), key=str.lower)
+
+            if delete_empty and not formatted[0]:
+                return formatted[1:]
+            return formatted
         except TypeError:  # pragma: no cover
             return self.main_list
