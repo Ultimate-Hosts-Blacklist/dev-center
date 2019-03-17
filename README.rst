@@ -29,6 +29,9 @@ The sript can be called as :code:`uhb-comparison`, :code:`uhb_comparison` and :c
         -c, --cache           Use cache if exist.
         --clean               Clean the given file/link with our official whitelist
                                 tool before processing.
+        -e, --export          Produce a JSON file with all complete information -
+                                including the list or domains and IPs which are not
+                                present.
         -f FILE, --file FILE  File to compare.
         -l LINK, --link LINK  Link to compare.
         --verbose             Run in verbose mode.
