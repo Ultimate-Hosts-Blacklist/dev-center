@@ -31,7 +31,7 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from json import dump
+from json import decoder, dump, loads
 
 
 class Dict:  # pylint: disable=too-few-public-methods
@@ -66,3 +66,18 @@ class Dict:  # pylint: disable=too-few-public-methods
                 indent=4,
                 sort_keys=True,
             )
+
+    @classmethod
+    def from_json(cls, json):
+        """
+        Given a JSON formatted string, we convert it
+        into a dict which we return.
+
+        :param json: A JSON formatted string.
+        :type json: str
+        """
+
+        try:
+            return loads(json)
+        except decoder.JSONDecodeError:
+            return {}
