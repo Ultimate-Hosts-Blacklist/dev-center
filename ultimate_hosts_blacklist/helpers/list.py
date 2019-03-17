@@ -63,3 +63,10 @@ class List:  # pylint: disable=too-few-public-methods
             return formatted
         except TypeError:  # pragma: no cover
             return self.main_list
+
+    def delete_none_element(self):
+        """
+        Delete all None type elements.
+        """
+
+        return [x for x in self.main_list if x]
