@@ -21,10 +21,10 @@ cache:
 
 install:
   - pip3 install --upgrade pip
-  - pip3 install ultimate-hosts-blacklist-comparison --verbose
+  - pip3 install ultimate-hosts-blacklist-comparison
 
 script:
-  - ultimate-hosts-blacklist-comparison
+  - ultimate-hosts-blacklist-comparison --verbose
 
 notifications:
   on_success:   change
