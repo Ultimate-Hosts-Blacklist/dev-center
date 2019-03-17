@@ -4,7 +4,7 @@ env:
     - GIT_NAME: Travis CI
     - GIT_EMAIL: dead-hosts@funilrys.com
     - TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/dev-center
-    - GIT_BRANCH: master
+    - GIT_BRANCH: compare-with-system
 
 language: python
 dist: xenial
@@ -21,11 +21,10 @@ cache:
 
 install:
   - pip3 install --upgrade pip
-  - pip3 install -r requirements.txt
-  - pip3 install pylint
+  - pip3 install ultimate-hosts-blacklist-comparison --verbose
 
 script:
-  - pylint compare_with_upstream.py && python3 compare_with_upstream.py
+  - ultimate-hosts-blacklist-comparison
 
 notifications:
   on_success:   change
