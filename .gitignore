@@ -107,3 +107,4 @@ venv.bak/
 .vscode/
 ips.list
 domains.list
+exported.json

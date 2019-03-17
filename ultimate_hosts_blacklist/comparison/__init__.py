@@ -275,13 +275,25 @@ def _command_line():
 
         if args.file:
             compare_file(
-                args.file, verbose=args.verbose, cache=args.cache, clean=args.clean
+                args.file,
+                verbose=args.verbose,
+                cache=args.cache,
+                clean=args.clean,
+                export=args.export,
             )
         elif args.link:
             compare_link(
-                args.link, verbose=args.verbose, cache=args.cache, clean=args.clean
+                args.link,
+                verbose=args.verbose,
+                cache=args.cache,
+                clean=args.clean,
+                export=args.export,
             )
         else:
             compare_with_administration_file(
-                verbose=args.verbose, cache=args.cache, clean=args.clean
+                verbose=args.verbose,
+                cache=args.cache,
+                clean=args.clean,
+                export=args.export,
             )
+
