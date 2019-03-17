@@ -31,8 +31,9 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-
+from re import MULTILINE
 from re import compile as comp
+from re import sub as substring
 
 
 class Regex:  # pylint: disable=too-few-public-methods
@@ -67,7 +68,7 @@ class Regex:  # pylint: disable=too-few-public-methods
         for (arg, default) in optional_arguments.items():
             setattr(self, arg, args.get(arg, default))
 
-            self.regex = regex
+        self.regex = regex
 
     def match(self):
         """
@@ -99,4 +100,27 @@ class Regex:  # pylint: disable=too-few-public-methods
 
         return list(
             filter(lambda element: not pre_result.search(str(element)), self.data)
+        )
+
+    def replace_with(self, replacement, occurences=0, multiline=False):
+        """
+        Replace the matched element with the given replacement.
+
+        :param replacement: The replacement.
+        :type replacement: str
+
+        :param occurences: The numbers of x time we have to replace.
+        :type occurences: int
+
+        :param multiline: Multiline match/replace.
+        :type multiline: bool
+        """
+
+        if multiline:
+            flag = MULTILINE
+        else:
+            flag = 0
+
+        return substring(
+            self.regex, replacement, self.data, count=occurences, flags=flag
         )
