@@ -5,6 +5,8 @@ env:
     - GIT_EMAIL: dead-hosts@funilrys.com
     - TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/dev-center
     - GIT_BRANCH: compare-with-system
+    - PYFUNCEBLE_AUTO_CONFIGURATION: PyFunceble
+
 
 language: python
 dist: xenial
