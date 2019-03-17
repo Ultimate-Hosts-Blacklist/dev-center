@@ -81,7 +81,7 @@ if __name__ == "__main__":
         description="The comparison tool of the Ultimate Hosts Blacklist project.",
         long_description=_get_long_description(),
         license="MIT",
-        url="https://github.com/Ultimate-Hosts-Blacklist/whitelist/tree/script",
+        url="https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/comparison",
         platforms=["any"],
         packages=["ultimate_hosts_blacklist.comparison"],
         keywords=["Python", "hosts", "hosts file"],

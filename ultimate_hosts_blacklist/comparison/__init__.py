@@ -44,7 +44,7 @@ from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelis
 from ultimate_hosts_blacklist.comparison.configuration import Configuration
 
 # Set our version.
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 
 def response_from_data(data):
