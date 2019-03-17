@@ -31,15 +31,17 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
+# pylint: disable=bad-continuation
 
 import argparse
-
+from os import path
 from colorama import Fore, Style
 from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.comparison.core import Core
-from ultimate_hosts_blacklist.helpers import Download, File
+from ultimate_hosts_blacklist.helpers import Download, File, Dict
 from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelist
+from ultimate_hosts_blacklist.comparison.configuration import Configuration
 
 # Set our version.
 VERSION = "1.0.0"
@@ -101,8 +103,10 @@ def response_from_data(data):
         )
     )
 
+    return data
 
-def compare_file(file_path, verbose=False, cache=False, clean=False):
+
+def compare_file(file_path, verbose=False, cache=False, clean=False, export=False):
     """
     Given a file path, we make the comparison of its
     content with our infrastructure.
@@ -120,6 +124,10 @@ def compare_file(file_path, verbose=False, cache=False, clean=False):
         Activate/Deactivate the cleaning of with our whitelist before
         performing the comparison.
     :type clean: bool
+
+    :param export:
+        Activate/Deactive the production of a dump of all information.
+    :type export bool
     """
 
     to_compare = [Core.format_line(x) for x in File(file_path).to_list()]
@@ -127,10 +135,17 @@ def compare_file(file_path, verbose=False, cache=False, clean=False):
     if clean:
         to_compare = clean_list_with_official_whitelist(to_compare)
 
-    response_from_data(Core(to_compare, verbose=verbose, use_cache=cache).count())
+    if export:
+        Dict(
+            response_from_data(
+                Core(to_compare, verbose=verbose, use_cache=cache).count()
+            )
+        ).to_json(Configuration.EXPORT)
+    else:
+        response_from_data(Core(to_compare, verbose=verbose, use_cache=cache).count())
 
 
-def compare_link(link, verbose=False, cache=False, clean=False):
+def compare_link(link, verbose=False, cache=False, clean=False, export=False):
     """
     Given a link, we make the comparison of its
     content with our infrastructure.
@@ -148,6 +163,10 @@ def compare_link(link, verbose=False, cache=False, clean=False):
         Activate/Deactivate the cleaning of with our whitelist before
         performing the comparison.
     :type clean: bool
+
+    :param export:
+        Activate/Deactive the production of a dump of all information.
+    :type export bool
     """
 
     data = Download(link, None).link()
@@ -158,9 +177,54 @@ def compare_link(link, verbose=False, cache=False, clean=False):
         if clean:
             to_compare = clean_list_with_official_whitelist(to_compare)
 
-        response_from_data(Core(to_compare, verbose=verbose, use_cache=cache).count())
+        if export:
+            Dict(
+                response_from_data(
+                    Core(to_compare, verbose=verbose, use_cache=cache).count()
+                )
+            ).to_json(Configuration.EXPORT)
+        else:
+            response_from_data(
+                Core(to_compare, verbose=verbose, use_cache=cache).count()
+            )
     else:
         raise Exception("Could not download {0}".format(repr(link)))
+
+
+def compare_with_administration_file(
+    verbose=False, cache=False, clean=False, export=False
+):
+    """
+    Look for the adminsitration file in the current
+    directory, and execute based on the given info.
+
+    :param verbose: Activate/Deactivate the verbosity.
+    :type verbose: bool
+
+    :param cache: Activate/Deactivate the cache usage.
+    :type cache bool
+
+    :param clean:
+        Activate/Deactivate the cleaning of with our whitelist before
+        performing the comparison.
+    :type clean: bool
+
+    :param export:
+        Activate/Deactive the production of a dump of all information.
+    :type export bool
+    """
+
+    data = Dict.from_json(File(Configuration.INFO).read())
+
+    if data and isinstance(data, dict):
+        if "link" in data and data["link"]:
+            compare_link(
+                data["link"], verbose=verbose, cache=cache, clean=clean, export=export
+            )
+        elif "file" in data and data["file"]:
+            compare_file(
+                data["file"], verbose=verbose, cache=cache, clean=clean, export=export
+            )
 
 
 def _command_line():
@@ -194,6 +258,13 @@ def _command_line():
             default=False,
             help="Clean the given file/link with our official whitelist tool before processing.",
         )
+        parser.add_argument(
+            "-e",
+            "--export",
+            action="store_true",
+            default=False,
+            help="Produce a JSON file with all complete information - including the list or domains and IPs which are not present.",  # pylint: disable=line-too-long
+        )
         parser.add_argument("-f", "--file", type=str, help="File to compare.")
         parser.add_argument("-l", "--link", type=str, help="Link to compare.")
         parser.add_argument(
@@ -209,4 +280,8 @@ def _command_line():
         elif args.link:
             compare_link(
                 args.link, verbose=args.verbose, cache=args.cache, clean=args.clean
+            )
+        else:
+            compare_with_administration_file(
+                verbose=args.verbose, cache=args.cache, clean=args.clean
             )

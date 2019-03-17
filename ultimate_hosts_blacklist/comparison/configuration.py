@@ -32,7 +32,8 @@ License:
     SOFTWARE.
 """
 
-class Configuration:
+
+class Configuration:  # pylint: disable=too-few-public-methods
     """
     Set the configuration.
     """
