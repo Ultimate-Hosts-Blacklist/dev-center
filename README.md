@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Ultimate Hosts Blacklist comparison system
 
 This branch will help us and/or you to know how many domains or IPs from a given list are not already present in the [Ultimate Hosts Blacklist](https://github.com/mitchellkrogza/Ultimate.Hosts.Blacklist) infrastructure.
@@ -34,31 +33,6 @@ Want to compare a file? Simply add your file to your branch and add its name her
 
 If you want to run a test locally simply install the requirements with
 
-    pip3 install -r requirements.txt
+    pip3 install ultimate-hosts-blacklist-comparison
 
 and use the script!
-
-#### Usage of the script
-
-    usage: compare_with_upstream.py [-h] [-l LINK] [-f FILE]
-
-    A script to compare a given link or file to Ultimate.Hosts.Blacklist
-    infrastructure.
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      -l LINK, --link LINK  Link to compare.
-      -f FILE, --file FILE  File to compare.
-
-    Crafted with ♥ by Nissar Chababy (Funilrys)
-=======
-# Ultimate Hosts Blacklist dev-center
-
-## Comparison system
-
-Want to compare a list with the current state of the Ultimate Hosts Blacklist ? Simply move to the [`compare-with-system`](https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/compare-with-system) branch.
-
-## Whitelisting script
-
-Want to use our whitelist system and list again your list or hosts file ? Simply move to the [`whitelisting`](https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/whitelisting) branch.
->>>>>>> origin/master
