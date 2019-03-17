@@ -1,7 +1,7 @@
 """
 The helpers classes/function of the Ultimate-Hosts-Blacklist project.
 
-provide the main entry.
+Provide the helpers we use for file manipulation.
 
 License:
 ::
@@ -31,10 +31,38 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
+from json import dump
 
-from ultimate_hosts_blacklist.helpers.download import Download
-from ultimate_hosts_blacklist.helpers.file import File
-from ultimate_hosts_blacklist.helpers.list import List
-from ultimate_hosts_blacklist.helpers.regex import Regex
 
-VERSION = "1.1.0"
+class Dict:  # pylint: disable=too-few-public-methods
+    """
+    Dictionary manipulations.
+
+    :param main_dictionnary: The :code:`dict` we are working with.
+    :type main_dictionnary: dict
+    """
+
+    def __init__(self, main_dictionnary=None):
+        if main_dictionnary is None:
+            self.main_dictionnary = {}
+        else:
+            self.main_dictionnary = main_dictionnary
+
+    def to_json(self, destination):
+        """
+        Save a dictionnary into a JSON file and format.
+
+        :param destination:
+            A path to a file where we're going to Write the
+            converted dict into a JSON format.
+        :type destination: str
+        """
+
+        with open(destination, "w") as file:
+            dump(
+                self.main_dictionnary,
+                file,
+                ensure_ascii=False,
+                indent=4,
+                sort_keys=True,
+            )

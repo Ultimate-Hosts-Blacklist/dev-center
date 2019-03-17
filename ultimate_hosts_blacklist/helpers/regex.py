@@ -39,17 +39,19 @@ class Regex:  # pylint: disable=too-few-public-methods
 
     """A simple implementation ot the python.re package
 
-    Arguments:
-        - data: str
-            The data to regex check.
-        - regex: str
-            The regex to match.
-        - group: int
-            The group to return
-        - replace_with: str
-            The value to replace the matched regex with.
-        - occurences: int
-            The number of occurence(s) to replace.
+    :param data: The data we are working with:
+    :type data: str
+
+    :param regex: The regex to match.
+    :type regex: str|regex
+
+    :param group: The group to return.
+    :type group: int
+
+    :param return_data:
+        Tell us if we only match and return the matching state.
+        Or if we return the matched element(s).
+    :param return_data: bool
     """
 
     def __init__(self, data, regex, **args):
@@ -58,12 +60,7 @@ class Regex:  # pylint: disable=too-few-public-methods
         self.data = data
 
         # We assign the default value of our optional arguments
-        optional_arguments = {
-            "escape": False,
-            "group": 0,
-            "occurences": 0,
-            "return_data": True,
-        }
+        optional_arguments = {"group": 0, "return_data": True}
 
         # We initiate our optional_arguments in order to be usable all over the
         # class

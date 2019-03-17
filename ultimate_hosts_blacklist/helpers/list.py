@@ -36,6 +36,9 @@ License:
 class List:  # pylint: disable=too-few-public-methods
     """
     List manipulation.
+
+    :param main_list: The list we are working with.
+    :type main_list: list
     """
 
     def __init__(self, main_list=None):

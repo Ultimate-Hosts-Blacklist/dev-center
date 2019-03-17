@@ -39,9 +39,8 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
     """
     File treatment/manipulations.
 
-    Argument:
-        - file: str
-            - a path to the file to manipulate.
+    :param file: A path to the file we are working with.
+    :type file: str
     """
 
     def __init__(self, file):
@@ -73,9 +72,11 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
         """
         Write or append data into the given file path.
 
-        Argument:
-            - data_to_write: str
-                The data to write.
+        :param data_to_write: The data to write into the file.
+        :type data_to_write: str
+
+        :param overwrite: Overwrite.
+        :type oberwrite: bool
         """
 
         if data_to_write is not None and isinstance(data_to_write, str):

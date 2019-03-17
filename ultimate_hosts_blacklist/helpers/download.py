@@ -33,6 +33,7 @@ License:
 """
 
 from requests import get
+
 from ultimate_hosts_blacklist.helpers.file import File
 
 
@@ -40,11 +41,17 @@ class Download:  # pylint: disable=too-few-public-methods  # pragma: no cover
     """
     This class will initiate a download of the desired link.
 
-    Arguments:
-        - link_to_download: str
-            The link to the file we are going to download.
-        - destination: str
-            The destination of the downloaded data.
+    :param link_to_download:
+        The link to the document we are going to download.
+    :type link_to_download: str
+
+    :param destination:
+        The destinaion of the downloaded data.
+
+        .. note::
+            If :code:`None` is given, we return the document
+            text.
+    :type destination: str|None
     """
 
     def __init__(self, link_to_download, destination, convert_to_idna=False):
@@ -56,9 +63,12 @@ class Download:  # pylint: disable=too-few-public-methods  # pragma: no cover
         """
         This method convert a given data into IDNA format.
 
-        Argument:
-            - data: str
-                The downloaded data.
+        :param data: The downloaded data.
+        :type data: str
+
+        .. warning::
+            This method might be depracted anytime soon because
+            a better implementation has to be written.
         """
 
         if self.convert_to_idna:
