@@ -31,6 +31,7 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
+from itertools import filterfalse
 from re import MULTILINE
 from re import compile as comp
 from re import sub as substring
@@ -70,22 +71,27 @@ class Regex:  # pylint: disable=too-few-public-methods
 
         self.regex = regex
 
-    def match(self):
+    def match(self, data=None):
         """
-        Used to get exploitable result of re.search
+        Used to get exploitable result of re.search.
+
+        :param data: The data we are working with.
+        :type data: str
         """
+
+        if not data:
+            data = self.data
 
         # We compile the regex string
         to_match = comp(self.regex)
 
         # In case we have to use the implementation of ${BASH_REMATCH} we use
         # re.findall otherwise, we use re.search
-        pre_result = to_match.search(self.data)
+        pre_result = to_match.search(data)
 
-        if self.return_data and pre_result:  # pylint: disable=no-member
-            return pre_result.group(self.group).strip()  # pylint: disable=no-member
-
-        if not self.return_data and pre_result:  # pylint: disable=no-member
+        if pre_result:
+            if self.return_data:  # pylint: disable=no-member
+                return pre_result.group(self.group).strip()  # pylint: disable=no-member
             return True
 
         return False
@@ -96,11 +102,7 @@ class Regex:  # pylint: disable=too-few-public-methods
         given regex.
         """
 
-        pre_result = comp(self.regex)
-
-        return list(
-            filter(lambda element: not pre_result.search(str(element)), self.data)
-        )
+        return list(filterfalse(self.match, self.data))
 
     def replace_with(self, replacement, occurences=0, multiline=False):
         """
