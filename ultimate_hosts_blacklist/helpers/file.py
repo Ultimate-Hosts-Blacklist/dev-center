@@ -32,7 +32,7 @@ License:
     SOFTWARE.
 """
 
-from os import path
+from os import path, remove
 
 
 class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
@@ -86,3 +86,13 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
             else:
                 with open(self.file, "a", encoding="utf-8") as file:
                     file.write(data_to_write)
+
+    def delete(self):
+        """
+        Delete a given file path.
+        """
+
+        try:
+            remove(self.file)
+        except OSError:
+            pass

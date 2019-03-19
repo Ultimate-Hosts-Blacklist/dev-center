@@ -1,7 +1,7 @@
 """
 The helpers classes/function of the Ultimate-Hosts-Blacklist project.
 
-Provide the helpers we use for file manipulation.
+Provide the helpers we use for dict manipulation.
 
 License:
 ::
