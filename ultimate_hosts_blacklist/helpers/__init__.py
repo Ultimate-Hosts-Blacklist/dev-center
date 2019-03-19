@@ -39,4 +39,4 @@ from ultimate_hosts_blacklist.helpers.file import File
 from ultimate_hosts_blacklist.helpers.list import List
 from ultimate_hosts_blacklist.helpers.regex import Regex
 
-VERSION = "1.5.0"
+VERSION = "1.5.1"

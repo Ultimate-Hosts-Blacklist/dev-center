@@ -79,7 +79,7 @@ class Regex:  # pylint: disable=too-few-public-methods
         :type data: str
         """
 
-        if not data:
+        if data is None:
             data = self.data
 
         # We compile the regex string
