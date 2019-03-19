@@ -37,6 +37,8 @@ import logging
 from colorama import Fore, Style
 from colorama import init as initiate_coloration
 
+from ultimate_hosts_blacklist.central_repo_updater.core import Core
+
 VERSION = "0.0.1"
 
 
@@ -62,3 +64,5 @@ def _command_line():
         )
 
         args = parser.parse_args()
+
+        Core().process()

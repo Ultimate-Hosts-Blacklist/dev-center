@@ -32,7 +32,6 @@ License:
     SOFTWARE.
 """
 # pylint: disable=bad-continuation, inconsistent-return-statements
-from itertools import chain
 from multiprocessing import Manager, Process
 from time import sleep
 
@@ -65,7 +64,7 @@ class Core:
         TravisCI().configure_git_repo()
         TravisCI().fix_permissions()
 
-        self.repositories = list(Repositories().get())
+        self.repositories = Repositories().get()
         self.multiprocessing = multiprocessing
         self.whitelisting_core = WhitelistCore()
 
@@ -183,15 +182,22 @@ class Core:
         Process the repository update in a simple way.
         """
 
-        all_domains = None
-        all_ips = None
+        all_domains = []
+        all_ips = []
+
+        repos = []
 
         for data in self.repositories:
+            logging.debug(data)
             domains, ips = self.__separate_domains_from_ip(
                 self.get_list(data, None, self.whitelisting_core)
             )
             all_domains.extend(domains)
             all_ips.extend(ips)
+            repos.append(data)
+
+        logging.info("Saving the list of repositories.")
+        Dict(repos).to_json(Output.repos_file)
 
         return all_domains, all_ips
 
@@ -203,7 +209,7 @@ class Core:
         if self.multiprocessing:
             domains, ips = self.process_multiprocessing()
         else:
-            self.process_simple()
+            domains, ips = self.process_simple()
 
         Generate.dotted(domains)
         Generate.plain_text_domain(domains)
@@ -211,11 +217,11 @@ class Core:
         Generate.unix_hosts(domains)
         Generate.windows_hosts(domains)
         Generate.hosts_deny(ips)
-        Generate.superhosts_deny(chain(domains, ips))
+        Generate.superhosts_deny(domains + ips)
         Generate.readme_md(len(domains), len(ips))
 
         Clean()
 
-        Deploy().github()
-        sleep(3)
-        Deploy().hosts_ubuntu101_co_za()
+        # Deploy().github()
+        # sleep(3)
+        # Deploy().hosts_ubuntu101_co_za()

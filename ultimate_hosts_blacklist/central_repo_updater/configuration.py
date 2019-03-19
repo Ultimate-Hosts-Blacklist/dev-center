@@ -67,7 +67,7 @@ class GitHub:  # pylint: disable=too-few-public-methods
     partial_raw_link = "{0}{1}/%s/master/".format(urls["raw"], org_slug)
 
     # We construct the complete link to the ORGS api page.
-    complete_api_orgs_url = "{0}/orgs/{1}".format(urls["api"], org_slug)
+    complete_api_orgs_url = "{0}orgs/{1}".format(urls["api"], org_slug)
 
 
 class Infrastructure:  # pylint: disable=too-few-public-methods

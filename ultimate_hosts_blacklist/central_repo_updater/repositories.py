@@ -107,7 +107,7 @@ class Repositories:  # pylint: disable=too-few-public-methods
 
             if "Link" in req.headers:
                 next_url = Regex(
-                    req.headers, self.regex_next_url, group=1, return_data=True
+                    req.headers["Link"], self.regex_next_url, group=1, return_data=True
                 ).match()
 
                 if next_url:
@@ -116,6 +116,13 @@ class Repositories:  # pylint: disable=too-few-public-methods
                             yield element
                         else:
                             continue
+
+            if repos:
+                for element in repos:
+                    if element["name"] not in Infrastructure.repositories_to_ignore:
+                        yield element
+                    else:
+                        continue
         elif req.status_code == 304:
             data = Dict.from_json(File(Output.repos_file).read())
 
