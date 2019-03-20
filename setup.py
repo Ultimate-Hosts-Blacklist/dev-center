@@ -55,7 +55,7 @@ def _get_requirements():
 
 def _get_version():
     """
-    Extract the version from ultimate_hosts_blacklist/central_repo_updater/__init__.py
+    Extract the version from ultimate_hosts_blacklist/MODULE/__init__.py
     """
 
     to_match = comp(r'VERSION\s=\s"(.*)"\n')

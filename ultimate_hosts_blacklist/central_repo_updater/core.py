@@ -33,6 +33,7 @@ License:
 """
 # pylint: disable=bad-continuation, inconsistent-return-statements
 from multiprocessing import Pool
+from os import cpu_count
 from time import sleep
 
 from PyFunceble import ipv4_syntax_check, syntax_check
@@ -60,15 +61,28 @@ class Core:
     # Will save what we write into repos.json
     repos = []
 
-    def __init__(self, multiprocessing=True, processes=8):
+    def __init__(self, multiprocessing=True, processes=None):
         TravisCI().configure_git_repo()
         TravisCI().fix_permissions()
 
         self.multiprocessing = multiprocessing
-        self.processes = processes
 
         if self.multiprocessing:
+            logging.info("multiprocessing activated.")
             self.repositories = list(Repositories().get())
+
+            if not processes:
+                cpu_numbers = cpu_count()
+
+                if cpu_numbers is not None:
+                    self.processes = len(self.repositories) // cpu_numbers
+                else:
+                    self.processes = len(self.repositories) // 2 % 10
+            else:
+                self.processes = processes
+            logging.info(
+                "Using {0} simultaneous processes.".format(repr(self.processes))
+            )
         else:
             self.repositories = Repositories().get()
 
@@ -109,7 +123,9 @@ class Core:
                 "Could get the clean list for {0}".format(repr(repository_info["name"]))
             )
             logging.info("Starting cleaning {0}".format(repr(repository_info["name"])))
-            result = self.whitelisting_core.filter(string=req.text)
+            result = self.whitelisting_core.filter(
+                string=req.text, already_formatted=True
+            )
             logging.info("Finished cleaning {0}".format(repr(repository_info["name"])))
         else:
             req = get(non_clean_url)
@@ -123,7 +139,9 @@ class Core:
                 logging.info(
                     "Starting cleaning {0}".format(repr(repository_info["name"]))
                 )
-                result = self.whitelisting_core.filter(string=req.text)
+                result = self.whitelisting_core.filter(
+                    string=req.text, already_formatted=True
+                )
                 logging.info(
                     "Finished cleaning {0}".format(repr(repository_info["name"]))
                 )
@@ -209,6 +227,6 @@ class Core:
 
         Clean()
 
-        # Deploy().github()
-        # sleep(3)
-        # Deploy().hosts_ubuntu101_co_za()
+        Deploy().github()
+        sleep(3)
+        Deploy().hosts_ubuntu101_co_za()

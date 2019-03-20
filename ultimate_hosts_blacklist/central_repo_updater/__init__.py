@@ -39,7 +39,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.central_repo_updater.core import Core
 
-VERSION = "0.0.1"
+VERSION = "1.0.0"
 
 
 def _command_line():
@@ -63,6 +63,24 @@ def _command_line():
             ),
         )
 
-        args = parser.parse_args()
+        parser.add_argument(
+            "-m",
+            "--multiprocessing",
+            action="store_true",
+            default=False,
+            help="Activate the usage of the multiprocessing.",
+        )
 
-        Core().process()
+        parser.add_argument(
+            "-p",
+            "--processes",
+            type=int,
+            default=0,
+            help="The number of simulatenous processes to create and use.",
+        )
+
+        arguments = parser.parse_args()
+
+        Core(
+            multiprocessing=arguments.multiprocessing, processes=arguments.processes
+        ).process()

@@ -1,0 +1,5 @@
+colorama
+PyFunceble
+requests
+ultimate-hosts-blacklist-helpers
+ultimate-hosts-blacklist-whitelist
