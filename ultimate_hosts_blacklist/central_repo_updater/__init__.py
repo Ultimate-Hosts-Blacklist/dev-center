@@ -39,7 +39,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.central_repo_updater.core import Core
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 
 def _command_line():
@@ -77,6 +77,14 @@ def _command_line():
             type=int,
             default=0,
             help="The number of simulatenous processes to create and use.",
+        )
+
+        parser.add_argument(
+            "-v",
+            "--version",
+            help="Show the version end exist.",
+            action="version",
+            version="%(prog)s " + VERSION,
         )
 
         arguments = parser.parse_args()

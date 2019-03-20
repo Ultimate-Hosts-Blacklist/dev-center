@@ -107,7 +107,7 @@ class Core:
         """
 
         logging.info(
-            "Trying to get domains and ips from {0}".format(
+            "Trying to get domains and ips from {0} input source.".format(
                 repr(repository_info["name"])
             )
         )
@@ -120,34 +120,44 @@ class Core:
 
         if req.status_code == 200:
             logging.info(
-                "Could get the clean list for {0}".format(repr(repository_info["name"]))
+                "Could get `clean.list` of {0}.".format(
+                    repr(repository_info["name"])
+                )
             )
-            logging.info("Starting cleaning {0}".format(repr(repository_info["name"])))
+            logging.info(
+                "Starting whitelisting of {0}.".format(repr(repository_info["name"]))
+            )
             result = self.whitelisting_core.filter(
                 string=req.text, already_formatted=True
             )
-            logging.info("Finished cleaning {0}".format(repr(repository_info["name"])))
+            logging.info(
+                "Finished whitelisting of {0}.".format(repr(repository_info["name"]))
+            )
         else:
             req = get(non_clean_url)
 
             if req.status_code == 200:
                 logging.info(
-                    "Could get the non-clean list for {0}".format(
+                    "Could get `domains.list` of {0}.".format(
                         repr(repository_info["name"])
                     )
                 )
                 logging.info(
-                    "Starting cleaning {0}".format(repr(repository_info["name"]))
+                    "Starting whitelisting of {0}.".format(
+                        repr(repository_info["name"])
+                    )
                 )
                 result = self.whitelisting_core.filter(
                     string=req.text, already_formatted=True
                 )
                 logging.info(
-                    "Finished cleaning {0}".format(repr(repository_info["name"]))
+                    "Finished whitelisting of {0}.".format(
+                        repr(repository_info["name"])
+                    )
                 )
             else:
                 raise Exception(
-                    "Unable to get a list from {0}".format(
+                    "Unable to get a list from {0}.".format(
                         repr(repository_info["name"])
                     )
                 )

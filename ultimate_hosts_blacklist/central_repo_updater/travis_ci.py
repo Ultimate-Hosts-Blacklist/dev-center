@@ -78,7 +78,7 @@ class TravisCI:
             logging.info("Update of git.push.default")
             Command("git config --global push.default simple", True).execute()
 
-            logging.info("Checkout of {0}", format(repr(environ["GIT_BRANCH"])))
+            logging.info("Checkout of {0}".format(repr(environ["GIT_BRANCH"])))
             Command("git checkout %s" % environ["GIT_BRANCH"], True).execute()
         except KeyError:
             pass
