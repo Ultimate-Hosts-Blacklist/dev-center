@@ -75,7 +75,7 @@ class Core:
                 cpu_numbers = cpu_count()
 
                 if cpu_numbers is not None:
-                    self.processes = len(self.repositories) // cpu_numbers
+                    self.processes = cpu_numbers
                 else:
                     self.processes = len(self.repositories) // 2 % 10
             else:
@@ -120,9 +120,7 @@ class Core:
 
         if req.status_code == 200:
             logging.info(
-                "Could get `clean.list` of {0}.".format(
-                    repr(repository_info["name"])
-                )
+                "Could get `clean.list` of {0}.".format(repr(repository_info["name"]))
             )
             logging.info(
                 "Starting whitelisting of {0}.".format(repr(repository_info["name"]))
