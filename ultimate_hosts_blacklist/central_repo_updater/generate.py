@@ -292,5 +292,4 @@ class Generate:
             format(len_ips + len_domains, ",d")
         )
 
-        logging.debug("Writting template: \n {0}".format(template))
         File(Output.readme_file).write(template, overwrite=True)

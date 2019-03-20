@@ -32,7 +32,7 @@ License:
     SOFTWARE.
 """
 # pylint: disable=bad-continuation, inconsistent-return-statements
-from multiprocessing import Manager, Process
+from multiprocessing import Pool
 from time import sleep
 
 from PyFunceble import ipv4_syntax_check, syntax_check
@@ -45,7 +45,7 @@ from ultimate_hosts_blacklist.central_repo_updater.deploy import Deploy
 from ultimate_hosts_blacklist.central_repo_updater.generate import Generate
 from ultimate_hosts_blacklist.central_repo_updater.repositories import Repositories
 from ultimate_hosts_blacklist.central_repo_updater.travis_ci import TravisCI
-from ultimate_hosts_blacklist.helpers import Dict
+from ultimate_hosts_blacklist.helpers import Dict, List
 from ultimate_hosts_blacklist.whitelist.core import Core as WhitelistCore
 
 
@@ -60,12 +60,18 @@ class Core:
     # Will save what we write into repos.json
     repos = []
 
-    def __init__(self, multiprocessing=False):
+    def __init__(self, multiprocessing=True, processes=8):
         TravisCI().configure_git_repo()
         TravisCI().fix_permissions()
 
-        self.repositories = Repositories().get()
         self.multiprocessing = multiprocessing
+        self.processes = processes
+
+        if self.multiprocessing:
+            self.repositories = list(Repositories().get())
+        else:
+            self.repositories = Repositories().get()
+
         self.whitelisting_core = WhitelistCore()
 
     @classmethod
@@ -81,14 +87,15 @@ class Core:
         logging.info("Getting the list of IPs.")
         return (domains, [x for x in temp if x and ipv4_syntax_check(x)])
 
-    @classmethod
-    def get_list(cls, repository_info, manager_list, whitelisting_core):
+    def get_list(self, repository_info):
         """
         Get the list from the input source.
         """
 
         logging.info(
-            "Trying to get domains and ips from {0}".format(repr(repository_info))
+            "Trying to get domains and ips from {0}".format(
+                repr(repository_info["name"])
+            )
         )
 
         url_base = GitHub.partial_raw_link % repository_info["name"]
@@ -101,15 +108,9 @@ class Core:
             logging.info(
                 "Could get the clean list for {0}".format(repr(repository_info["name"]))
             )
-            logging.info("Starting cleaning.")
-
-            if manager_list:
-                manager_list.extend(whitelisting_core.filter(string=req.text))
-            else:
-                logging.info("Finished cleaning.")
-                return whitelisting_core.filter(string=req.text)
-
-            logging.info("Finished cleaning.")
+            logging.info("Starting cleaning {0}".format(repr(repository_info["name"])))
+            result = self.whitelisting_core.filter(string=req.text)
+            logging.info("Finished cleaning {0}".format(repr(repository_info["name"])))
         else:
             req = get(non_clean_url)
 
@@ -119,15 +120,13 @@ class Core:
                         repr(repository_info["name"])
                     )
                 )
-                logging.info("Starting cleaning.")
-
-                if manager_list:
-                    manager_list.extend(whitelisting_core.filter(string=req.text))
-                else:
-                    logging.info("Finished cleaning.")
-                    return whitelisting_core.filter(string=req.text)
-
-                logging.info("Finished cleaning.")
+                logging.info(
+                    "Starting cleaning {0}".format(repr(repository_info["name"]))
+                )
+                result = self.whitelisting_core.filter(string=req.text)
+                logging.info(
+                    "Finished cleaning {0}".format(repr(repository_info["name"]))
+                )
             else:
                 raise Exception(
                     "Unable to get a list from {0}".format(
@@ -135,38 +134,22 @@ class Core:
                     )
                 )
 
+        return result
+
     def process_multiprocessing(self):
         """
         Process the repository update with taking advantage of
         the multiprocessing.
         """
 
-        all_domains = None
-        all_ips = None
+        all_domains = []
+        all_ips = []
 
-        with Manager() as manager:
-            manager_list = manager.list()
+        with Pool(processes=self.processes) as pool:
 
-            for seq in [self.repos[x::4] for x in range(4)]:
-                processes = []
+            for element in pool.map(self.get_list, self.repositories):
+                domains, ips = self.__separate_domains_from_ip(element)
 
-                for data in seq:
-                    logging.debug(
-                        "Assigning {0} to one process.".format(repr(data["name"]))
-                    )
-
-                    process = Process(
-                        target=self.get_list,
-                        args=(data, manager, self.whitelisting_core),
-                    )
-                    process.start()
-
-                    processes.append(process)
-
-                for proc in processes:
-                    proc.join()
-
-                domains, ips = self.__separate_domains_from_ip(list(manager_list))
                 all_domains.extend(domains)
                 all_ips.extend(ips)
 
@@ -175,7 +158,10 @@ class Core:
         logging.info("Saving the list of repositories.")
         Dict(self.repositories).to_json(Output.repos_file)
 
-        return all_domains, all_ips
+        return (
+            List(all_domains).format(delete_empty=True),
+            List(all_ips).format(delete_empty=True),
+        )
 
     def process_simple(self):
         """
@@ -189,9 +175,7 @@ class Core:
 
         for data in self.repositories:
             logging.debug(data)
-            domains, ips = self.__separate_domains_from_ip(
-                self.get_list(data, None, self.whitelisting_core)
-            )
+            domains, ips = self.__separate_domains_from_ip(self.get_list(data))
             all_domains.extend(domains)
             all_ips.extend(ips)
             repos.append(data)
@@ -199,7 +183,10 @@ class Core:
         logging.info("Saving the list of repositories.")
         Dict(repos).to_json(Output.repos_file)
 
-        return all_domains, all_ips
+        return (
+            List(all_domains).format(delete_empty=True),
+            List(all_ips).format(delete_empty=True),
+        )
 
     def process(self):
         """
