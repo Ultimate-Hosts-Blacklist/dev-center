@@ -32,7 +32,7 @@ License:
     SOFTWARE.
 """
 
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 
 class Command:
