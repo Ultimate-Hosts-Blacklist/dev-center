@@ -32,7 +32,6 @@ License:
     SOFTWARE.
 """
 # pylint: disable=bad-continuation, inconsistent-return-statements
-from multiprocessing import Pool
 from os import cpu_count
 from time import sleep
 
@@ -86,7 +85,12 @@ class Core:
         else:
             self.repositories = Repositories().get()
 
-        self.whitelisting_core = WhitelistCore()
+        if self.multiprocessing:
+            self.whitelisting_core = WhitelistCore(
+                multiprocessing=True, processes=self.processes // 2
+            )
+        else:
+            self.whitelisting_core = WhitelistCore()
 
     @classmethod
     def __separate_domains_from_ip(cls, cleaned_list):
@@ -162,33 +166,6 @@ class Core:
 
         return result
 
-    def process_multiprocessing(self):
-        """
-        Process the repository update with taking advantage of
-        the multiprocessing.
-        """
-
-        all_domains = []
-        all_ips = []
-
-        with Pool(processes=self.processes) as pool:
-
-            for element in pool.map(self.get_list, self.repositories):
-                domains, ips = self.__separate_domains_from_ip(element)
-
-                all_domains.extend(domains)
-                all_ips.extend(ips)
-
-                del domains, ips
-
-        logging.info("Saving the list of repositories.")
-        Dict(self.repositories).to_json(Output.repos_file)
-
-        return (
-            List(all_domains).format(delete_empty=True),
-            List(all_ips).format(delete_empty=True),
-        )
-
     def process_simple(self):
         """
         Process the repository update in a simple way.
@@ -219,10 +196,7 @@ class Core:
         Process the repository update.
         """
 
-        if self.multiprocessing:
-            domains, ips = self.process_multiprocessing()
-        else:
-            domains, ips = self.process_simple()
+        domains, ips = self.process_simple()
 
         Generate.dotted(domains)
         Generate.plain_text_domain(domains)

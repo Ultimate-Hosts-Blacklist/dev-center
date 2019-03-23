@@ -93,7 +93,7 @@ class Generate:
 
         while True:
             broken = False
-            destination = "{0}{2}".format(directory_path, filename.format(i))
+            destination = "{0}{1}".format(directory_path, filename.format(i))
 
             logging.info("Generation of {0}".format(destination))
             with open(destination, "w", encoding="utf-8") as file:
