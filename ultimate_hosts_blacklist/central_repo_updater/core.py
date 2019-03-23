@@ -44,8 +44,7 @@ from ultimate_hosts_blacklist.central_repo_updater.configuration import GitHub, 
 from ultimate_hosts_blacklist.central_repo_updater.deploy import Deploy
 from ultimate_hosts_blacklist.central_repo_updater.generate import Generate
 from ultimate_hosts_blacklist.central_repo_updater.repositories import Repositories
-from ultimate_hosts_blacklist.central_repo_updater.travis_ci import TravisCI
-from ultimate_hosts_blacklist.helpers import Dict, List
+from ultimate_hosts_blacklist.helpers import Dict, List, TravisCI
 from ultimate_hosts_blacklist.whitelist.core import Core as WhitelistCore
 
 

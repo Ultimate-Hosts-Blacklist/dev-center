@@ -37,8 +37,7 @@ from ultimate_hosts_blacklist.central_repo_updater.configuration import (
     Infrastructure,
     environ,
 )
-from ultimate_hosts_blacklist.central_repo_updater.travis_ci import TravisCI
-from ultimate_hosts_blacklist.helpers import Command
+from ultimate_hosts_blacklist.helpers import Command, TravisCI
 
 
 class Deploy:
