@@ -32,7 +32,7 @@ License:
     SOFTWARE.
 """
 # pylint: disable=line-too-long, anomalous-backslash-in-string
-from os import environ, getcwd
+from os import environ, getcwd, path
 from os import sep as directory_separator
 from time import strftime, time
 
@@ -106,6 +106,13 @@ class Output:  # pylint: disable=too-few-public-methods
     current_directory = getcwd() + directory_separator
 
     max_file_size_in_bytes = 5_242_880
+
+    template_dir = "templates"
+
+    if path.isdir("{0}{1}".format(current_directory, template_dir)):
+        templates_dir = "{0}{1}".format(current_directory, template_dir)
+    else:
+        templates_dir = None
 
     etags_file = "{0}etags.json".format(current_directory)
     repos_file = "{0}repos.json".format(current_directory)

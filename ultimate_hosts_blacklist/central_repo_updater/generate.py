@@ -174,7 +174,16 @@ class Generate:
         :type subject: list
         """
 
-        template = Regex(Templates.hosts_deny, r"%%version%%").replace_with(
+        possible_template_file_location = "{0}hostsdeny.template".format(
+            Output.current_directory
+        )
+
+        if Output.templates_dir and path.isfile(possible_template_file_location):
+            template_base = File(possible_template_file_location).read()
+        else:
+            template_base = Templates.hosts_deny
+
+        template = Regex(template_base, r"%%version%%").replace_with(
             Infrastructure.version
         )
         template = Regex(template, r"%%lenIP%%").replace_with(
@@ -199,7 +208,16 @@ class Generate:
         :type subject: list
         """
 
-        template = Regex(Templates.superhosts_deny, r"%%version%%").replace_with(
+        possible_template_file_location = "{0}superhostsdeny.template".format(
+            Output.current_directory
+        )
+
+        if Output.templates_dir and path.isfile(possible_template_file_location):
+            template_base = File(possible_template_file_location).read()
+        else:
+            template_base = Templates.superhosts_deny
+
+        template = Regex(template_base, r"%%version%%").replace_with(
             Infrastructure.version
         )
         template = Regex(template, r"%%lenIPHosts%%").replace_with(
@@ -224,7 +242,16 @@ class Generate:
         :type subject: list
         """
 
-        template = Regex(Templates.unix_hosts, r"%%version%%").replace_with(
+        possible_template_file_location = "{0}hosts.template".format(
+            Output.current_directory
+        )
+
+        if Output.templates_dir and path.isfile(possible_template_file_location):
+            template_base = File(possible_template_file_location).read()
+        else:
+            template_base = Templates.unix_hosts
+
+        template = Regex(template_base, r"%%version%%").replace_with(
             Infrastructure.version
         )
         template = Regex(template, r"%%lenHosts%%").replace_with(
@@ -249,7 +276,16 @@ class Generate:
         :type subject: list
         """
 
-        template = Regex(Templates.windows_hosts, r"%%version%%").replace_with(
+        possible_template_file_location = "{0}hosts.windows.template".format(
+            Output.current_directory
+        )
+
+        if Output.templates_dir and path.isfile(possible_template_file_location):
+            template_base = File(possible_template_file_location).read()
+        else:
+            template_base = Templates.windows_hosts
+
+        template = Regex(template_base, r"%%version%%").replace_with(
             Infrastructure.version
         )
         template = Regex(template, r"%%lenHosts%%").replace_with(
@@ -279,7 +315,16 @@ class Generate:
 
         logging.info("Generation of {0}".format(repr(Output.readme_file)))
 
-        template = Regex(Templates.readme_md, r"%%version%%").replace_with(
+        possible_template_file_location = "{0}README_template.md".format(
+            Output.current_directory
+        )
+
+        if Output.templates_dir and path.isfile(possible_template_file_location):
+            template_base = File(possible_template_file_location).read()
+        else:
+            template_base = Templates.readme_md
+
+        template = Regex(template_base, r"%%version%%").replace_with(
             Infrastructure.version
         )
         template = Regex(template, r"%%lenHosts%%").replace_with(
