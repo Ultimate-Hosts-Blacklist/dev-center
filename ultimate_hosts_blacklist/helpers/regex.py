@@ -79,7 +79,7 @@ class Regex:  # pylint: disable=too-few-public-methods
         :type data: str
         """
 
-        if not data:
+        if data is None:
             data = self.data
 
         # We compile the regex string
@@ -102,7 +102,9 @@ class Regex:  # pylint: disable=too-few-public-methods
         given regex.
         """
 
-        return list(filterfalse(self.match, self.data))
+        to_match = comp(self.regex)
+
+        return list(filterfalse(to_match.search, self.data))
 
     def replace_with(self, replacement, occurences=0, multiline=False):
         """
