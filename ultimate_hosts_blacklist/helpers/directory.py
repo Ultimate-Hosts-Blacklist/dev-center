@@ -1,7 +1,7 @@
 """
 The helpers classes/function of the Ultimate-Hosts-Blacklist project.
 
-provide the main entry.
+Provide the helpers we manipulate directories.
 
 License:
 ::
@@ -32,13 +32,40 @@ License:
     SOFTWARE.
 """
 
-from ultimate_hosts_blacklist.helpers.command import Command
-from ultimate_hosts_blacklist.helpers.dict import Dict
-from ultimate_hosts_blacklist.helpers.directory import Directory
-from ultimate_hosts_blacklist.helpers.download import Download
-from ultimate_hosts_blacklist.helpers.file import File
-from ultimate_hosts_blacklist.helpers.list import List
-from ultimate_hosts_blacklist.helpers.regex import Regex
-from ultimate_hosts_blacklist.helpers.travis_ci import TravisCI
+from os import makedirs, path
+from shutil import rmtree
 
-VERSION = "1.8.0"
+
+class Directory:
+    """
+    Directory manipulation.
+
+    :param directory: A path to the directory we are working with.
+    :type directory: str
+    """
+
+    def __init__(self, directory):
+        self.dir = directory
+
+    def exists(self):
+        """
+        Check if the given directory exists.
+        """
+
+        return path.isdir(self.dir)
+
+    def create(self):
+        """
+        Create the given directory if it does not exits.
+        """
+
+        if not self.exists():
+            makedirs(self.dir)
+
+    def delete(self):
+        """
+        Delete the given directory if it exists.
+        """
+
+        if self.exists():
+            rmtree(self.dir)
