@@ -46,12 +46,8 @@ def _command_line():
     Provide the CLI.
     """
 
-    if __name__ == "ultimate_hosts_blacklist.internal_repo_updater":
+    if __name__ == "ultimate_hosts_blacklist.input_repo_updater":
         initiate_coloration(autoreset=True)
-
-        logging.basicConfig(
-            format="%(asctime)s - %(levelname)s -- %(message)s", level=logging.INFO
-        )
 
         parser = argparse.ArgumentParser(
             description="The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
@@ -63,19 +59,11 @@ def _command_line():
         )
 
         parser.add_argument(
-            "-m",
-            "--multiprocessing",
+            "-d",
+            "--debug",
+            help="Write all debug information to stdout.",
             action="store_true",
             default=False,
-            help="Activate the usage of the multiprocessing.",
-        )
-
-        parser.add_argument(
-            "-p",
-            "--processes",
-            type=int,
-            default=0,
-            help="The number of simulatenous processes to create and use.",
         )
 
         parser.add_argument(
@@ -88,6 +76,9 @@ def _command_line():
 
         arguments = parser.parse_args()
 
-        Core(
-            multiprocessing=arguments.multiprocessing, processes=arguments.processes
-        ).process()
+        if arguments.debug:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
+
+        a = Core(logging_level=logging_level)
