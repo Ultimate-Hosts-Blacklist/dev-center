@@ -1,7 +1,7 @@
 """
 The helpers classes/function of the Ultimate-Hosts-Blacklist project.
 
-Provide the helpers we use for file manipulation.
+Provide the helpers we manipulate files.
 
 License:
 ::
@@ -38,7 +38,7 @@ from tarfile import open as tarfile_open
 
 class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
     """
-    File treatment/manipulations.
+    File manipulations.
 
     :param file: A path to the file we are working with.
     :type file: str
@@ -46,6 +46,13 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
 
     def __init__(self, file):
         self.file = file
+
+    def exists(self):
+        """
+        Check if the given file exists.
+        """
+
+        return path.isfile(self.file)
 
     def read(self):
         """
@@ -81,7 +88,7 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
         """
 
         if data_to_write is not None and isinstance(data_to_write, str):
-            if overwrite or not path.isfile(self.file):
+            if overwrite or not self.exists():
                 with open(self.file, "w", encoding="utf-8") as file:
                     file.write(data_to_write)
             else:
