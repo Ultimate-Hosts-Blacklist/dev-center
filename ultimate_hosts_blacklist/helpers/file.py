@@ -33,6 +33,7 @@ License:
 """
 
 from os import path, remove
+from tarfile import open as tarfile_open
 
 
 class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
@@ -96,3 +97,18 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
             remove(self.file)
         except OSError:
             pass
+
+    def tar_gz_decompresse(self, destination):
+        """
+        Decompress the given file into the given destination.
+
+        :param str destination: The destination of the decompression.
+        """
+
+        if destination is not None and isinstance(destination, str):
+            with tarfile_open(self.file) as thetar:
+                thetar.extractall(path=destination)
+        else:
+            raise ValueError(
+                "{0} expected. {1} given.".format(type(str), type(destination))
+            )
