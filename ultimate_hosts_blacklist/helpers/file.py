@@ -105,7 +105,7 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
         except OSError:
             pass
 
-    def tar_gz_decompresse(self, destination):
+    def tar_gz_decompress(self, destination):
         """
         Decompress the given file into the given destination.
 
