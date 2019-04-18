@@ -82,7 +82,7 @@ class OurPyFunceble:
         """
 
         Command(
-            "pip install --upgrade {0}".format(package), allow_stdout=allow_stdout
+            "pip install {0}".format(package), allow_stdout=allow_stdout
         ).execute()
 
     def install(self):
