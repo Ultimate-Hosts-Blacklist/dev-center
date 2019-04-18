@@ -31,12 +31,13 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
-from ultimate_hosts_blacklist.helpers import Regex, Command
-from ultimate_hosts_blacklist.input_repo_updater import logging
-from time import time
-from ultimate_hosts_blacklist.input_repo_updater.pyfunceble import PyFunceble
 from tempfile import gettempdir
+from time import time
+
+from ultimate_hosts_blacklist.helpers import Command, Regex
+from ultimate_hosts_blacklist.input_repo_updater import logging
+from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
+from ultimate_hosts_blacklist.input_repo_updater.domains_list import DomainsList
 
 
 class Authorization:
@@ -45,10 +46,14 @@ class Authorization:
 
     If needed, this class automatically clean the output directory.
     If needed, we download the latest version of upstream.
+
+    :param dict administration data: The fomatted content of the administration file.
     """
 
+    # Save the authorization to run.
     authorized = False
-    cleaned = False
+    # Save the cleaning part.
+    clean = False
 
     def __init__(self, administration_data):
         self.__administration_data = administration_data
@@ -78,44 +83,73 @@ class Authorization:
         """
 
         if self.__launch_test():
+            # The launch test marker was send by a maintainer or
+            # member of the team.
+
+            # We authorize the test.
             self.authorized = True
+
+            # And we "force" the cleaning.
+            self.clean = True
+
+            # We download/format the raw link/domains.list file.
+            DomainsList(self.__administration_data["raw_link"])
             logging.info(
                 "Test authorized by: {0}.".format(
                     repr(Infrastructure.markers["launch_test"])
                 )
             )
-
-            # TODO: Implement the cleaning logic.
         elif self.__currently_under_test():
+            # We are still under test.
+
+            # We authorize the test.
             self.authorized = True
-            self.cleaned = False
+            # But we do not authorize the cleaning.
+            self.clean = False
 
             logging.info("Test authorized by: Still under test.")
         elif not self.__currently_under_test():
-            self.authorized = True
-            self.cleaned = True
+            # We are not under test.
 
-            PyFunceble.clean()
+            # We authorize the test.
+            self.authorized = True
+            # We "force" the cleaning.
+            self.clean = True
+
+            # We download/format the raw link/domains.list file.
+            DomainsList(self.__administration_data["raw_link"])
             logging.info("Test authorized by: Not currently under test.")
         elif (
             self.__administration_data["days_until_next_test"] >= 1
-            and self.__administration_data["last_test"] != 0
+            and self.__administration_data["last_test"] >= 0
         ):
+            # * The given days until next next is >= 1.
+            # and
+            # * The last test time is >= 0
+
+            # We calculate the expected retest date.
             expected_retest_date = (
                 24 * self.__administration_data["days_until_next_test"] * 3600
             )
 
             if int(time()) >= expected_retest_date:
-                self.authorized = True
-                self.cleaned = True
+                # The expected retest date is in the past.
 
-                PyFunceble.clean()
+                # We authorize the test.
+                self.authorized = True
+                # We "force" the cleaning.
+                self.clean = True
+
+                # We download/format the raw link/domains.list file.
+                DomainsList(self.__administration_data["raw_link"])
                 logging.info("Test authorized by: Restest time in the past.")
             else:
-                self.authorized = self.cleaned = False
+                # The expected retest date is in th efuture.
+
+                # We do not authorize the test.
+                self.authorized = self.clean = False
                 logging.info("Test not authorized by: Retest time in the future.")
         else:
             raise Exception("Unable to determine authorization.")
 
         return self.authorized
-

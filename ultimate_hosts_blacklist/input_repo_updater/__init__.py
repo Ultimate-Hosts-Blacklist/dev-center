@@ -33,8 +33,9 @@ License:
 """
 import argparse
 import logging
+
+from colorama import Fore, Style
 from colorama import init as initiate_coloration
-from colorama import Style, Fore
 
 from ultimate_hosts_blacklist.input_repo_updater.core import Core
 
@@ -43,7 +44,7 @@ VERSION = "0.0.1"
 
 def _command_line():
     """
-    Provide the CLI.
+    Provides the CLI.
     """
 
     if __name__ == "ultimate_hosts_blacklist.input_repo_updater":
@@ -67,6 +68,14 @@ def _command_line():
         )
 
         parser.add_argument(
+            "-m",
+            "--multiprocess",
+            help="Activate the usage of multiple processes.",
+            action="store_true",
+            default=False,
+        )
+
+        parser.add_argument(
             "-v",
             "--version",
             help="Show the version end exist.",
@@ -81,4 +90,6 @@ def _command_line():
         else:
             logging_level = logging.INFO
 
-        a = Core(logging_level=logging_level)
+        Core(
+            logging_level=logging_level, multiprocessing=arguments.multiprocess
+        ).process()

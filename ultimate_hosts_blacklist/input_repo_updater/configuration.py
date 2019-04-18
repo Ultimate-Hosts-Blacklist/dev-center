@@ -35,6 +35,10 @@ License:
 from os import getcwd
 from os import sep as directory_separator
 
+from ultimate_hosts_blacklist.whitelist.configuration import (
+    Configuration as WhitelistConfiguration,
+)
+
 
 class Outputs:
     """
@@ -44,21 +48,43 @@ class Outputs:
     # The current directory path.
     current_directory = getcwd() + directory_separator
 
-    # The name of the file where we save the input
-    # source list.
-    input_destination = "{0}domains.list".format(current_directory)
+    # The name of the input file.
+    input_filename = "domains.list"
+    # The name of the clean list.
+    clean_filename = "clean.list"
+    # The name of the whitelisted list.
+    whitelisted_filename = "whitelisted.list"
+    # The name of the volatile list.
+    volatile_filename = "volatile.list"
+    # The name of the continue file.
+    continue_filename = "continue.json"
 
-    # The name of the file where we save the input
-    # source list cleaned with the help of PyFunceble.
-    clean_destination = "{0}clean.list".format(current_directory)
+    # The location of the input file.
+    input_destination = "{0}{1}".format(current_directory, input_filename)
 
-    # The name of the file where we save the input
-    # source list cleaned with our whitelisting tool.
-    whitelisted_destination = "{0}whitelisted.list".format(current_directory)
+    # The location of the clean file.
+    clean_destination = "{0}{1}".format(current_directory, clean_filename)
 
-    # The name of the file where we save the input
-    # source list cleaned with the help of PyFunceble without the SPECIAL rules.
-    volatile_destination = "{0}volatile.list".format(current_directory)
+    # The location of the whitelisted file.
+    whitelisted_destination = "{0}{1}".format(current_directory, whitelisted_filename)
+
+    # The location of the volatile file.
+    volatile_destination = "{0}{1}".format(current_directory, volatile_filename)
+
+    # The location of the temporary volatile file.
+    temp_volatile_destination = "{0}output{1}{2}".format(
+        current_directory, directory_separator, volatile_filename
+    )
+
+    # The location of the continue file.
+    continue_destination = "{0}output{1}{2}".format(
+        current_directory, directory_separator, continue_filename
+    )
+
+    # The location of the list of ACTIVE domains.
+    active_subjects_destination = "{0}output{1}domains{1}ACTIVE{1}list".format(
+        current_directory, directory_separator
+    )
 
 
 class PyFunceble:
@@ -79,21 +105,41 @@ class PyFunceble:
     }
 
     # Tell us if we have to install the dev version.
-    stable = True
+    stable = False
 
     # The configuration indexes to update
     configuration = {
         "less": False,
+        "no_files": True,
         "plain_list_domain": True,
         "seconds_before_http_timeout": 6,
         "share_logs": True,
-        "show_execution_time": True,
-        "split": True,
-        "travis": True,
+        "show_execution_time": False,
+        "show_percentage": True,
+        "split": False,
+        "travis": False,
         "travis_autosave_commit": "[Autosave] Testing for Ultimate Hosts Blacklist",
         "travis_autosave_final_commit": "[Results] Testing for Ultimate Hosts Blacklist",
         "travis_autosave_minutes": 15,
         "idna_conversion": True,
+    }
+
+    # The configuration we are going to parse to the PyFunceble API.
+    #
+    # Note: You might think: WTF ! My response: We only use PyFunceble API and
+    # not the CLI. So the following is required to keep running with the
+    # same structure as previous.
+    api_configuration = {
+        "api_file_generation": True,
+        "inactive_database": True,
+        "no_files": False,
+        "whois_database": True,
+    }
+
+    # Set the PyFunceble packages to install.
+    packages = {
+        "stable": "PyFunceble",
+        "dev": "-e git+https://github.com/funilrys/PyFunceble.git@2.x.x#egg=PyFunceble",
     }
 
 
@@ -102,6 +148,7 @@ class Infrastructure:
     Provide some configuration around our infrastructure.
     """
 
+    # Set our infrastructure links.
     links = {
         "license": {
             "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/LICENSE",
@@ -114,12 +161,15 @@ class Infrastructure:
         },
     }
 
-    markers = {"launch_test": r"Launch\stest"}
+    # Set our makers list.
+    markers = {
+        "launch_test": r"Launch\stest"
+    }
 
+    # The path to the administration file.
     administration_file = "{0}info.json".format(Outputs.current_directory)
 
+    # List indexes in the administration file and how we interpret them.
     should_be_bool = ["currently_under_test"]
-
     should_be_int = ["days_until_next_test", "last_test"]
-
     unneeded_indexes = ["arguments", "clean_original", "stable"]

@@ -32,9 +32,9 @@ License:
     SOFTWARE.
 """
 
+from ultimate_hosts_blacklist.helpers import Command, Dict, File
 from ultimate_hosts_blacklist.input_repo_updater import logging
 from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
-from ultimate_hosts_blacklist.helpers import File, Dict, Command
 
 
 class Administration:
@@ -42,7 +42,9 @@ class Administration:
     Provide the information of the administration file.
     """
 
-    location = Infrastructure.administration_file
+    # This is the location of the administration file.
+    location = File(Infrastructure.administration_file)
+    # Saves the administration file.
     data = {}
 
     def __init__(self):
@@ -51,18 +53,91 @@ class Administration:
     def __convert_into_understandable(self, data):
         """
         Convert the given data values into something we understand.
+
+        :param dict data: The content of the administration file.
+
+        :return: The understandable data.
+        :rtype: dict
         """
 
+        # We initiate a variable which will save the final
+        # output.
         result = {}
 
         for index, value in data.items():
+            # We loop through the keys and values
+            # of the given data.
+
             if index in Infrastructure.unneeded_indexes:
+                # The currenctly needed index is not needed.
+
+                # We continue the loop.
                 continue
             elif index == "name":
-                result[index] = Command("basename `git rev-parse --show-toplevel`", allow_stdout=False).execute().strip()
+                # The index is the name.
+
+                # We get/set the name from the repository name.
+                result[index] = (
+                    Command(
+                        "basename `git rev-parse --show-toplevel`", allow_stdout=False
+                    )
+                    .execute()
+                    .strip()
+                )
             elif index in Infrastructure.should_be_bool:
+                # The index is in the list of indexes
+                # which should be bool interpretted.
+
+                # We convert the value to bool and append
+                # the result into the result.
                 result[index] = bool(int(value))
             elif index in Infrastructure.should_be_int:
+                # The index is in the list of indexes
+                # which should be int interpretted.
+
+                # We conver the value to int and append
+                # the result into the result.
+                result[index] = int(value)
+            else:
+                result[index] = value
+
+        return result
+
+    def __convert_into_not_understandable(self, data):
+        """
+        Convert the given values into something we don't understand.
+
+        :param dict data: The content of the administration file.
+
+        :return: The not understandable data.
+        :rtype: dict
+        """
+
+        # We initiate a variable which will save the final
+        # output.
+        result = {}
+        for index, value in data.items():
+            # We loop through the keys and values
+            # of the given data.
+
+            if index in Infrastructure.unneeded_indexes:
+                # The currenctly needed index is not needed.
+
+                # We continue.
+                continue
+            elif index in Infrastructure.should_be_bool:
+                # The index is in the list of indexes
+                # which should be bool interpretted.
+
+                # We convert the value to bool then to str and append
+                # the result into the result.
+                result[index] = str(int(bool(value)))
+            elif index in Infrastructure.should_be_int:
+                # The index is in the list of indexes
+                # which should be int interpretted.
+
+                # We conver the value to int and append
+                # the result into the result.
                 result[index] = int(value)
             else:
                 result[index] = value
@@ -74,7 +149,7 @@ class Administration:
         Read and return the content of teh administration file.
         """
 
-        content = File(self.location).read()
+        content = self.location.read()
         logging.debug("Administration file content: \n{0}".format(content))
 
         data = Dict.from_json(content)
@@ -89,4 +164,4 @@ class Administration:
         if data is None:
             data = self.data
 
-        Dict(data).to_json(self.location)
+        Dict(self.__convert_into_not_understandable(data)).to_json(self.location.file)
