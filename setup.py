@@ -82,7 +82,7 @@ if __name__ == "__main__":
         name=PYPI_NAME,
         version=_get_version(),
         install_requires=_get_requirements(),
-        description="The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.",
+        description="The tool to update the input source repositories of the Ultimate-Hosts-Blacklist project.",
         long_description=_get_long_description(),
         license="MIT",
         url="https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/input-repo-updater",
