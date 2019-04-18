@@ -8,7 +8,7 @@ Installation
 
 ::
 
-    $ pip3 install --user pip install ultimate-hosts-blacklist-input-repo-updater
+    $ pip3 install --user ultimate-hosts-blacklist-input-repo-updater
 
 
 
