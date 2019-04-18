@@ -30,9 +30,8 @@ License:
     SOFTWARE.
 """
 
-from re import sub as substring
 from re import compile as comp
-from unittest import TestLoader
+from re import sub as substring
 
 from setuptools import setup
 
@@ -61,8 +60,7 @@ def _get_version():
     to_match = comp(r'VERSION\s=\s"(.*)"\n')
     extracted = to_match.findall(
         open(
-            "ultimate_hosts_blacklist/{0}/__init__.py".format(MODULE),
-            encoding="utf-8",
+            "ultimate_hosts_blacklist/{0}/__init__.py".format(MODULE), encoding="utf-8"
         ).read()
     )[0]
 
@@ -82,7 +80,7 @@ if __name__ == "__main__":
         name=PYPI_NAME,
         version=_get_version(),
         install_requires=_get_requirements(),
-        description="The tool to update the input source repositories of the Ultimate-Hosts-Blacklist project.",
+        description="The tool to update the input source repositories of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
         long_description=_get_long_description(),
         license="MIT",
         url="https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/input-repo-updater",
@@ -100,9 +98,15 @@ if __name__ == "__main__":
         ],
         entry_points={
             "console_scripts": [
-                "uhb_input_repo_updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
-                "uhb-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
-                "ultimate-hosts-blacklist-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
+                "uhb_input_repo_updater=ultimate_hosts_blacklist.{0}:_command_line".format(
+                    MODULE
+                ),
+                "uhb-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(
+                    MODULE
+                ),
+                "ultimate-hosts-blacklist-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(  # pylint: disable=line-too-long
+                    MODULE
+                ),
             ]
         },
     )

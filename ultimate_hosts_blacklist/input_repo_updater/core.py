@@ -31,21 +31,13 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-
+# pylint: disable=bad-continuation
 from itertools import chain
-from os import cpu_count, environ, path
+from multiprocessing import Manager, Process
+from os import environ, path
 from time import time
-from multiprocessing import Process, Manager
 
-from ultimate_hosts_blacklist.helpers import (
-    Command,
-    Dict,
-    Download,
-    File,
-    Regex,
-    List,
-    TravisCI,
-)
+from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
 from ultimate_hosts_blacklist.input_repo_updater.authorization import Authorization
@@ -60,7 +52,7 @@ from ultimate_hosts_blacklist.input_repo_updater.our_pyfunceble import OurPyFunc
 from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelist
 
 
-class Core:
+class Core:  # pylint: disable=too-many-instance-attributes
     """
     Brain of the tool.
 
@@ -125,7 +117,8 @@ class Core:
                 # We process the cleaning of the output directory.
                 self.our_pyfunceble.clean()
 
-    def update_cross_pyfunceble_configuration_file(self):
+    @classmethod
+    def update_cross_pyfunceble_configuration_file(cls):
         """
         Install the cross repository configuration which is shared with
         all input sources.
@@ -239,7 +232,8 @@ class Core:
                 "Cross configuration file ({0}) not found.".format(destination)
             )
 
-    def install_cross_pyfunceble_configuration_file(self):
+    @classmethod
+    def install_cross_pyfunceble_configuration_file(cls):
         """
         Install the cross repository configuration which is shared with
         all input sources.
@@ -539,13 +533,13 @@ class Core:
                     if indexes != "ACTIVE":
                         # The index is not ACTIVE.
 
-                        for x in data[indexes]:
+                        for subject in data[indexes]:
                             # We loop through the list of member of the currently
                             # read index.
 
                             # We add each members of the index
                             # data into the inactive database.
-                            self.our_pyfunceble.inactive_db.add(x)
+                            self.our_pyfunceble.inactive_db.add(subject)
 
             # We save the continue data into its file.
             Dict(continue_data).to_json(self.continue_file.file)
@@ -628,14 +622,18 @@ class Core:
             # We finaly save everything into the destination.
             self.clean_file.write("\n".join(clean_list), overwrite=True)
 
-        logging.info("Finished the generation of {0}".format(repr(self.clean_file.file)))
+        logging.info(
+            "Finished the generation of {0}".format(repr(self.clean_file.file))
+        )
 
     def update_whitelisted_list(self):
         """
         Update the content of the whitelisted list.
         """
 
-        logging.info("Started the generation of {0}".format(repr(self.whitelisted_file.file)))
+        logging.info(
+            "Started the generation of {0}".format(repr(self.whitelisted_file.file))
+        )
 
         if self.clean_file.exists():
             # The input file exists.
@@ -654,14 +652,18 @@ class Core:
             # We finaly save everything into the destination.
             self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
 
-        logging.info("Finished the generation of {0}".format(repr(self.whitelisted_file.file)))
+        logging.info(
+            "Finished the generation of {0}".format(repr(self.whitelisted_file.file))
+        )
 
     def update_volatile_list(self):
         """
         Update the content of the volatile list.
         """
 
-        logging.info("Started the generation of {0}".format(repr(self.volatile_file.file)))
+        logging.info(
+            "Started the generation of {0}".format(repr(self.volatile_file.file))
+        )
 
         volatile_list = []
 
@@ -685,7 +687,9 @@ class Core:
         # We finaly save everything into the destination.
         self.volatile_file.write("\n".join(volatile_list), overwrite=True)
 
-        logging.info("Finished the generation of {0}".format(repr(self.volatile_file.file)))
+        logging.info(
+            "Finished the generation of {0}".format(repr(self.volatile_file.file))
+        )
 
     def process(self):
         """
@@ -714,10 +718,13 @@ class Core:
         # We get the content of the continue file.
         continue_data = Dict.from_json(self.continue_file.read())
 
+        # pylint: disable=consider-using-set-comprehension
+
         # We construct the list to test.
         #
         # Components:
-        #   * List to test (- minus ) Already saved into the inactive data (last tested at most 1 day ago).
+        #   * List to test (- minus ) Already saved into the
+        #   inactive data (last tested at most 1 day ago).
         #   * The inactive data to rested (last tested at least 1 day ago)
         to_test = chain(
             list(
@@ -766,4 +773,3 @@ class Core:
 
         # And we manage the end of the tool.
         self.end_management()
-

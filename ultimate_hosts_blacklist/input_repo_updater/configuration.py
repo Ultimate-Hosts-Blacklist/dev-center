@@ -35,12 +35,8 @@ License:
 from os import getcwd
 from os import sep as directory_separator
 
-from ultimate_hosts_blacklist.whitelist.configuration import (
-    Configuration as WhitelistConfiguration,
-)
 
-
-class Outputs:
+class Outputs:  # pylint: disable=too-few-public-methods
     """
     Provide some configurations.
     """
@@ -87,7 +83,7 @@ class Outputs:
     )
 
 
-class PyFunceble:
+class PyFunceble:  # pylint: disable=too-few-public-methods
     """
     Provide some configuration for the usage of PyFunceble.
     """
@@ -95,7 +91,7 @@ class PyFunceble:
     # Some list of links we may use.
     links = {
         "production_config": {
-            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/.PyFunceble_production.yaml",
+            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/.PyFunceble_production.yaml",  # pylint: disable=line-too-long
             "destination": ".PyFunceble_production.yaml",
         },
         "license": {
@@ -143,7 +139,7 @@ class PyFunceble:
     }
 
 
-class Infrastructure:
+class Infrastructure:  # pylint: disable=too-few-public-methods
     """
     Provide some configuration around our infrastructure.
     """
@@ -151,20 +147,18 @@ class Infrastructure:
     # Set our infrastructure links.
     links = {
         "license": {
-            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/LICENSE",
+            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/LICENSE",  # pylint: disable=line-too-long
             "destination": "LICENSE",
         },
         "config": {
-            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/.PyFunceble_cross_input_sources.yaml",
+            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/.PyFunceble_cross_input_sources.yaml",  # pylint: disable=line-too-long
             "cross_destination": ".PyFunceble_cross_input_sources.yaml",
             "destination": ".PyFunceble.yaml",
         },
     }
 
     # Set our makers list.
-    markers = {
-        "launch_test": r"Launch\stest"
-    }
+    markers = {"launch_test": r"Launch\stest"}
 
     # The path to the administration file.
     administration_file = "{0}info.json".format(Outputs.current_directory)

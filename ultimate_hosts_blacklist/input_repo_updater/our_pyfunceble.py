@@ -31,7 +31,7 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from ultimate_hosts_blacklist.helpers import Command, Directory, Download, File, Dict
+from ultimate_hosts_blacklist.helpers import Command, Dict, Download, File
 from ultimate_hosts_blacklist.input_repo_updater import logging
 from ultimate_hosts_blacklist.input_repo_updater.configuration import Outputs
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
@@ -122,7 +122,8 @@ class OurPyFunceble:
             custom=InfrastructrePyFuncebleConfiguration.api_configuration,
         )
 
-    def download_complementary_files(self):
+    @classmethod
+    def download_complementary_files(cls):
         """
         Download all complementary files.
         """
@@ -199,17 +200,19 @@ class OurPyFunceble:
             data = Dict.from_json(inactive_database_file.read())
 
             # We get the list of indexes to merge.
-            to_merge = [x for x in data.keys() if x != "api_call"]
+            to_merge = [index for index in data.keys() if index != "api_call"]
 
             if to_merge:
                 # We have something to merge.
 
-                for database in [data[x] for x in to_merge]:
+                for database in [data[index] for index in to_merge]:
                     # We loop through the database of the index
                     # to merge.
 
                     # We get its list of subjects to test.
-                    database_subjects = [y for x in database.values() for y in x]
+                    database_subjects = [
+                        y for index in database.values() for y in index
+                    ]
 
                     if "api_call" in data:
                         # The api_call index exists.
@@ -226,18 +229,19 @@ class OurPyFunceble:
                             # We create it.
                             data["api_call"]["to_test"] = database_subjects
 
-                for x in to_merge:
+                for index in to_merge:
                     # We loop through the index to merge.
 
                     # And we delete them.
-                    del data[x]
+                    del data[index]
 
             logging.info(
                 "Saving formated into {0}.".format(repr(inactive_database_file.file))
             )
             Dict(data).to_json(inactive_database_file.file)
 
-    def generate_percentage_file(self, counters):
+    @classmethod
+    def generate_percentage_file(cls, counters):
         """
         Print the percentage on file and screen.
         """

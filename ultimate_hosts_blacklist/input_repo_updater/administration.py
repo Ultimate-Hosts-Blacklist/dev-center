@@ -50,7 +50,8 @@ class Administration:
     def __init__(self):
         self.data.update(self.get())
 
-    def __convert_into_understandable(self, data):
+    @classmethod
+    def __convert_into_understandable(cls, data):
         """
         Convert the given data values into something we understand.
 
@@ -103,7 +104,8 @@ class Administration:
 
         return result
 
-    def __convert_into_not_understandable(self, data):
+    @classmethod
+    def __convert_into_not_understandable(cls, data):
         """
         Convert the given values into something we don't understand.
 

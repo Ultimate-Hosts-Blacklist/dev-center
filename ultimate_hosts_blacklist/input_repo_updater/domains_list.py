@@ -32,14 +32,14 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
+# pylint: disable=bad-continuation
 from os import walk
 from tempfile import tempdir
 
 from domain2idna import get as domain2idna
 
-from ultimate_hosts_blacklist.helpers import Directory, Download, File, List, Regex
+from ultimate_hosts_blacklist.helpers import Directory, Download, File, List
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
-    Infrastructure,
     Outputs,
     directory_separator,
 )
@@ -159,7 +159,8 @@ class DomainsList:
         # We return an empty string, we have nothing more to say :-)
         return ""
 
-    def __extract_domains_from_line(self, line):
+    @classmethod
+    def __extract_domains_from_line(cls, line):
         """
         Given a line, we return the domains.
 
@@ -253,7 +254,11 @@ class DomainsList:
 
                 # We append the line without`www.` to the list to test.
                 result.append(line[4:])
-            elif self.our_pyfunceble.is_domain(line) and not self.our_pyfunceble.is_subdomain(line):
+            elif self.our_pyfunceble.is_domain(  # pylint: disable=no-member
+                line
+            ) and not self.our_pyfunceble.is_subdomain(  # pylint: disable=no-member
+                line
+            ):
                 # * The line is a domain.
                 # and
                 # * The line is not a subdomain.

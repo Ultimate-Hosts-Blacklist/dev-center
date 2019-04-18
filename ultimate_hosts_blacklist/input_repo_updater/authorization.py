@@ -31,7 +31,7 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from tempfile import gettempdir
+# pylint: disable=bad-continuation
 from time import time
 
 from ultimate_hosts_blacklist.helpers import Command, Regex
@@ -40,7 +40,7 @@ from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastruc
 from ultimate_hosts_blacklist.input_repo_updater.domains_list import DomainsList
 
 
-class Authorization:
+class Authorization:  # pylint: disable=too-few-public-methods
     """
     Provide the authorization for a test.
 
@@ -56,10 +56,11 @@ class Authorization:
     clean = False
 
     def __init__(self, administration_data):
-        self.__administration_data = administration_data
+        self._administration_data = administration_data
         self.get()
 
-    def __launch_test(self):
+    @classmethod
+    def __launch_test(cls):
         """
         Provide the launch test handler.
         """
@@ -75,7 +76,7 @@ class Authorization:
         Provide the currently under test handler.
         """
 
-        return self.__administration_data["currently_under_test"]
+        return self._administration_data["currently_under_test"]
 
     def get(self):
         """
@@ -93,7 +94,7 @@ class Authorization:
             self.clean = True
 
             # We download/format the raw link/domains.list file.
-            DomainsList(self.__administration_data["raw_link"])
+            DomainsList(self._administration_data["raw_link"])
             logging.info(
                 "Test authorized by: {0}.".format(
                     repr(Infrastructure.markers["launch_test"])
@@ -117,11 +118,11 @@ class Authorization:
             self.clean = True
 
             # We download/format the raw link/domains.list file.
-            DomainsList(self.__administration_data["raw_link"])
+            DomainsList(self._administration_data["raw_link"])
             logging.info("Test authorized by: Not currently under test.")
         elif (
-            self.__administration_data["days_until_next_test"] >= 1
-            and self.__administration_data["last_test"] >= 0
+            self._administration_data["days_until_next_test"] >= 1
+            and self._administration_data["last_test"] >= 0
         ):
             # * The given days until next next is >= 1.
             # and
@@ -129,7 +130,7 @@ class Authorization:
 
             # We calculate the expected retest date.
             expected_retest_date = (
-                24 * self.__administration_data["days_until_next_test"] * 3600
+                24 * self._administration_data["days_until_next_test"] * 3600
             )
 
             if int(time()) >= expected_retest_date:
@@ -141,7 +142,7 @@ class Authorization:
                 self.clean = True
 
                 # We download/format the raw link/domains.list file.
-                DomainsList(self.__administration_data["raw_link"])
+                DomainsList(self._administration_data["raw_link"])
                 logging.info("Test authorized by: Restest time in the past.")
             else:
                 # The expected retest date is in th efuture.
