@@ -95,11 +95,11 @@ class PyFunceble:
     # Some list of links we may use.
     links = {
         "production_config": {
-            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/master/.PyFunceble_production.yaml",
+            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/.PyFunceble_production.yaml",
             "destination": ".PyFunceble_production.yaml",
         },
         "license": {
-            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/master/LICENSE",
+            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/LICENSE",
             "destination": ".PyFunceble_LICENSE",
         },
     }

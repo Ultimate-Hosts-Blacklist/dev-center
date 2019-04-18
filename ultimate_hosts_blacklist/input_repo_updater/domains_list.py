@@ -36,7 +36,6 @@ from os import walk
 from tempfile import tempdir
 
 from domain2idna import get as domain2idna
-from PyFunceble import is_subdomain, is_domain
 
 from ultimate_hosts_blacklist.helpers import Directory, Download, File, List, Regex
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
@@ -44,6 +43,7 @@ from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     Outputs,
     directory_separator,
 )
+from ultimate_hosts_blacklist.input_repo_updater.our_pyfunceble import OurPyFunceble
 
 
 class DomainsList:
@@ -59,6 +59,9 @@ class DomainsList:
     def __init__(self, raw_link):
         # We share the raw link.
         self.raw_link = raw_link
+
+        # We create a local instance of PyFunceble.
+        self.our_pyfunceble = OurPyFunceble()
 
         File(Outputs.input_destination).write(self.format(self.get()), overwrite=True)
 
@@ -250,7 +253,7 @@ class DomainsList:
 
                 # We append the line without`www.` to the list to test.
                 result.append(line[4:])
-            elif is_domain(line) and not is_subdomain(line):
+            elif self.our_pyfunceble.is_domain(line) and not self.our_pyfunceble.is_subdomain(line):
                 # * The line is a domain.
                 # and
                 # * The line is not a subdomain.
