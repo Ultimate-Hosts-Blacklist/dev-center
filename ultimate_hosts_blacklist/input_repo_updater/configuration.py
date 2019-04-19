@@ -96,7 +96,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
         },
         "license": {
             "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/LICENSE",
-            "destination": ".PyFunceble_LICENSE",
+            "destination": "LICENSE_PyFunceble",
         },
     }
 

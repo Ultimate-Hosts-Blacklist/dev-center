@@ -57,11 +57,11 @@ class OurPyFunceble:
     travis = None
 
     def __init__(self):
-        # We install the complementary files.
-        self.download_complementary_files()
-
         # We install PyFunceble.
         self.install()
+
+        # We install the complementary files.
+        self.download_complementary_files()
 
         # We merge older database entries into our new format.
         self.merge_inactive_database()
@@ -253,7 +253,7 @@ class OurPyFunceble:
 
         from PyFunceble.percentage import Percentage
 
-        Percentage(None, init=counters).log()
+        Percentage(init=counters).log()
 
     def test(self, element, complete=False):
         """
