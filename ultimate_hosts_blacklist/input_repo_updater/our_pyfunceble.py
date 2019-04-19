@@ -57,6 +57,9 @@ class OurPyFunceble:
     travis = None
 
     def __init__(self):
+        # We install the complementary files.
+        self.download_complementary_files()
+
         # We install PyFunceble.
         self.install()
 
