@@ -113,7 +113,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
         "show_execution_time": False,
         "show_percentage": True,
         "split": False,
-        "travis": False,
+        "travis": True,
         "travis_autosave_commit": "[Autosave] Testing for Ultimate Hosts Blacklist",
         "travis_autosave_final_commit": "[Results] Testing for Ultimate Hosts Blacklist",
         "travis_autosave_minutes": 15,
