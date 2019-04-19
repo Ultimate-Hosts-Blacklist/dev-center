@@ -37,7 +37,6 @@ from os import walk
 from tempfile import tempdir
 
 from domain2idna import get as domain2idna
-
 from ultimate_hosts_blacklist.helpers import Directory, Download, File, List
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     Outputs,

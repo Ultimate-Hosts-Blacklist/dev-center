@@ -1,3 +1,4 @@
 colorama
 domain2idna
+ultimate-hosts-blacklist-helpers
 ultimate-hosts-blacklist-whitelist

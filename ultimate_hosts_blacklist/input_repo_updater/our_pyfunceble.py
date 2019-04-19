@@ -82,7 +82,7 @@ class OurPyFunceble:
         """
 
         Command(
-            "pip3 install {0}".format(package), allow_stdout=allow_stdout
+            "pip3 install --upgrade {0}".format(package), allow_stdout=allow_stdout
         ).execute()
 
     def install(self):
@@ -193,7 +193,9 @@ class OurPyFunceble:
             # The inactive file exists.
 
             logging.info(
-                "Merging {0} into the new format.".format(repr(inactive_database_file.file))
+                "Merging {0} into the new format.".format(
+                    repr(inactive_database_file.file)
+                )
             )
 
             # We get the content of the file.
