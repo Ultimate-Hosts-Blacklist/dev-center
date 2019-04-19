@@ -193,7 +193,7 @@ class OurPyFunceble:
             # The inactive file exists.
 
             logging.info(
-                "Merging {0} into the new format.".format(repr(inactive_database_file))
+                "Merging {0} into the new format.".format(repr(inactive_database_file.file))
             )
 
             # We get the content of the file.

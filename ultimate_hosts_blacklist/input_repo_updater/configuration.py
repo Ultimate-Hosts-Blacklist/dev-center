@@ -100,7 +100,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
         },
     }
 
-    # Tell us if we have to install the dev version.
+    # Tell us if we have to install the stable version.
     stable = False
 
     # The configuration indexes to update
@@ -135,7 +135,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     # Set the PyFunceble packages to install.
     packages = {
         "stable": "PyFunceble",
-        "dev": "git+https://github.com/funilrys/PyFunceble.git@2.x.x#egg=PyFunceble",
+        "dev": "git+https://github.com/funilrys/PyFunceble.git@2.x.x",
     }
 
 

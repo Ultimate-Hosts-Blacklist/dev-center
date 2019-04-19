@@ -80,6 +80,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We get our administration data.
         self.information = self.administation.data
 
+        # We update the cross repository file.
+        self.update_cross_pyfunceble_configuration_file()
+        # We install the repository file.
+        self.install_cross_pyfunceble_configuration_file()
+
         # We get the global authorization.
         #
         # Note: If we are authorized to operate this class
@@ -102,11 +107,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         if self.authorization.authorized:
             # We are authorized to launch the testing logic.
-
-            # We update the cross repository file.
-            self.update_cross_pyfunceble_configuration_file()
-            # We install the repository file.
-            self.install_cross_pyfunceble_configuration_file()
 
             # We initiate PyFunceble
             self.our_pyfunceble = OurPyFunceble()

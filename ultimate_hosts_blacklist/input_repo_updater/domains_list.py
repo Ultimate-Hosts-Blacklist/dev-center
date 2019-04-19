@@ -254,9 +254,9 @@ class DomainsList:
 
                 # We append the line without`www.` to the list to test.
                 result.append(line[4:])
-            elif self.our_pyfunceble.is_domain(  # pylint: disable=no-member
+            elif self.our_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
                 line
-            ) and not self.our_pyfunceble.is_subdomain(  # pylint: disable=no-member
+            ) and not self.our_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
                 line
             ):
                 # * The line is a domain.
