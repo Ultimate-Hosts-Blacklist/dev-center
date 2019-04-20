@@ -131,7 +131,7 @@ class OurPyFunceble:
         Download all complementary files.
         """
 
-        for data in InfrastructrePyFuncebleConfiguration.links:
+        for _, data in InfrastructrePyFuncebleConfiguration.links.items():
             # We loop through the list of file to download.
 
             # We construct the destination of the file we are
