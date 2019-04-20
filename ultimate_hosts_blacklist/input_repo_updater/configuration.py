@@ -106,7 +106,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     # The configuration indexes to update
     configuration = {
         "less": False,
-        "no_files": True,
+        "no_files": False,
         "plain_list_domain": True,
         "seconds_before_http_timeout": 6,
         "share_logs": True,

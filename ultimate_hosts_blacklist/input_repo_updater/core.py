@@ -696,6 +696,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Processes the whole logic.
         """
 
+        logging.info("Test processes started.")
+
         # We get the current time as start time.
         start_time = int(time())
         # We calculate the end time in second.

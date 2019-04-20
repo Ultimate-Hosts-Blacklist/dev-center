@@ -121,3 +121,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project oriented.
+.PyFunceble*
+*.list
+dir_structure*.json
+iana-*.json
+inactive*.json
+info.json
+public-*.json
+whois*.json
