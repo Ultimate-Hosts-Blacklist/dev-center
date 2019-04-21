@@ -343,6 +343,10 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We get the status.
         status = test_result["status"]
+        # We get the source.
+        source = test_result["status_source"]
+        # We get the HTTP status code.
+        status_code = test_result["http_status_code"]
 
         if test_result["_status"] != "ACTIVE" and status == "ACTIVE":
             # The special rule was applied.
@@ -367,7 +371,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
             coloration = Fore.CYAN + Style.BRIGHT
 
         # We print the status on screen.
-        print("{0} is {1}".format(coloration + repr(subject), status))
+        print(
+            "{0} is {1} ({2} - {3})".format(
+                coloration + repr(subject), status, source, status_code
+            )
+        )
 
         if status in continue_data:
             # The status is in the continue data.
@@ -454,7 +462,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # We process with the manager.
 
             # We initiate a manager list.
-            manager_list = manager.list([])
+            manager_list = manager.list()
 
             while int(time()) < end_time:
                 # We loop untill the end time is in the past.

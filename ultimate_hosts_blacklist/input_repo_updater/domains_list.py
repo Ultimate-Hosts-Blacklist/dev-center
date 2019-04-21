@@ -272,7 +272,4 @@ class DomainsList:
             # We append the formatted line to the result.
             result.append(line)
 
-        try:
-            return "\n".join(List(result).format(delete_empty=True))
-        except IndexError:
-            return "\n".join([])
+        return "\n".join(List(result).format(delete_empty=True))
