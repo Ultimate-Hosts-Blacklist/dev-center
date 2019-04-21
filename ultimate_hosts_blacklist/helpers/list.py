@@ -58,7 +58,7 @@ class List:  # pylint: disable=too-few-public-methods
         try:
             formatted = sorted(list(set(self.main_list)), key=str.lower)
 
-            if delete_empty and not formatted[0]:
+            if delete_empty and formatted and not formatted[0]:
                 return formatted[1:]
             return formatted
         except TypeError:  # pragma: no cover
