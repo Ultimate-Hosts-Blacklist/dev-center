@@ -107,6 +107,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     configuration = {
         "less": False,
         "no_files": False,
+        "quiet": True,
         "plain_list_domain": True,
         "seconds_before_http_timeout": 6,
         "share_logs": True,
