@@ -38,13 +38,13 @@ from os import environ, path
 from time import time
 
 from ultimate_hosts_blacklist.helpers import (
+    Command,
     Dict,
     Download,
     File,
     List,
     Regex,
     TravisCI,
-    Command,
 )
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration

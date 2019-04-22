@@ -34,7 +34,7 @@ License:
 """
 # pylint: disable=bad-continuation
 from os import walk
-from tempfile import tempdir
+from tempfile import gettempdir
 
 from domain2idna import get as domain2idna
 
@@ -72,7 +72,7 @@ class DomainsList:
 
         # We construct the path to the temp directory.
         our_tempdir = "{0}{1}ultimate-input_source{1}".format(
-            tempdir, directory_separator
+            gettempdir(), directory_separator
         )
         # We construct the path to the decompression directory.
         decompression_dir = "{0}upstream".format(our_tempdir)
