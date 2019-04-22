@@ -81,7 +81,7 @@ class DomainsList:
         Directory(our_tempdir).create()
 
         # We construct the final file.
-        destination = "{0}{1}".format(our_tempdir, directory_separator)
+        destination = "{0}upstream_file".format(our_tempdir)
 
         if not Download(self.raw_link, destination).link():
             # We could not download the raw link.
