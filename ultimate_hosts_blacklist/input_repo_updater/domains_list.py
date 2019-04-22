@@ -93,6 +93,9 @@ class DomainsList:
         # We decompress the file into the decompression directory.
         File(destination).tar_gz_decompress(decompression_dir)
 
+        # We update the permissions af all directories and files.
+        self.our_pyfunceble.travis.permissions()
+
         # We initiate the variable which will save the output.
         result = []
 
