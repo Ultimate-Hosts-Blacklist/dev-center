@@ -113,6 +113,9 @@ class DomainsList:
             for file in files:
                 # We loop through the list of found file.
 
+                if "BL" in root and not file.endswith("domains"):
+                    continue
+
                 logging.info(
                     "Parsing {0}".format(repr(root + directory_separator + file))
                 )
