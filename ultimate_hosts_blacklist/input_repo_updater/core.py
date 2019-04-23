@@ -175,7 +175,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 "Downloading {0} into {1}".format(repr(link), repr(destination))
             )
 
-            if not Download(link, destination).link():
+            if not Download(link, destination).text():
                 # We could not download the configuration file.
 
                 # We raise an exception, we can't continue without a configuration
@@ -271,7 +271,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             if not Download(
                 InfrastructrePyFuncebleConfiguration.links["production_config"]["link"],
                 destination,
-            ).link():
+            ).text():
                 # We could not download the cross configuration file.
 
                 # We raise an exception, we can't work without a configuration file.

@@ -149,7 +149,7 @@ class OurPyFunceble:
                 # We update the link to reflec that choice.
                 link = data["link"].replace("master", "dev")
 
-            if not Download(link, file_path).link():
+            if not Download(link, file_path).text():
                 # We could not download the link.
 
                 # We raise an exception, what if that file is important ?

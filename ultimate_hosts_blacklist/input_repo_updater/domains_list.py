@@ -84,7 +84,7 @@ class DomainsList:
         # We construct the final file.
         destination = "{0}{1}".format(our_tempdir, self.raw_link.split("/")[-1])
 
-        if not Download(self.raw_link, destination).link():
+        if not Download(self.raw_link, destination).stream():
             # We could not download the raw link.
 
             # We raise an exception, we can't do nothing without something
@@ -137,7 +137,7 @@ class DomainsList:
                 return self.__get_from_tar_gz()
 
             # We download the content of the raw link.
-            upstream = Download(self.raw_link, None).link()
+            upstream = Download(self.raw_link, None).stream()
 
             if isinstance(upstream, str):
                 # The downloaded data is a str.
