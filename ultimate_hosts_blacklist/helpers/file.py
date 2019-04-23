@@ -64,6 +64,17 @@ class File:  # pylint: disable=too-few-public-methods  # pragma: no cover
 
         return funilrys
 
+    def read_bytes(self):
+        """
+        Read a given file in bytes mode and return its
+        content.
+        """
+
+        with open(self.file, "rb") as file:
+            funilrys = file.read()
+
+        return funilrys
+
     def to_list(self):
         """
         Read a file path and return each line as a list element.
