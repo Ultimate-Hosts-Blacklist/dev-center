@@ -93,11 +93,16 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We install the repository file.
         self.install_cross_pyfunceble_configuration_file()
 
+        # We initiate PyFunceble
+        self.our_pyfunceble = OurPyFunceble()
+
         # We get the global authorization.
         #
         # Note: If we are authorized to operate this class
         # also initiate/downlaod the data we are going to test.
-        self.authorization = Authorization(self.information)
+        self.authorization = Authorization(
+            self.information, shared_pyfunceble=self.our_pyfunceble
+        )
 
         # We starts a File instance with the continue file.
         # The objective of the continue file is to allow
@@ -115,9 +120,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         if self.authorization.authorized:
             # We are authorized to launch the testing logic.
-
-            # We initiate PyFunceble
-            self.our_pyfunceble = OurPyFunceble()
 
             if self.authorization.clean:
                 # We are authorized to clean.

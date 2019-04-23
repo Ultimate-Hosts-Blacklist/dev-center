@@ -55,8 +55,9 @@ class Authorization:  # pylint: disable=too-few-public-methods
     # Save the cleaning part.
     clean = False
 
-    def __init__(self, administration_data):
+    def __init__(self, administration_data, shared_pyfunceble=None):
         self._administration_data = administration_data
+        self.shared_pyfunceble = shared_pyfunceble
         self.get()
 
     @classmethod
@@ -94,7 +95,10 @@ class Authorization:  # pylint: disable=too-few-public-methods
             self.clean = True
 
             # We download/format the raw link/domains.list file.
-            DomainsList(self._administration_data["raw_link"])
+            DomainsList(
+                self._administration_data["raw_link"],
+                shared_pyfunceble=self.shared_pyfunceble,
+            )
             logging.info(
                 "Test authorized by: {0}.".format(
                     repr(Infrastructure.markers["launch_test"])
@@ -118,7 +122,10 @@ class Authorization:  # pylint: disable=too-few-public-methods
             self.clean = True
 
             # We download/format the raw link/domains.list file.
-            DomainsList(self._administration_data["raw_link"])
+            DomainsList(
+                self._administration_data["raw_link"],
+                shared_pyfunceble=self.shared_pyfunceble,
+            )
             logging.info("Test authorized by: Not currently under test.")
         elif (
             self._administration_data["days_until_next_test"] >= 1
@@ -142,7 +149,10 @@ class Authorization:  # pylint: disable=too-few-public-methods
                 self.clean = True
 
                 # We download/format the raw link/domains.list file.
-                DomainsList(self._administration_data["raw_link"])
+                DomainsList(
+                    self._administration_data["raw_link"],
+                    shared_pyfunceble=self.shared_pyfunceble,
+                )
                 logging.info("Test authorized by: Restest time in the past.")
             else:
                 # The expected retest date is in th efuture.

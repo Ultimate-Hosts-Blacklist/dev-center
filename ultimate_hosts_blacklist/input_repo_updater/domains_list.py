@@ -43,7 +43,6 @@ from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     Outputs,
     directory_separator,
 )
-from ultimate_hosts_blacklist.input_repo_updater.our_pyfunceble import OurPyFunceble
 
 
 class DomainsList:
@@ -56,12 +55,12 @@ class DomainsList:
     # Save the content of the upstream (raw link).
     upstream = None
 
-    def __init__(self, raw_link):
+    def __init__(self, raw_link, shared_pyfunceble=None):
         # We share the raw link.
         self.raw_link = raw_link
 
         # We create a local instance of PyFunceble.
-        self.our_pyfunceble = OurPyFunceble()
+        self.shared_pyfunceble = shared_pyfunceble
 
         File(Outputs.input_destination).write(self.format(self.get()), overwrite=True)
 
@@ -75,13 +74,15 @@ class DomainsList:
             gettempdir(), directory_separator
         )
         # We construct the path to the decompression directory.
-        decompression_dir = "{0}upstream".format(our_tempdir)
+        decompression_dir = "{0}upstream-decompressed".format(our_tempdir)
 
         # We create the temporary directory.
         Directory(our_tempdir).create()
+        # We create the decompression directory.
+        Directory(decompression_dir).create()
 
         # We construct the final file.
-        destination = "{0}upstream_file".format(our_tempdir)
+        destination = "{0}{1}".format(our_tempdir, self.raw_link.split("/")[-1])
 
         if not Download(self.raw_link, destination).link():
             # We could not download the raw link.
@@ -94,7 +95,7 @@ class DomainsList:
         File(destination).tar_gz_decompress(decompression_dir)
 
         # We update the permissions af all directories and files.
-        self.our_pyfunceble.travis.permissions()
+        self.shared_pyfunceble.travis.permissions()
 
         # We initiate the variable which will save the output.
         result = []
@@ -257,9 +258,9 @@ class DomainsList:
 
                 # We append the line without`www.` to the list to test.
                 result.append(line[4:])
-            elif self.our_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
+            elif self.shared_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
                 line
-            ) and not self.our_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
+            ) and not self.shared_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
                 line
             ):
                 # * The line is a domain.
