@@ -116,7 +116,7 @@ class Download:  # pylint: disable=too-few-public-methods  # pragma: no cover
         """
 
         if self.link_to_download:
-            request = get(self.link_to_download)
+            request = get(self.link_to_download, stream=True)
 
             if request.status_code == 200:
                 request.raw.decode_content = True
