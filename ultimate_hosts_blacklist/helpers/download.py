@@ -32,6 +32,8 @@ License:
     SOFTWARE.
 """
 
+from shutil import copyfileobj
+
 from requests import get
 
 from ultimate_hosts_blacklist.helpers.file import File
@@ -91,8 +93,41 @@ class Download:  # pylint: disable=too-few-public-methods  # pragma: no cover
                     else:
                         to_write.append(line)
             return to_write
-
         return None
+
+    def text(self):
+        """
+        Download the text response of the link.
+        """
+
+        if self.link_to_download:
+            request = get(self.link_to_download)
+
+            if request.status_code == 200:
+                if self.destination:
+                    File(self.destination).write(request.text, overwrite=True)
+                    return True
+                return request.text
+        return False
+
+    def stream(self):
+        """
+        Dowload the stream/file link.
+        """
+
+        if self.link_to_download:
+            request = get(self.link_to_download)
+
+            if request.status_code == 200:
+                request.raw.decode_content = True
+
+                if self.destination:
+                    with open(self.destination, "wb") as file:
+                        copyfileobj(request.raw, file)
+                    return True
+
+                return request.raw
+        return False
 
     def link(self):
         """
@@ -111,11 +146,6 @@ class Download:  # pylint: disable=too-few-public-methods  # pragma: no cover
                         )
                     else:
                         File(self.destination).write(request.text, overwrite=True)
-                else:
-                    return request.text
-
-                del request
-
-                return True
-
+                    return True
+                return request.text
         return False
