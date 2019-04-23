@@ -32,7 +32,9 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-# pylint: disable=bad-continuation
+# pylint: disable=bad-continuation, logging-format-interpolation
+import logging
+from multiprocessing import Pool
 from os import walk
 from tempfile import gettempdir
 
@@ -54,17 +56,21 @@ class DomainsList:
     raw_link = None
     # Save the content of the upstream (raw link).
     upstream = None
+    # Save the pyfunceble instance
+    shared_pyfunceble = None
 
-    def __init__(self, raw_link, shared_pyfunceble=None):
+    @classmethod
+    def __init__(cls, raw_link, shared_pyfunceble=None):
         # We share the raw link.
-        self.raw_link = raw_link
+        cls.raw_link = raw_link
 
         # We create a local instance of PyFunceble.
-        self.shared_pyfunceble = shared_pyfunceble
+        cls.shared_pyfunceble = shared_pyfunceble
 
-        File(Outputs.input_destination).write(self.format(self.get()), overwrite=True)
+        File(Outputs.input_destination).write(cls.format(cls.get()), overwrite=True)
 
-    def __get_from_tar_gz(self):
+    @classmethod
+    def __get_from_tar_gz(cls):
         """
         Download the tar.gz and compile all files into the result.
         """
@@ -82,20 +88,20 @@ class DomainsList:
         Directory(decompression_dir).create()
 
         # We construct the final file.
-        destination = "{0}{1}".format(our_tempdir, self.raw_link.split("/")[-1])
+        destination = "{0}{1}".format(our_tempdir, cls.raw_link.split("/")[-1])
 
-        if not Download(self.raw_link, destination).stream():
+        if not Download(cls.raw_link, destination).stream():
             # We could not download the raw link.
 
             # We raise an exception, we can't do nothing without something
             # to test.
-            raise Exception("Unable to download {0}.".format(repr(self.raw_link)))
+            raise Exception("Unable to download {0}.".format(repr(cls.raw_link)))
 
         # We decompress the file into the decompression directory.
         File(destination).tar_gz_decompress(decompression_dir)
 
         # We update the permissions af all directories and files.
-        self.shared_pyfunceble.travis.permissions()
+        cls.shared_pyfunceble.travis.permissions()
 
         # We initiate the variable which will save the output.
         result = []
@@ -107,11 +113,24 @@ class DomainsList:
             for file in files:
                 # We loop through the list of found file.
 
-                # We append the content of the currently
-                # read filename into the result.
-                result.append(
-                    File("{0}{1}{2}".format(root, directory_separator, file)).read()
+                logging.info(
+                    "Parsing {0}".format(repr(root + directory_separator + file))
                 )
+
+                try:
+                    # We append the content of the currently
+                    # read filename into the result.
+                    result.append(
+                        File("{0}{1}{2}".format(root, directory_separator, file))
+                        .read_bytes()
+                        .decode("utf-8")
+                    )
+                except UnicodeDecodeError:
+                    result.append(
+                        File("{0}{1}{2}".format(root, directory_separator, file))
+                        .read_bytes()
+                        .decode("latin-1")
+                    )
 
         # We finally delete the decompression directory.
         Directory(decompression_dir).delete()
@@ -121,23 +140,24 @@ class DomainsList:
         # And the return the result as a big string.
         return "\n".join(result)
 
-    def get(self):
+    @classmethod
+    def get(cls):
         """
         Get the upstream version.
         """
 
-        if self.raw_link:
+        if cls.raw_link:
             # The raw link is given.
 
-            if self.raw_link.endswith(".tar.gz"):
+            if cls.raw_link.endswith(".tar.gz"):
                 # The raw link is a tarball.
 
                 # We get and return the compilation of each
                 # files of the tarball.
-                return self.__get_from_tar_gz()
+                return cls.__get_from_tar_gz()
 
             # We download the content of the raw link.
-            upstream = Download(self.raw_link, None).stream()
+            upstream = Download(cls.raw_link, None).text()
 
             if isinstance(upstream, str):
                 # The downloaded data is a str.
@@ -148,7 +168,7 @@ class DomainsList:
             # Otherwise, we raise an exception, we can't do nothing without
             # something to test.
             raise Exception(
-                "Unable to get the content of {0}.".format(repr(self.raw_link))
+                "Unable to get the content of {0}.".format(repr(cls.raw_link))
             )
 
         # We create an instance of the input destination file.
@@ -203,7 +223,54 @@ class DomainsList:
 
         return line
 
-    def format(self, data):
+    @classmethod
+    def get_subjects_from_line(cls, line):
+        """
+        Return the list of subjects to test from the
+        given line.
+        """
+
+        logging.debug("Getting subjects from {0}".format(repr(line)))
+
+        result = []
+
+        # We loop through each lines.
+        line = line.strip()
+
+        if line and not line.startswith("#"):
+            # We format the line and conver to idna.
+            line = domain2idna(cls.__extract_domains_from_line(line))
+
+            if line.startswith("www.") and line[4:] not in result:
+                # * The line starts with `www.`
+                # and
+                # * The line without `www.` is not listed.
+
+                # We append the line without`www.` to the list to test.
+                result.append(line[4:])
+            elif cls.shared_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
+                line
+            ) and not cls.shared_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
+                line
+            ):
+                # * The line is a domain.
+                # and
+                # * The line is not a subdomain.
+
+                if "www.{0}".format(line) not in result:
+                    # The line with `www.` is not listed.
+
+                    # We append the line with `www.` to the list to test.
+                    result.append("www.{0}".format(line))
+
+            # We append the formatted line to the result.
+            result.append(line)
+
+        logging.debug("Subjects: {0}".format(result))
+        return result
+
+    @classmethod
+    def format(cls, data):
         """
         Given a string (whole file content) or a list (file content in list format).
         we format each lines.
@@ -229,51 +296,7 @@ class DomainsList:
                 )
             )
 
-        # We initiate what will save our result.
-        result = []
-
-        for line in data:
-            # We loop through each lines.
-            line = line.strip()
-
-            if not line:
-                # The line is empty.
-
-                # We continue the loop.
-                continue
-
-            if line.startswith("#"):
-                # The line is a comment line.
-
-                # We continue the loop.
-                continue
-
-            # We format the line and conver to idna.
-            line = domain2idna(self.__extract_domains_from_line(line))
-
-            if line.startswith("www.") and line[4:] not in result:
-                # * The line starts with `www.`
-                # and
-                # * The line without `www.` is not listed.
-
-                # We append the line without`www.` to the list to test.
-                result.append(line[4:])
-            elif self.shared_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
-                line
-            ) and not self.shared_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
-                line
-            ):
-                # * The line is a domain.
-                # and
-                # * The line is not a subdomain.
-
-                if "www.{0}".format(line) not in result:
-                    # The line with `www.` is not listed.
-
-                    # We append the line with `www.` to the list to test.
-                    result.append("www.{0}".format(line))
-
-            # We append the formatted line to the result.
-            result.append(line)
+        with Pool(60) as pool:
+            result = [y for x in pool.map(cls.get_subjects_from_line, data) for y in x]
 
         return "\n".join(List(result).format(delete_empty=True))
