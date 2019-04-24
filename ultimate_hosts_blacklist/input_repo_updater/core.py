@@ -39,15 +39,7 @@ from time import time
 
 from domain2idna import get as domain2idna
 
-from ultimate_hosts_blacklist.helpers import (
-    Command,
-    Dict,
-    Download,
-    File,
-    List,
-    Regex,
-    TravisCI,
-)
+from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
 from ultimate_hosts_blacklist.input_repo_updater.authorization import Authorization
@@ -875,11 +867,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We udpdate/create the whitelisted list.
         self.update_volatile_list()
-
-        logging.error(Command("ls -al output/logs/", allow_stdout=False).execute())
-        logging.error(
-            Command("ls -al output/logs/percentage/", allow_stdout=False).execute()
-        )
 
         # And we manage the end of the tool.
         self.end_management()
