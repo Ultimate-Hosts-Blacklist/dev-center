@@ -34,20 +34,17 @@ License:
 """
 # pylint: disable=bad-continuation, logging-format-interpolation
 import logging
-from multiprocessing import Pool
 from os import walk
 from tempfile import gettempdir
 
-from domain2idna import get as domain2idna
-
-from ultimate_hosts_blacklist.helpers import Directory, Download, File, List
+from ultimate_hosts_blacklist.helpers import Directory, Download, File
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     Outputs,
     directory_separator,
 )
 
 
-class DomainsList:
+class DomainsList:  # pylint: disable=too-few-public-methods
     """
     Get, format and save the upstream source into `domains.list`.
     """
@@ -67,7 +64,7 @@ class DomainsList:
         # We create a local instance of PyFunceble.
         cls.shared_pyfunceble = shared_pyfunceble
 
-        File(Outputs.input_destination).write(cls.format(cls.get()), overwrite=True)
+        File(Outputs.input_destination).write(cls.get(), overwrite=True)
 
     @classmethod
     def __get_from_tar_gz(cls):
@@ -185,121 +182,3 @@ class DomainsList:
 
         # We return an empty string, we have nothing more to say :-)
         return ""
-
-    @classmethod
-    def __extract_domains_from_line(cls, line):
-        """
-        Given a line, we return the domains.
-
-        :param str line: The line to format.
-
-        :return: The partially formatted line.
-        :rtype: str
-        """
-
-        if "#" in line:
-            # A comment is present into the line.
-
-            # We remove the comment..
-            line = line[: line.find("#")].strip()
-
-        if " " in line or "\t" in line:
-            # * A space is present into the line.
-            # or
-            # * A tabs is present into the line.
-
-            # We split every whitespace.
-            splited = line.split()
-
-            for element in splited[1:]:
-                # We loop through the list of subject starting from the second element (index 1).
-
-                if element:
-                    # It is a non empty subject.
-
-                    # We keep the currenlty read element.
-                    line = element
-
-                    # And we break the loop, there is nothing more
-                    # to look for.
-                    break
-
-        return line
-
-    @classmethod
-    def get_subjects_from_line(cls, line):
-        """
-        Return the list of subjects to test from the
-        given line.
-        """
-
-        logging.debug("Getting subjects from {0}".format(repr(line)))
-
-        result = []
-
-        # We loop through each lines.
-        line = line.strip()
-
-        if line and not line.startswith("#"):
-            # We format the line and conver to idna.
-            line = domain2idna(cls.__extract_domains_from_line(line))
-
-            if line.startswith("www.") and line[4:] not in result:
-                # * The line starts with `www.`
-                # and
-                # * The line without `www.` is not listed.
-
-                # We append the line without`www.` to the list to test.
-                result.append(line[4:])
-            elif cls.shared_pyfunceble.pyfunceble.is_domain(  # pylint: disable=no-member
-                line
-            ) and not cls.shared_pyfunceble.pyfunceble.is_subdomain(  # pylint: disable=no-member
-                line
-            ):
-                # * The line is a domain.
-                # and
-                # * The line is not a subdomain.
-
-                if "www.{0}".format(line) not in result:
-                    # The line with `www.` is not listed.
-
-                    # We append the line with `www.` to the list to test.
-                    result.append("www.{0}".format(line))
-
-            # We append the formatted line to the result.
-            result.append(line)
-
-        logging.debug("Subjects: {0}".format(result))
-        return result
-
-    @classmethod
-    def format(cls, data):
-        """
-        Given a string (whole file content) or a list (file content in list format).
-        we format each lines.
-
-        :param str data: The content we are going to test.
-
-        :return: The data to write into the file we are going to test.
-        :rtype: str
-        """
-
-        if isinstance(data, str):
-            # A string is given.
-
-            # We split every new line char.
-            data = data.split("\n")
-        elif not isinstance(data, list):
-            # A non list is given.
-
-            # We raise an exception, we only support str and list.
-            raise ValueError(
-                "{0} or {1} expected. {2} given.".format(
-                    type(str), type(list), type(data)
-                )
-            )
-
-        with Pool(60) as pool:
-            result = [y for x in pool.map(cls.get_subjects_from_line, data) for y in x]
-
-        return "\n".join(List(result).format(delete_empty=True))

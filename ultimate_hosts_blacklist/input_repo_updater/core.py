@@ -37,6 +37,8 @@ from multiprocessing import Manager, Process
 from os import environ, path
 from time import time
 
+from domain2idna import get as domain2idna
+
 from ultimate_hosts_blacklist.helpers import (
     Command,
     Dict,
@@ -410,6 +412,87 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # into its file.
             Dict(continue_data).to_json(Outputs.continue_destination)
 
+    @classmethod
+    def __extract_domains_from_line(cls, line):
+        """
+        Given a line, we return the domains.
+
+        :param str line: The line to format.
+
+        :return: The partially formatted line.
+        :rtype: str
+        """
+
+        if "#" in line:
+            # A comment is present into the line.
+
+            # We remove the comment..
+            line = line[: line.find("#")].strip()
+
+        if " " in line or "\t" in line:
+            # * A space is present into the line.
+            # or
+            # * A tabs is present into the line.
+
+            # We split every whitespace.
+            splited = line.split()
+
+            for element in splited[1:]:
+                # We loop through the list of subject starting from the second element (index 1).
+
+                if element:
+                    # It is a non empty subject.
+
+                    # We keep the currenlty read element.
+                    line = element
+
+                    # And we break the loop, there is nothing more
+                    # to look for.
+                    break
+
+        return line
+
+    def __get_subject_to_test(self, subject):
+        """
+        Given the subject (line), we format
+        and return a list of subject to test next.
+        """
+
+        result = []
+
+        if subject and not subject.startswith("#"):
+            # The subject is empty or equal to None.
+
+            # We extract the subject from the given line.
+            pre_result = domain2idna(subject)
+
+            if pre_result.startswith("www."):
+                # The subject starts with "www."
+
+                # We create a list of subject to test.
+                result.extend([pre_result, pre_result[4:]])
+            elif self.our_pyfunceble.pyfunceble.is_domain(
+                pre_result
+            ) and not self.our_pyfunceble.pyfunceble.is_subdomain(pre_result):
+                # * The line is a domain.
+                # and
+                # * The line is not a subdomain.
+
+                # We create a list of subject to test.
+                result.extend([pre_result, "www.{0}".format(pre_result)])
+            else:
+                result.append(pre_result)
+
+        i = 0
+
+        while i < len(result):
+            if self.__is_in_continue_data(result[i]):
+                del result[i]
+
+            i += 1
+
+        return result
+
     def __process_simple(self, to_test, end_time):
         """
         Process a single process test.
@@ -425,21 +508,15 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 # We get the subject we are going to test.
                 subject = next(to_test).strip()
 
-                if not subject:
-                    # The subject is empty or equal to None.
+                for subject in self.__get_subject_to_test(subject):
+                    # We loop through the list of subject to test.
 
-                    # We continue the loop.
-                    continue
+                    # We process the test and everything related to
+                    # it.
+                    self.test(subject)
 
-                if self.__is_in_continue_data(subject):
-                    # The subject is in the continue data.
-
-                    # We continue the loop.
-                    continue
-
-                # We process the test and everything related to
-                # it.
-                self.test(subject)
+                # And we continue the loop
+                continue
             except StopIteration:
                 # No subjects is available. We finished to test
                 # everything.
@@ -481,21 +558,18 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     # We get the subject we are going to test.
                     subject = next(to_test).strip()
 
-                    if not subject:
-                        # The subject is empty or equal to None.
+                    for subject in self.__get_subject_to_test(subject):
+                        # We loop through the list of subject to test.
 
-                        # We continue the loop.
-                        continue
+                        # We initiate a process which will test the current domain.
+                        process = Process(
+                            target=self.test, args=(subject, None, manager_list)
+                        )
+                        # We append the process into the "pool" of processes.
+                        processes.append(process)
 
-                    # We initiate a process which will test the current domain.
-                    process = Process(
-                        target=self.test, args=(subject, None, manager_list)
-                    )
-                    # We append the process into the "pool" of processes.
-                    processes.append(process)
-
-                    # We start the process.
-                    process.start()
+                        # We start the process.
+                        process.start()
 
                     # And we continue the loop.
                     continue
@@ -727,7 +801,18 @@ class Core:  # pylint: disable=too-many-instance-attributes
         )
 
         # We get the list to test.
-        to_test = File(Outputs.input_destination).to_list()
+        to_test = [
+            x
+            for x in self.__extract_domains_from_line(
+                File(Outputs.input_destination).to_list()
+            )
+            if x and not x.startswith("#")
+        ]
+
+        # We save the formatted dataset
+        File(Outputs.input_destination).write(
+            "\n".join(List(to_test).format(delete_empty=True)), overwrite=True
+        )
 
         if not self.continue_file.exists():
             # The continue file do not exists.
