@@ -72,7 +72,7 @@ class Authorization:  # pylint: disable=too-few-public-methods
             return_data=False,
         ).match()
 
-    def __currently_under_test(self):
+    def __is_currently_under_test(self):
         """
         Provide the currently under test handler.
         """
@@ -104,7 +104,7 @@ class Authorization:  # pylint: disable=too-few-public-methods
                     repr(Infrastructure.markers["launch_test"])
                 )
             )
-        elif self.__currently_under_test():
+        elif self.__is_currently_under_test():
             # We are still under test.
 
             # We authorize the test.
@@ -113,7 +113,7 @@ class Authorization:  # pylint: disable=too-few-public-methods
             self.clean = False
 
             logging.info("Test authorized by: Still under test.")
-        elif not self.__currently_under_test():
+        elif not self.__is_currently_under_test():
             # We are not under test.
 
             # We authorize the test.
@@ -128,8 +128,8 @@ class Authorization:  # pylint: disable=too-few-public-methods
             )
             logging.info("Test authorized by: Not currently under test.")
         elif (
-            self._administration_data["days_until_next_test"] >= 1
-            and self._administration_data["last_test"] >= 0
+            int(self._administration_data["days_until_next_test"]) >= 1
+            and int(self._administration_data["last_test"]) >= 0
         ):
             # * The given days until next next is >= 1.
             # and

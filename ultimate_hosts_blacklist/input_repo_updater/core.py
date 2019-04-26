@@ -587,7 +587,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
             # We initiate the future content of the
             # continue data file.
-            continue_data = {}
+            continue_data = Dict.from_json(self.continue_file.read())
 
             for data in manager_list:
                 # We loop through the list of manager entries.
