@@ -686,94 +686,101 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Update the content of the clean list.
         """
 
-        logging.info("Started the generation of {0}".format(repr(self.clean_file.file)))
+        if not self.information["currently_under_test"]:
+            logging.info(
+                "Started the generation of {0}".format(repr(self.clean_file.file))
+            )
 
-        # We get the path to the file we are going to read.
-        input_file = File(Outputs.active_subjects_destination)
+            # We get the path to the file we are going to read.
+            input_file = File(Outputs.active_subjects_destination)
 
-        if input_file.exists():
-            # The input file exists.
+            if input_file.exists():
+                # The input file exists.
 
-            # We get its content into list format.
-            clean_list = input_file.to_list()
+                # We get its content into list format.
+                clean_list = input_file.to_list()
 
-            # We remove every uneeded lines.
-            clean_list = Regex(clean_list, "^#").not_matching_list()
+                # We remove every uneeded lines.
+                clean_list = Regex(clean_list, "^#").not_matching_list()
 
-            # We remove any duplicates.
-            clean_list = List(clean_list).format(delete_empty=True)
+                # We remove any duplicates.
+                clean_list = List(clean_list).format(delete_empty=True)
 
-            # We finaly save everything into the destination.
-            self.clean_file.write("\n".join(clean_list), overwrite=True)
+                # We finaly save everything into the destination.
+                self.clean_file.write("\n".join(clean_list), overwrite=True)
 
-        logging.info(
-            "Finished the generation of {0}".format(repr(self.clean_file.file))
-        )
+            logging.info(
+                "Finished the generation of {0}".format(repr(self.clean_file.file))
+            )
 
     def update_whitelisted_list(self):
         """
         Update the content of the whitelisted list.
         """
 
-        logging.info(
-            "Started the generation of {0}".format(repr(self.whitelisted_file.file))
-        )
-
-        if self.clean_file.exists():
-            # The input file exists.
-
-            # We get its content into list format.
-            clean_list = self.clean_file.to_list()
-
-            # We whitelist its content.
-            whitelisted_list = clean_list_with_official_whitelist(
-                clean_list, multiprocessing=True, processes=60
+        if not self.information["currently_under_test"]:
+            logging.info(
+                "Started the generation of {0}".format(repr(self.whitelisted_file.file))
             )
 
-            # We remove any duplicated.
-            whitelisted_list = List(whitelisted_list).format(delete_empty=True)
+            if self.clean_file.exists():
+                # The input file exists.
 
-            # We finaly save everything into the destination.
-            self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
+                # We get its content into list format.
+                clean_list = self.clean_file.to_list()
 
-        logging.info(
-            "Finished the generation of {0}".format(repr(self.whitelisted_file.file))
-        )
+                # We whitelist its content.
+                whitelisted_list = clean_list_with_official_whitelist(
+                    clean_list, multiprocessing=True, processes=60
+                )
+
+                # We remove any duplicated.
+                whitelisted_list = List(whitelisted_list).format(delete_empty=True)
+
+                # We finaly save everything into the destination.
+                self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
+
+            logging.info(
+                "Finished the generation of {0}".format(
+                    repr(self.whitelisted_file.file)
+                )
+            )
 
     def update_volatile_list(self):
         """
         Update the content of the volatile list.
         """
 
-        logging.info(
-            "Started the generation of {0}".format(repr(self.volatile_file.file))
-        )
+        if not self.information["currently_under_test"]:
+            logging.info(
+                "Started the generation of {0}".format(repr(self.volatile_file.file))
+            )
 
-        volatile_list = []
+            volatile_list = []
 
-        if self.temp_volatile_file.exists():
-            # The input file exists.
+            if self.temp_volatile_file.exists():
+                # The input file exists.
 
-            # We get its content into list format.
-            volatile_list.extend(self.temp_volatile_file.to_list())
+                # We get its content into list format.
+                volatile_list.extend(self.temp_volatile_file.to_list())
 
-        # We append the content of the previously whitelisted list.
-        volatile_list.extend(self.whitelisted_file.to_list())
+            # We append the content of the previously whitelisted list.
+            volatile_list.extend(self.whitelisted_file.to_list())
 
-        # We whitelist the finale content content.
-        volatile_list = clean_list_with_official_whitelist(
-            volatile_list, multiprocessing=True, processes=60
-        )
+            # We whitelist the finale content content.
+            volatile_list = clean_list_with_official_whitelist(
+                volatile_list, multiprocessing=True, processes=60
+            )
 
-        # We remove any duplicated.
-        volatile_list = List(volatile_list).format(delete_empty=True)
+            # We remove any duplicated.
+            volatile_list = List(volatile_list).format(delete_empty=True)
 
-        # We finaly save everything into the destination.
-        self.volatile_file.write("\n".join(volatile_list), overwrite=True)
+            # We finaly save everything into the destination.
+            self.volatile_file.write("\n".join(volatile_list), overwrite=True)
 
-        logging.info(
-            "Finished the generation of {0}".format(repr(self.volatile_file.file))
-        )
+            logging.info(
+                "Finished the generation of {0}".format(repr(self.volatile_file.file))
+            )
 
     def process(self):
         """
@@ -865,7 +872,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We update/create the whitelisted list.
         self.update_whitelisted_list()
 
-        # We udpdate/create the whitelisted list.
+        # We update/create the whitelisted list.
         self.update_volatile_list()
 
         # And we manage the end of the tool.
