@@ -38,15 +38,15 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
     """
     Dictionary manipulations.
 
-    :param main_dictionnary: The :code:`dict` we are working with.
-    :type main_dictionnary: dict
+    :param main: The :code:`dict` we are working with.
+    :type main: dict
     """
 
-    def __init__(self, main_dictionnary=None):
-        if main_dictionnary is None:
-            self.main_dictionnary = {}
+    def __init__(self, main=None):
+        if main is None:
+            self.main = {}
         else:
-            self.main_dictionnary = main_dictionnary
+            self.main = main
 
     def to_json(self, destination):
         """
@@ -59,13 +59,7 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
         """
 
         with open(destination, "w") as file:
-            dump(
-                self.main_dictionnary,
-                file,
-                ensure_ascii=False,
-                indent=4,
-                sort_keys=True,
-            )
+            dump(self.main, file, ensure_ascii=False, indent=4, sort_keys=True)
 
     @classmethod
     def from_json(cls, json):
@@ -106,27 +100,19 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
         for index, data in to_merge.items():
             # We loop through the given dict to merge.
 
-            if index in self.main_dictionnary:
+            if index in self.main:
                 # The currently read index is in the main dict.
 
-                if isinstance(data, dict) and isinstance(
-                    self.main_dictionnary[index], dict
-                ):
+                if isinstance(data, dict) and isinstance(self.main[index], dict):
                     # They are dict in both sides.
 
                     # We merge the dict tree and save into the local result.
-                    result[index] = Dict(self.main_dictionnary[index]).merge(
-                        data, strict=strict
-                    )
-                elif isinstance(data, list) and isinstance(
-                    self.main_dictionnary[index], list
-                ):
+                    result[index] = Dict(self.main[index]).merge(data, strict=strict)
+                elif isinstance(data, list) and isinstance(self.main[index], list):
                     # They are list in both sides.
 
                     # We merge the lists and save into the local result.
-                    result[index] = List(self.main_dictionnary[index]).merge(
-                        data, strict=strict
-                    )
+                    result[index] = List(self.main[index]).merge(data, strict=strict)
                 else:
                     # They are not list nor dict.
 
@@ -137,7 +123,7 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
                 # We create it.
                 result[index] = data
 
-        for index, data in self.main_dictionnary.items():
+        for index, data in self.main.items():
             # We loop through each element of the main dict.
 
             if index not in result:
@@ -148,4 +134,106 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
                 result[index] = data
 
         # We return the result.
+        return result
+
+    def flatten(self, seperator=".", previous=None):
+        """
+        Flatten the given dict.
+
+        :param str separator: A separator to apply between each keys.
+        :param str previous:
+            DO NOT USE, used to recursively get the key of the previously set keys.
+        """
+
+        # We create a variable which will save the result.
+        result = {}
+
+        if isinstance(self.main, dict):
+            # The main data is a dict.
+
+            for key, value in self.main.items():
+                # We loop through each keys and values.
+
+                for yek, eulav in (
+                    Dict(value).flatten(seperator=seperator, previous=key).items()
+                ):
+                    # We then loop through the flatten version of each subkeys and values.
+
+                    if previous:
+                        # The previous key was set.
+
+                        # We initiate the flatten key with the currently read value.
+                        result[previous + seperator + yek] = eulav
+                    else:
+                        # The previous key was not set.
+
+                        # We initiate the flatten key the currently read key and value.
+                        result[yek] = eulav
+        else:
+            # The main data is not a dict.
+
+            if previous:
+                # The previous key was set.
+
+                # We use the previous key as a the key of the currently given data.
+                result[previous] = self.main
+            else:
+                # The previous key was not set.
+
+                while seperator in result:
+                    # We loop until we are sure that the separator is not preset
+                    # into the result as a key.
+
+                    # We append the separator to the separato
+                    seperator += seperator
+
+                # We set the constructed separator as the key o f the currently given
+                # data.
+                result[seperator] = self.main
+
+        # We finally return the result.
+        return result
+
+    def unflatten(self, seperator="."):
+        """
+        Unflatten the given flatten dict.
+
+        :param str separator: A separator to apply between each keys.
+        """
+
+        # We create a variable which will save the result.
+        result = {}
+
+        for key, value in self.main.items():
+            # We loop through each flatten keys and their values.
+
+            # We set the context we are going to work with.
+            local_result = result
+
+            if seperator in key:
+                # The separator is in the currently read key.
+
+                for k in key.split(seperator)[:-1]:
+                    # We split over the single keys (except the last one.)
+                    # and we iterate over them.
+
+                    if k not in local_result:
+                        # The currently read single key is not into the
+                        # current local result.
+
+                        # We initiate it.
+                        local_result[k] = {}
+
+                    # We then update the context we are working with.
+                    local_result = local_result[k]
+
+                # We then set the value of the last key.
+                local_result[key.split(seperator)[-1]] = value
+            else:
+                # The separator is not in the currently read key.
+
+                # We explicitly set the currently read key and value
+                # into the current local result.
+                local_result[key] = value
+
         return result

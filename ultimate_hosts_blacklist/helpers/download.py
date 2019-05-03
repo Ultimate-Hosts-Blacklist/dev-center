@@ -35,7 +35,6 @@ License:
 from shutil import copyfileobj
 
 from requests import get
-
 from ultimate_hosts_blacklist.helpers.file import File
 
 
