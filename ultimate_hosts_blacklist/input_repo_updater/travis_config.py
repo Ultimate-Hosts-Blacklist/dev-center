@@ -68,10 +68,11 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
     ]
 
     def __init__(self):
-        self.get_current_local_version()
-        self.get_central_version()
-        self.save()
-        self.check_changes_and_commit()
+        if not File(Infrastructure.admin_file).exists():
+            self.get_current_local_version()
+            self.get_central_version()
+            self.save()
+            self.check_changes_and_commit()
 
     @classmethod
     def check_changes_and_commit(cls):

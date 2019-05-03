@@ -168,7 +168,10 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     administration_file = "{0}info.json".format(Outputs.current_directory)
 
     # The path to the .travis.yml file.
-    travis_config_file = "{0}.travis.yml"
+    travis_config_file = "{0}.travis.yml".format(Outputs.current_directory)
+
+    # The path to the admin file.
+    admin_file = "{0}.admin".format(Outputs.current_directory)
 
     # List indexes in the administration file and how we interpret them.
     should_be_bool = ["currently_under_test"]
