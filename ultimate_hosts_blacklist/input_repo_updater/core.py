@@ -592,38 +592,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
             for data in manager_list:
                 # We loop through the list of manager entries.
 
-                for indexes in data:
-                    # We loop through the indexes of the
-                    # currently read data.
-
-                    if indexes in continue_data:
-                        # The currently read index is already into the
-                        # continue data.
-
-                        # We extend its index into the continue data
-                        # with the index saved in the manager.
-                        continue_data[indexes].extend(data[indexes])
-                    else:
-                        # The currently read index is not into the
-                        # continue data.
-
-                        # We create its index into the continue data
-                        # with the saved (and currently read) data
-                        continue_data[indexes] = data[indexes]
-
-                    # We remove all duplicates from the read/set index.
-                    continue_data[indexes] = List(continue_data[indexes]).format()
-
-                    if indexes != "ACTIVE":
-                        # The index is not ACTIVE.
-
-                        for subject in data[indexes]:
-                            # We loop through the list of member of the currently
-                            # read index.
-
-                            # We add each members of the index
-                            # data into the inactive database.
-                            self.our_pyfunceble.inactive_db.add(subject)
+                # We merge the currently read data with the continue file.
+                continue_data = List(continue_data).merge(data, strict=False)
 
             # We save the continue data into its file.
             Dict(continue_data).to_json(self.continue_file.file)
