@@ -151,11 +151,14 @@ class Administration:
         Read and return the content of teh administration file.
         """
 
+        # We get the content of the administration file.
         content = self.location.read()
         logging.debug("Administration file content: \n{0}".format(content))
 
+        # We convert it to a dict.
         data = Dict.from_json(content)
 
+        # And we return the understable version of it.
         return self.__convert_into_understandable(data)
 
     def save(self, data=None):
