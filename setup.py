@@ -80,7 +80,6 @@ if __name__ == "__main__":
         name=PYPI_NAME,
         version=_get_version(),
         install_requires=_get_requirements(),
-        python_requires='>=3',
         description="The tool to update the input source repositories of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
         long_description=_get_long_description(),
         license="MIT",
