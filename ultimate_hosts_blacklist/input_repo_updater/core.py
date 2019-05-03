@@ -592,6 +592,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
             for data in manager_list:
                 # We loop through the list of manager entries.
 
+                logging.info("Merging processes data.")
+
                 # We merge the currently read data with the continue file.
                 continue_data = List(continue_data).merge(data, strict=False)
 
