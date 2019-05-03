@@ -32,8 +32,10 @@ License:
     SOFTWARE.
 """
 
+from ultimate_hosts_blacklist.helpers import Dict
 
-class List:  # pylint: disable=too-few-public-methods
+
+class List:  # pylint: disable=too-few-public-methods, bad-continuation
     """
     List manipulation.
 
@@ -70,3 +72,76 @@ class List:  # pylint: disable=too-few-public-methods
         """
 
         return [x for x in self.main_list if x]
+
+    def merge(self, to_merge, strict=True):
+        """
+        Merge to_merge into the given main list.
+
+        :param list to_merge: The list to merge.
+
+        :param bool strict:
+            Tell us if we have to respect index (:code:`True`)
+            or not (:code:`False`).
+
+        :return: The merged list.
+        :rtype: list
+        """
+
+        # We initiate a variable which will save the
+        # result
+        result = []
+
+        if strict:
+            # We are in strict mode.
+
+            for index, element in enumerate(to_merge):
+                # We loop through each element of the list to merge
+                # to the main dict.
+
+                try:
+                    if isinstance(element, dict) and isinstance(
+                        self.main_list[index], dict
+                    ):
+                        # The currently read element is a dict.
+
+                        # We merge its content into the main dict
+                        # and append into the result.
+                        result.append(Dict(self.main_list[index]).merge(element))
+                    elif isinstance(element, list) and isinstance(
+                        self.main_list[index], list
+                    ):
+                        # The currently read element is a list.
+
+                        # We loop through this method.
+                        result.append(List(self.main_list[index]).merge(element))
+                    else:
+                        # The currently read element is not a list
+                        # nor a dict.
+
+                        # We append the element to the result.
+                        result.append(element)
+                except IndexError:  # pragma: no cover
+                    # The index does not exist.
+                    # Which means that for example one list is bigger
+                    # than the other one.
+
+                    # We append the element to the result.
+                    result.append(element)
+        else:
+            # We are not is strict mode.
+
+            # We initiate the result with the main list.
+            result = self.main_list
+
+            for element in to_merge:
+                # We loop through the element to merge.
+
+                if element not in result:
+                    # The currently read element is not
+                    # in the result.
+
+                    # We append it to the result
+                    result.append(element)
+
+        # We return the result.
+        return result

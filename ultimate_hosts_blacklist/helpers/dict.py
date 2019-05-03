@@ -33,8 +33,10 @@ License:
 """
 from json import decoder, dump, loads
 
+from ultimate_hosts_blacklist.helpers import List
 
-class Dict:  # pylint: disable=too-few-public-methods
+
+class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
     """
     Dictionary manipulations.
 
@@ -81,3 +83,69 @@ class Dict:  # pylint: disable=too-few-public-methods
             return loads(json)
         except decoder.JSONDecodeError:
             return {}
+
+    def merge(self, to_merge, strict=True):
+        """
+        Merge the content of :code:`to_merge` into the main dictionnary.
+
+        :param dict to_merge: The dictionnary to merge.
+
+        :param bool strict:
+            Tell us if we have to strictly merge lists.
+
+            - :code:`True`: We follow index.
+            - :code:`False`: We follow element (content/value)
+
+        :return: The merged dict.
+        :rtype: dict
+        """
+
+        # We initiate a variable which will save our result.
+        result = {}
+
+        for index, data in to_merge.items():
+            # We loop through the given dict to merge.
+
+            if index in self.main_dictionnary:
+                # The currently read index is in the main dict.
+
+                if isinstance(data, dict) and isinstance(
+                    self.main_dictionnary[index], dict
+                ):
+                    # They are dict in both sides.
+
+                    # We merge the dict tree and save into the local result.
+                    result[index] = Dict(self.main_dictionnary[index]).merge(
+                        data, strict=strict
+                    )
+                elif isinstance(data, list) and isinstance(
+                    self.main_dictionnary[index], list
+                ):
+                    # They are list in both sides.
+
+                    # We merge the lists and save into the local result.
+                    result[index] = List(self.main_dictionnary[index]).merge(
+                        data, strict=strict
+                    )
+                else:
+                    # They are not list nor dict.
+
+                    result[index] = data
+            else:
+                # The currently read index is not in the main dict.
+
+                # We create it.
+                result[index] = data
+
+        for index, data in self.main_dictionnary.items():
+            # We loop through each element of the main dict.
+
+            if index not in result:
+                # The currently read index is not into
+                # the result.
+
+                # We append it to the result.
+                result[index] = data
+
+        # We return the result.
+        return result
