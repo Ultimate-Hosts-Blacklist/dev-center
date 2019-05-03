@@ -32,8 +32,6 @@ License:
     SOFTWARE.
 """
 
-from ultimate_hosts_blacklist.helpers import Dict
-
 
 class List:  # pylint: disable=too-few-public-methods, bad-continuation
     """
@@ -86,6 +84,8 @@ class List:  # pylint: disable=too-few-public-methods, bad-continuation
         :return: The merged list.
         :rtype: list
         """
+
+        from ultimate_hosts_blacklist.helpers.dict import Dict
 
         # We initiate a variable which will save the
         # result

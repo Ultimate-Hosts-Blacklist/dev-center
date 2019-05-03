@@ -33,8 +33,6 @@ License:
 """
 from json import decoder, dump, loads
 
-from ultimate_hosts_blacklist.helpers import List
-
 
 class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
     """
@@ -99,6 +97,8 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
         :return: The merged dict.
         :rtype: dict
         """
+
+        from ultimate_hosts_blacklist.helpers.list import List
 
         # We initiate a variable which will save our result.
         result = {}
