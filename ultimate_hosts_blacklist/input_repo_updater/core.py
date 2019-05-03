@@ -38,7 +38,6 @@ from os import environ, path
 from time import time
 
 from domain2idna import get as domain2idna
-
 from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
@@ -51,6 +50,7 @@ from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     PyFunceble as InfrastructrePyFuncebleConfiguration,
 )
 from ultimate_hosts_blacklist.input_repo_updater.our_pyfunceble import OurPyFunceble
+from ultimate_hosts_blacklist.input_repo_updater.travis_config import TravisConfig
 from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelist
 
 
@@ -76,6 +76,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
         TravisCI.configure_git_repo()
         # We fix the permissions of the repository.
         TravisCI.fix_permissions()
+
+        # We update the travis configuration file if needed.
+        TravisConfig()
 
         # We initiate our administration logic.
         self.administation = Administration()
@@ -262,10 +265,16 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 )
             )
 
-            if not Download(
-                InfrastructrePyFuncebleConfiguration.links["production_config"]["link"],
-                destination,
-            ).text():
+            if Infrastructure.stable:
+                link = InfrastructrePyFuncebleConfiguration.links["production_config"][
+                    "link"
+                ].replace("dev", "master")
+            else:
+                link = InfrastructrePyFuncebleConfiguration.links["production_config"][
+                    "link"
+                ].replace("master", "dev")
+
+            if not Download(link, destination).text():
                 # We could not download the cross configuration file.
 
                 # We raise an exception, we can't work without a configuration file.

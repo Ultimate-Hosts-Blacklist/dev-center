@@ -156,6 +156,9 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
             "cross_destination": ".PyFunceble_cross_input_sources.yaml",
             "destination": ".PyFunceble.yaml",
         },
+        "travis_config": {
+            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/.travis.yml"  # pylint: disable=line-too-long
+        },
     }
 
     # Set our makers list.
@@ -164,7 +167,16 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     # The path to the administration file.
     administration_file = "{0}info.json".format(Outputs.current_directory)
 
+    # The path to the .travis.yml file.
+    travis_config_file = "{0}.travis.yml"
+
     # List indexes in the administration file and how we interpret them.
     should_be_bool = ["currently_under_test"]
     should_be_int = ["days_until_next_test", "last_test"]
     unneeded_indexes = ["arguments", "clean_original", "stable"]
+
+    # Save if we use the prod or dev version of the configuration file.
+    stable = False
+
+    # Set the commit message to send when updating the travis configuration.
+    travis_config_update_message = "Update of the Travis CI configuration file"
