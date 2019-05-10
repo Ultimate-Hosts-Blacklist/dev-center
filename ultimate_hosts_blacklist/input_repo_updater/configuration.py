@@ -179,7 +179,7 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     unneeded_indexes = ["arguments", "clean_original", "stable"]
 
     # Save if we use the prod or dev version of the configuration file.
-    stable = False
+    stable = True
 
     # Set the commit message to send when updating the travis configuration.
     travis_config_update_message = "Update of the Travis CI configuration file"

@@ -266,13 +266,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
             )
 
             if Infrastructure.stable:
-                link = InfrastructrePyFuncebleConfiguration.links["production_config"][
-                    "link"
-                ].replace("dev", "master")
+                link = Infrastructure.links["config"]["link"].replace("dev", "master")
             else:
-                link = InfrastructrePyFuncebleConfiguration.links["production_config"][
-                    "link"
-                ].replace("master", "dev")
+                link = Infrastructure.links["config"]["link"].replace("master", "dev")
 
             if not Download(link, destination).text():
                 # We could not download the cross configuration file.
