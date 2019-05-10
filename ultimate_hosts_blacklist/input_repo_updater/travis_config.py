@@ -35,10 +35,11 @@ License:
 import logging
 from os import environ
 
-from ultimate_hosts_blacklist.helpers import Command, Dict, Download, File
-from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
 from yaml import safe_dump as yaml_dump
 from yaml import safe_load as yaml_load
+
+from ultimate_hosts_blacklist.helpers import Command, Dict, Download, File
+from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
 
 
 class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpolation
@@ -154,6 +155,8 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
             logging.debug("Content: \n {0}".format(upstream))
 
             self.upstream_version = yaml_load(upstream)
+
+            return None
 
         # Otherwise, we raise an exception, we can't do nothing without
         # something to test.
