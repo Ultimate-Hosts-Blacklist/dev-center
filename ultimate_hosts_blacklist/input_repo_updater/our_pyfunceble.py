@@ -161,7 +161,11 @@ class OurPyFunceble:
         """
 
         # We list the list of extra files to delete.
-        files = [self.output_dir + Outputs.continue_filename]
+        files = [
+            self.output_dir + Outputs.continue_filename,
+            Outputs.current_directory + "dir_structure.json",
+            Outputs.current_directory + "dir_structure_production.json",
+        ]
 
         for file in files:
             # We loop through the list of directory.

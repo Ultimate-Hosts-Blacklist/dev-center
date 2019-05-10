@@ -778,10 +778,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We get the list to test.
         to_test = [
-            x
-            for x in self.__extract_domains_from_line(
-                File(Outputs.input_destination).to_list()
-            )
+            self.__extract_domains_from_line(x)
+            for x in File(Outputs.input_destination).to_list()
             if x and not x.startswith("#")
         ]
 

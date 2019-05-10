@@ -116,104 +116,128 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
         Get the current local version.
         """
 
-        logging.info(
-            "Reading local version of {0}".format(
-                repr(Infrastructure.travis_config_file)
-            )
-        )
-        content = File(Infrastructure.travis_config_file).read()
-        logging.debug("Content: \n {0}".format(content))
+        try:
+            _ = environ["GIT_BRANCH"]
+            _ = environ["TRAVIS_BUILD_DIR"]
 
-        self.local_version = yaml_load(content)
+            logging.info(
+                "Reading local version of {0}".format(
+                    repr(Infrastructure.travis_config_file)
+                )
+            )
+            content = File(Infrastructure.travis_config_file).read()
+            logging.debug("Content: \n {0}".format(content))
+
+            self.local_version = yaml_load(content)
+        except KeyError:
+            pass
 
     def get_central_version(self):
         """
         Get the upstream (central) version.
         """
 
-        logging.info(
-            "Getting central version of {0}".format(
-                repr(Infrastructure.travis_config_file)
-            )
-        )
+        try:
+            _ = environ["GIT_BRANCH"]
+            _ = environ["TRAVIS_BUILD_DIR"]
 
-        if Infrastructure.stable:
-            link = Infrastructure.links["travis_config"]["link"].replace(
-                "dev", "master"
-            )
-        else:
-            link = Infrastructure.links["travis_config"]["link"].replace(
-                "master", "dev"
+            logging.info(
+                "Getting central version of {0}".format(
+                    repr(Infrastructure.travis_config_file)
+                )
             )
 
-        upstream = Download(link, None).text()
+            if Infrastructure.stable:
+                link = Infrastructure.links["travis_config"]["link"].replace(
+                    "dev", "master"
+                )
+            else:
+                link = Infrastructure.links["travis_config"]["link"].replace(
+                    "master", "dev"
+                )
 
-        if isinstance(upstream, str):
-            # The downloaded data is a str.
+            upstream = Download(link, None).text()
 
-            logging.debug("Content: \n {0}".format(upstream))
+            if isinstance(upstream, str):
+                # The downloaded data is a str.
 
-            self.upstream_version = yaml_load(upstream)
+                logging.debug("Content: \n {0}".format(upstream))
 
-            return None
+                self.upstream_version = yaml_load(upstream)
 
-        # Otherwise, we raise an exception, we can't do nothing without
-        # something to test.
-        raise Exception("Unable to get the content of {0}.".format(repr(link)))
+                return None
+
+            # Otherwise, we raise an exception, we can't do nothing without
+            # something to test.
+            raise Exception("Unable to get the content of {0}.".format(repr(link)))
+        except KeyError:
+            pass
 
     def merge(self):
         """
         Merge the two versions.
         """
 
-        for index in self.to_update:
-            logging.info(
-                "Merging {0} into {1} ".format(
-                    index, repr(Infrastructure.travis_config_file)
+        try:
+            _ = environ["GIT_BRANCH"]
+            _ = environ["TRAVIS_BUILD_DIR"]
+
+            for index in self.to_update:
+                logging.info(
+                    "Merging {0} into {1} ".format(
+                        index, repr(Infrastructure.travis_config_file)
+                    )
                 )
-            )
 
-            self.local_version[index] = self.upstream_version[index]
+                self.local_version[index] = self.upstream_version[index]
 
-        flattened = Dict(self.local_version).flatten(separator=".")
+            flattened = Dict(self.local_version).flatten(separator=".")
 
-        for index in self.to_delete:
-            logging.info(
-                "Deleting {0} from {1} ".format(
-                    index, repr(Infrastructure.travis_config_file)
+            for index in self.to_delete:
+                logging.info(
+                    "Deleting {0} from {1} ".format(
+                        index, repr(Infrastructure.travis_config_file)
+                    )
                 )
-            )
 
-            if index in flattened:
-                del flattened[index]
+                if index in flattened:
+                    del flattened[index]
 
-        self.local_version = Dict(flattened).unflatten(separato=".")
+            self.local_version = Dict(flattened).unflatten(separato=".")
+        except KeyError:
+            pass
 
     def save(self):
         """
         Save the new local versions.
         """
 
-        logging.debug(
-            "Saving new version into {0}.".format(
-                repr(Infrastructure.travis_config_file)
-            )
-        )
-
-        with open(
-            Infrastructure.travis_config_file, "w", encoding="utf-8"
-        ) as file_stream:
-            new_version = yaml_dump(
-                self.local_version,
-                encoding="utf-8",
-                allow_unicode=True,
-                indent=4,
-                default_flow_style=False,
-            ).decode("utf-8")
+        try:
+            _ = environ["GIT_BRANCH"]
+            _ = environ["TRAVIS_BUILD_DIR"]
 
             logging.debug(
-                "New version of {0}: \n{1}".format(
-                    repr(Infrastructure.travis_config_file), new_version
+                "Saving new version into {0}.".format(
+                    repr(Infrastructure.travis_config_file)
                 )
             )
-            file_stream.write(new_version)
+
+            with open(
+                Infrastructure.travis_config_file, "w", encoding="utf-8"
+            ) as file_stream:
+                new_version = yaml_dump(
+                    self.local_version,
+                    encoding="utf-8",
+                    allow_unicode=True,
+                    indent=4,
+                    default_flow_style=False,
+                ).decode("utf-8")
+
+                logging.debug(
+                    "New version of {0}: \n{1}".format(
+                        repr(Infrastructure.travis_config_file), new_version
+                    )
+                )
+                file_stream.write(new_version)
+        except KeyError:
+            pass
