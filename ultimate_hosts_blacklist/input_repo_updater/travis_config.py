@@ -212,7 +212,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
                 default_flow_style=False,
             ).decode("utf-8")
 
-            logging.info(
+            logging.debug(
                 "New version of {0}: \n{1}".format(
                     repr(Infrastructure.travis_config_file), new_version
                 )
