@@ -38,7 +38,6 @@ from os import environ, path
 from time import time
 
 from domain2idna import get as domain2idna
-
 from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
@@ -601,7 +600,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 logging.info("Merging processes data.")
 
                 # We merge the currently read data with the continue file.
-                continue_data = List(continue_data).merge(data, strict=False)
+                continue_data = Dict(continue_data).merge(data, strict=False)
 
             # We save the continue data into its file.
             Dict(continue_data).to_json(self.continue_file.file)
