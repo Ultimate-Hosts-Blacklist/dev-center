@@ -85,7 +85,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
 
         if (
             Command(
-                "git status --procelain {0}".format(Infrastructure.travis_config_file),
+                "git status --porcelain {0}".format(Infrastructure.travis_config_file),
                 allow_stdout=False,
             )
             .execute()
@@ -195,7 +195,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
         Save the new local versions.
         """
 
-        logging.info(
+        logging.debug(
             "Saving new version into {0}.".format(
                 repr(Infrastructure.travis_config_file)
             )
