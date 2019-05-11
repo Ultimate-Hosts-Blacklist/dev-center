@@ -41,4 +41,4 @@ from ultimate_hosts_blacklist.helpers.list import List
 from ultimate_hosts_blacklist.helpers.regex import Regex
 from ultimate_hosts_blacklist.helpers.travis_ci import TravisCI
 
-VERSION = "1.15.0"
+VERSION = "1.16.0"

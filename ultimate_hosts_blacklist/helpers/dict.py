@@ -33,6 +33,9 @@ License:
 """
 from json import decoder, dump, loads
 
+from yaml import dump as yaml_dump
+from yaml import safe_load as yaml_load
+
 
 class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
     """
@@ -61,6 +64,25 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
         with open(destination, "w") as file:
             dump(self.main, file, ensure_ascii=False, indent=4, sort_keys=True)
 
+    def to_yaml(self, destination, flow_style=False):
+        """
+        Save a dictionnary into a YAML file.
+
+        :param str destination:
+            A path to a file where we're going to write the
+            converted dict into a JSON format.
+        """
+
+        with open(destination, "w") as file:
+            yaml_dump(
+                self.main,
+                file,
+                encoding="utf-8",
+                allow_unicode=True,
+                indent=4,
+                default_flow_style=flow_style,
+            )
+
     @classmethod
     def from_json(cls, json):
         """
@@ -75,6 +97,18 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
             return loads(json)
         except decoder.JSONDecodeError:
             return {}
+
+    @classmethod
+    def from_yaml(cls, yaml):
+        """
+        Given a YAML formatted string, we convert it
+        into a dict which we return.
+
+        :param json: A YAML formatted string.
+        :type json: str
+        """
+
+        return yaml_load(yaml)
 
     def merge(self, to_merge, strict=True):
         """
