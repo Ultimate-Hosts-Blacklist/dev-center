@@ -38,6 +38,7 @@ from os import environ, path
 from time import time
 
 from domain2idna import get as domain2idna
+
 from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
@@ -628,7 +629,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
         status_map = {"ACTIVE": "up", "INACTIVE": "down", "INVALID": "invalid"}
 
         # We initiate the counters for the status we have locally.
-        counters = {status_map[x]: len(y) for x, y in continue_data.items()}
+        counters = {
+            status_map[x]: len(y) for x, y in continue_data.items() if x in status_map
+        }
 
         # We  complete with the status which are not found locally.
         counters.update({x: 0 for x in status_map.values() if x not in counters})
