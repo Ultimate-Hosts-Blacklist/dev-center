@@ -357,7 +357,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We get the HTTP status code.
         status_code = test_result["http_status_code"]
 
-        if test_result["_status"] != "ACTIVE" and status == "ACTIVE":
+        if test_result["_status"] != status or test_result["_status_source"] != source:
             # The special rule was applied.
 
             # We save the current subject into the volatile file.
