@@ -209,7 +209,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 "Writting latest configuration into {0}".format(repr(destination))
             )
             Dict(cross_config).to_yaml(destination)
-            File(destination).write(content, overwrite=True)
 
             logging.info(
                 "Writting latest configuration into {0}".format(
