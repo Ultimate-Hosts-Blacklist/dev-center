@@ -119,6 +119,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
         "travis_autosave_final_commit": "[Results] Testing for Ultimate Hosts Blacklist",
         "travis_autosave_minutes": 15,
         "idna_conversion": True,
+        "dns_server": ["1.1.1.1", "1.0.0.1"],
     }
 
     # The configuration we are going to parse to the PyFunceble API.

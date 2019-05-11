@@ -192,40 +192,23 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 # We set the branch as master.
                 travis_branch = "master"
 
-            # We set the regex which will match a line from
-            # the PyFunceble configuration.
-            regex_match_configuration_line = r"({0}\:)(.*)"
-
-            # We get the content of the cross configuration file.
-            content = File(destination).read()
-
-            for (
-                index,
-                value,
-            ) in InfrastructrePyFuncebleConfiguration.configuration.items():
-                # We loop though the configuration items.
-
-                if isinstance(value, str):
-                    # The value is a string.
-
-                    # We get its representation.
-                    value = repr(value)
-
-                # We update the content with the new value.
-                content = Regex(
-                    content, regex_match_configuration_line.format(index)
-                ).replace_with(r"\1 {0}".format(value))
+            # We get the content of the PyFunceble production configuration file.
+            cross_config = Dict.from_yaml(File(destination).read())
+            cross_config = Dict(cross_config).merge(
+                InfrastructrePyFuncebleConfiguration.configuration, strict=False
+            )
 
             # We set the travis branch.
-            content = Regex(
-                content, regex_match_configuration_line.format("travis_branch")
-            ).replace_with(r"\1 {0}".format(travis_branch))
+            cross_config["travis_branch"] = travis_branch
 
-            logging.debug("Cross configuration file content: \n {0}".format(content))
+            logging.debug(
+                "Cross configuration file content: \n {0}".format(cross_config)
+            )
 
             logging.info(
                 "Writting latest configuration into {0}".format(repr(destination))
             )
+            Dict(cross_config).to_yaml(destination)
             File(destination).write(content, overwrite=True)
 
             logging.info(
@@ -233,7 +216,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     repr(config_destination)
                 )
             )
-            File(config_destination).write(content, overwrite=True)
+            Dict(cross_config).to_yaml(config_destination)
         else:
             logging.info(
                 "Cross configuration file ({0}) not found.".format(destination)
