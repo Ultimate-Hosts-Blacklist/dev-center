@@ -33,13 +33,20 @@ License:
 """
 # pylint: disable=bad-continuation
 from itertools import chain
-from multiprocessing import Manager, Process
+from multiprocessing import Manager
 from os import environ, path
 from time import time
 
 from domain2idna import get as domain2idna
-
-from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
+from ultimate_hosts_blacklist.helpers import (
+    Dict,
+    Download,
+    File,
+    List,
+    OurProcessWrapper,
+    Regex,
+    TravisCI,
+)
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
 from ultimate_hosts_blacklist.input_repo_updater.authorization import Authorization
@@ -542,7 +549,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # We loop through the list of subject to test.
 
                         # We initiate a process which will test the current domain.
-                        process = Process(
+                        process = OurProcessWrapper(
                             target=self.test, args=(subject, None, manager_list)
                         )
                         # We append the process into the "pool" of processes.
@@ -566,12 +573,42 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     # We break the loop.
                     break
 
-            for process in processes:
-                # We loop through the list of processes.
+            # We check if an exception is present into one process
+            # and we then save the process index.
+            exception_present = [x for x, y in enumerate(processes) if y.exception]
 
-                # And we block until the currently read
-                # process finished.
-                process.join()
+            if exception_present:
+                # One or more exception is present.
+
+                for process in processes:
+                    # We loop through the list of processes.
+
+                    if process.exception:
+                        # There in an exception in the currently
+                        # read process.
+
+                        # We get the traceback
+                        _, traceback = process.exception
+
+                        # We print the traceback.
+                        print(traceback)
+
+                    # We kill the process.
+                    process.kill()
+
+                # We finally exit.
+                exit(1)
+            else:
+                # There was no exception.
+
+                for process in processes:
+                    # We loop through the list of processes.
+
+                    # We then wait until all processes are done.
+                    process.join()
+
+                    # We continue the loop
+                    continue
 
             # We initiate the future content of the
             # continue data file.
