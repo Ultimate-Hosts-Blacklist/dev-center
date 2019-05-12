@@ -38,7 +38,8 @@ from ultimate_hosts_blacklist.helpers.directory import Directory
 from ultimate_hosts_blacklist.helpers.download import Download
 from ultimate_hosts_blacklist.helpers.file import File
 from ultimate_hosts_blacklist.helpers.list import List
+from ultimate_hosts_blacklist.helpers.our_process_wrapper import OurProcessWrapper
 from ultimate_hosts_blacklist.helpers.regex import Regex
 from ultimate_hosts_blacklist.helpers.travis_ci import TravisCI
 
-VERSION = "1.16.0"
+VERSION = "1.17.0"
