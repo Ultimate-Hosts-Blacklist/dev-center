@@ -135,10 +135,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     }
 
     # Set the PyFunceble packages to install.
-    packages = {
-        "stable": "PyFunceble",
-        "dev": "git+https://github.com/funilrys/PyFunceble.git@2.x.x",
-    }
+    packages = {"stable": "PyFunceble", "dev": "PyFunceble-dev"}
 
 
 class Infrastructure:  # pylint: disable=too-few-public-methods
