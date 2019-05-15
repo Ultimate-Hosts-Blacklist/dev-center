@@ -35,7 +35,7 @@ License:
 from itertools import chain
 from multiprocessing import Manager
 from os import environ, path
-from time import time
+from time import sleep, time
 
 from domain2idna import get as domain2idna
 from ultimate_hosts_blacklist.helpers import (
@@ -555,8 +555,12 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # We append the process into the "pool" of processes.
                         processes.append(process)
 
-                        # We start the process.
-                        process.start()
+                        try:
+                            # We start the process.
+                            process.start()
+                        except OSError:
+                            sleep(Infrastructure.sleep_time)
+                            process.start()
 
                     # And we continue the loop.
                     continue
