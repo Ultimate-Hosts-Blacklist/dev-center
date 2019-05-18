@@ -587,8 +587,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
             if exception_present:
                 # One or more exception is present.
 
-                kill = False
-
                 for process in processes:
                     # We loop through the list of processes.
 
@@ -599,21 +597,14 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # We get the traceback
                         _, traceback = process.exception
 
-                        if "OSError:" not in traceback:
-                            # We print the traceback.
-                            print(traceback)
+                        # We print the traceback.
+                        print(traceback)
 
-                            kill = True
-                        else:
-                            kill = False
+                    # We kill the process.
+                    process.kill()
 
-                    if kill:
-                        # We kill the process.
-                        process.kill()
-
-                if kill:
-                    # We finally exit.
-                    exit(1)
+                # We finally exit.
+                exit(1)
             else:
                 # There was no exception.
 
