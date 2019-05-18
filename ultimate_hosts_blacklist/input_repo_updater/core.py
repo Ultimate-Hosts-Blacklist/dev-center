@@ -559,7 +559,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
                             # We start the process.
                             process.start()
                         except OSError:
-                            logging.info("Sleeping for {0}s".format(Infrastructure.sleep_time))
+                            logging.info(
+                                "Sleeping for {0}s".format(Infrastructure.sleep_time)
+                            )
                             sleep(Infrastructure.sleep_time)
                             process.start()
 
@@ -585,6 +587,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
             if exception_present:
                 # One or more exception is present.
 
+                kill = False
+
                 for process in processes:
                     # We loop through the list of processes.
 
@@ -595,14 +599,21 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # We get the traceback
                         _, traceback = process.exception
 
-                        # We print the traceback.
-                        print(traceback)
+                        if "OSError:" not in traceback:
+                            # We print the traceback.
+                            print(traceback)
 
-                    # We kill the process.
-                    process.kill()
+                            kill = True
+                        else:
+                            kill = False
 
-                # We finally exit.
-                exit(1)
+                    if kill:
+                        # We kill the process.
+                        process.kill()
+
+                if kill:
+                    # We finally exit.
+                    exit(1)
             else:
                 # There was no exception.
 
