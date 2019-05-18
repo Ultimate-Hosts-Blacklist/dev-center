@@ -183,4 +183,4 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     travis_config_update_message = "Update of the Travis CI configuration file"
 
     # Set the sleep time when we reach the end of the RAM.
-    sleep_time = 30
+    sleep_time = 40

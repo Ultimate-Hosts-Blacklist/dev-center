@@ -559,6 +559,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                             # We start the process.
                             process.start()
                         except OSError:
+                            logging.info("Sleeping for {0}s".format(Infrastructure.sleep_time))
                             sleep(Infrastructure.sleep_time)
                             process.start()
 
@@ -608,8 +609,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 for process in processes:
                     # We loop through the list of processes.
 
-                    # We then wait until all processes are done.
-                    process.join()
+                    if process.is_alive():
+                        # We then wait until all processes are done.
+                        process.join()
 
                     # We continue the loop
                     continue
