@@ -64,8 +64,12 @@ class OurProcessWrapper(Process):  # pragma: no cover
         except Exception as exception:  # pylint: disable= broad-except
             # We get the traceback.
             traceback = format_exc()
-            # We send the exception and its traceback to the pipe.
-            self.conn2.send((exception, traceback))
+
+            if "OSError:" not in traceback:
+                # We send the exception and its traceback to the pipe.
+                self.conn2.send((exception, traceback))
+            else:
+                self.conn2.send(None)
 
     @property
     def exception(self):
