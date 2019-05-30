@@ -30,8 +30,8 @@ License:
     SOFTWARE.
 """
 
-from re import sub as substring
 from re import compile as comp
+from re import sub as substring
 from unittest import TestLoader
 
 from setuptools import setup
@@ -39,7 +39,7 @@ from setuptools import setup
 NAMESPACE = "ultimate_hosts_blacklist"
 MODULE = "central_repo_updater"
 
-PYPI_NAME = substring(r"\_", r"\-", "{0}-{1}".format(NAMESPACE, MODULE))
+PYPI_NAME = substring(r"_", r"-", "{0}-{1}".format(NAMESPACE, MODULE))
 
 
 def _get_requirements():
@@ -61,8 +61,7 @@ def _get_version():
     to_match = comp(r'VERSION\s=\s"(.*)"\n')
     extracted = to_match.findall(
         open(
-            "ultimate_hosts_blacklist/{0}/__init__.py".format(MODULE),
-            encoding="utf-8",
+            "ultimate_hosts_blacklist/{0}/__init__.py".format(MODULE), encoding="utf-8"
         ).read()
     )[0]
 
@@ -100,9 +99,15 @@ if __name__ == "__main__":
         ],
         entry_points={
             "console_scripts": [
-                "uhb_central_repo_updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
-                "uhb-central-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
-                "ultimate-hosts-blacklist-central-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
+                "uhb_central_repo_updater=ultimate_hosts_blacklist.{0}:_command_line".format(
+                    MODULE
+                ),
+                "uhb-central-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(
+                    MODULE
+                ),
+                "ultimate-hosts-blacklist-central-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(
+                    MODULE
+                ),
             ]
         },
     )
