@@ -183,7 +183,7 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     travis_config_update_message = "Update of the Travis CI configuration file"
 
     # Set the commit message to send when updateing the PyFunceble configuration file.
-    pyfunceble_config_update_message = "Update of the PyFunceble's configuration file"
+    pyfunceble_config_update_message = "Update of the configuration file of PyFunceble"
 
     # Set the sleep time when we reach the end of the RAM.
     sleep_time = 40

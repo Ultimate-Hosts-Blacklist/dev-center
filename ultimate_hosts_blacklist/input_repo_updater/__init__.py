@@ -38,7 +38,7 @@ from colorama import Fore, Style
 from colorama import init as initiate_coloration
 from ultimate_hosts_blacklist.input_repo_updater.core import Core
 
-VERSION = "1.15.2"
+VERSION = "1.15.3"
 
 
 def _command_line():
