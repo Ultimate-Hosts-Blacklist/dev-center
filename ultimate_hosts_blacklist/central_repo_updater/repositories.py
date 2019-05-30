@@ -34,7 +34,6 @@ License:
 from os import path
 
 from requests import get
-
 from ultimate_hosts_blacklist.central_repo_updater.configuration import (
     GitHub,
     Infrastructure,

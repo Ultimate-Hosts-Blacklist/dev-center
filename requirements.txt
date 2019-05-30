@@ -1,5 +1,5 @@
 colorama
-PyFunceble
+PyFunceble-dev
 requests
 ultimate-hosts-blacklist-helpers>=1.6.1
 ultimate-hosts-blacklist-whitelist
