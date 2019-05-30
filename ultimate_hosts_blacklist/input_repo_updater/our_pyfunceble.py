@@ -192,7 +192,7 @@ class OurPyFunceble:
 
         # We create an instance of the file.
         inactive_database_file = File(
-            self.pyfunceble.CURRENT_DIRECTORY
+            self.pyfunceble.CONFIG_DIRECTORY
             + self.pyfunceble.OUTPUTS["default_files"]["inactive_db"]
         )
 
