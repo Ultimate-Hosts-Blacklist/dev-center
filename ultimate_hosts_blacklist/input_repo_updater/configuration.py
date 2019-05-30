@@ -91,11 +91,11 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     # Some list of links we may use.
     links = {
         "production_config": {
-            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/.PyFunceble_production.yaml",  # pylint: disable=line-too-long
+            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/dev/.PyFunceble_production.yaml",  # pylint: disable=line-too-long
             "destination": ".PyFunceble_production.yaml",
         },
         "license": {
-            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/2.x.x/LICENSE",
+            "link": "https://raw.githubusercontent.com/funilrys/PyFunceble/dev/LICENSE",
             "destination": ".PyFunceble_LICENSE",
         },
     }
