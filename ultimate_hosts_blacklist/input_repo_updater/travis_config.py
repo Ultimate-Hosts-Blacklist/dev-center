@@ -72,10 +72,13 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
             self.get_current_local_version()
             self.get_central_version()
             self.save()
-            self.check_changes_and_commit()
+            self.check_changes_and_commit(
+                Infrastructure.travis_config_file,
+                commit_message=Infrastructure.travis_config_update_message,
+            )
 
     @classmethod
-    def check_changes_and_commit(cls):
+    def check_changes_and_commit(cls, file_to_check, commit_message=None):
         """
         Check if there was some changes into the configuration file.
 
@@ -84,8 +87,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
 
         if (
             Command(
-                "git status --porcelain {0}".format(Infrastructure.travis_config_file),
-                allow_stdout=False,
+                "git status --porcelain {0}".format(file_to_check), allow_stdout=False
             )
             .execute()
             .strip()
@@ -95,15 +97,11 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
                 _ = environ["GIT_BRANCH"]
                 _ = environ["TRAVIS_BUILD_DIR"]
 
-                logging.info(
-                    "Stopping instance: New version of the Travis CI configuration file."
-                )
+                logging.info("Stopping instance: {0}".format(commit_message))
 
                 Command(
                     "git add {0} && git commit -m '{1}' && git push origin {2}".format(
-                        Infrastructure.travis_config_file,
-                        Infrastructure.travis_config_update_message,
-                        environ["GIT_BRANCH"],
+                        file_to_check, commit_message, environ["GIT_BRANCH"]
                     )
                 ).execute()
 

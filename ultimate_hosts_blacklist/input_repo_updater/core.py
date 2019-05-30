@@ -224,6 +224,15 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 )
             )
             Dict(cross_config).to_yaml(config_destination)
+
+            TravisConfig.check_changes_and_commit(
+                destination,
+                commit_message=Infrastructure.pyfunceble_config_update_message,
+            )
+            TravisConfig.check_changes_and_commit(
+                config_destination,
+                commit_message=Infrastructure.pyfunceble_config_update_message,
+            )
         else:
             logging.info(
                 "Cross configuration file ({0}) not found.".format(destination)
