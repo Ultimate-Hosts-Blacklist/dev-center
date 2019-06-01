@@ -61,6 +61,7 @@ class OurProcessWrapper(Process):  # pragma: no cover
 
             # We send None as message as there was no exception.
             self.conn2.send(None)
+            self.conn2.close()
         except Exception as exception:  # pylint: disable= broad-except
             # We get the traceback.
             traceback = format_exc()
@@ -70,6 +71,7 @@ class OurProcessWrapper(Process):  # pragma: no cover
                 self.conn2.send((exception, traceback))
             else:
                 self.conn2.send(None)
+            self.conn2.close()
 
     @property
     def exception(self):
@@ -82,5 +84,7 @@ class OurProcessWrapper(Process):  # pragma: no cover
 
             # We get and save the exception.
             self._exception_receiver = self.conn1.recv()
+
+        self.conn1.close()
 
         return self._exception_receiver
