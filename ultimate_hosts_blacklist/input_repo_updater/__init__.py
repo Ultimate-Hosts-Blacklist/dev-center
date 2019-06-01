@@ -38,7 +38,7 @@ from colorama import Fore, Style
 from colorama import init as initiate_coloration
 from ultimate_hosts_blacklist.input_repo_updater.core import Core
 
-VERSION = "1.15.3"
+VERSION = "1.16.0"
 
 
 def _command_line():
@@ -75,6 +75,14 @@ def _command_line():
         )
 
         parser.add_argument(
+            "-p",
+            "--processes",
+            help="Set the maximal number of process to use.",
+            type=int,
+            default=25,
+        )
+
+        parser.add_argument(
             "-v",
             "--version",
             help="Show the version end exist.",
@@ -90,5 +98,7 @@ def _command_line():
             logging_level = logging.INFO
 
         Core(
-            logging_level=logging_level, multiprocessing=arguments.multiprocess
+            logging_level=logging_level,
+            multiprocessing=arguments.multiprocess,
+            processes=arguments.processes,
         ).process()

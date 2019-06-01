@@ -33,9 +33,9 @@ License:
 """
 # pylint: disable=bad-continuation
 from itertools import chain
-from multiprocessing import Manager
+from multiprocessing import Manager, Pool, active_children
 from os import environ, path
-from time import sleep, time
+from time import stime
 
 from domain2idna import get as domain2idna
 from ultimate_hosts_blacklist.helpers import (
@@ -71,7 +71,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
     :param int logging_level: Set the logging level.
     """
 
-    def __init__(self, multiprocessing=False, logging_level=logging.INFO):
+    def __init__(self, multiprocessing=False, processes=25, logging_level=logging.INFO):
         # We configurate the logging.
         logging.basicConfig(
             format="%(asctime)s - %(levelname)s -- %(message)s", level=logging_level
@@ -79,6 +79,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We share the multiprocessing.
         self.multiprocessing = multiprocessing
+        self.processes = processes
 
         # We configurate the repository.
         TravisCI.configure_git_repo()
@@ -409,7 +410,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             Dict(continue_data).to_json(Outputs.continue_destination)
 
     @classmethod
-    def __extract_domains_from_line(cls, line):
+    def _extract_domains_from_line(cls, line):
         """
         Given a line, we return the domains.
 
@@ -418,6 +419,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
         :return: The partially formatted line.
         :rtype: str
         """
+
+        line = line.strip()
 
         if "#" in line:
             # A comment is present into the line.
@@ -547,57 +550,98 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # We initiate a manager list.
             manager_list = manager.list()
 
-            while int(time()) < end_time:
+            while True:
                 # We loop untill the end time is in the past.
 
-                try:
-                    # We get the subject we are going to test.
-                    subject = next(to_test).strip()
+                active = active_children()
+                processes = []
 
-                    for subject in self.__get_subject_to_test(subject):
-                        # We loop through the list of subject to test.
+                logging.debug("ACTIVE Children: {0}".format(active))
+                logging.debug(
+                    "WHILE_STATE: {0}".format(
+                        len(active) <= self.processes
+                        and len(processes) <= self.processes
+                        and int(time()) < int(end_time)
+                    )
+                )
 
-                        # We initiate a process which will test the current domain.
-                        process = OurProcessWrapper(
-                            target=self.test, args=(subject, None, manager_list)
-                        )
-                        # We append the process into the "pool" of processes.
-                        processes.append(process)
+                while (
+                    len(active) <= self.processes
+                    and len(processes) <= self.processes
+                    and int(time()) < int(end_time)
+                ):
 
-                        try:
+                    try:
+                        # We get the subject we are going to test.
+                        subject = next(to_test).strip()
+
+                        for subject in self.__get_subject_to_test(subject):
+                            # We loop through the list of subject to test.
+
+                            # We initiate a process which will test the current domain.
+                            process = OurProcessWrapper(
+                                target=self.test, args=(subject, None, manager_list)
+                            )
+                            # We append the process into the "pool" of processes.
+                            processes.append(process)
+
                             # We start the process.
                             process.start()
-                        except OSError:
-                            logging.info(
-                                "Sleeping for {0}s".format(Infrastructure.sleep_time)
-                            )
-                            sleep(Infrastructure.sleep_time)
-                            process.start()
 
-                    # And we continue the loop.
-                    continue
-                except StopIteration:
-                    # No subjects is available. We finished to test
-                    # everything.
+                        active = active_children()
 
-                    # We set that we are not under test anymore.
-                    #
-                    # Note: Not under test means that we finished to
-                    # test the `domains.list` file completly.
-                    self.information["currently_under_test"] = False
+                        # And we continue the loop.
+                        continue
+                    except StopIteration:
+                        # No subjects is available. We finished to test
+                        # everything.
 
-                    # We break the loop.
+                        # We set that we are not under test anymore.
+                        #
+                        # Note: Not under test means that we finished to
+                        # test the `domains.list` file completly.
+                        self.information["currently_under_test"] = False
+
+                        active = active_children()
+
+                        # We break the loop.
+                        break
+
+                while len(active) != 1:
+                    logging.debug("Still active: {0}".format(len(active)))
+
+                    active = active_children()
+
+                if (
+                    not self.information["currently_under_test"]
+                    or int(time()) > end_time
+                ):
+
+                    # We initiate the future content of the
+                    # continue data file.
+                    continue_data = Dict.from_json(self.continue_file.read())
+
+                    for data in manager_list:
+                        # We loop through the list of manager entries.
+
+                        logging.info("Merging processes data.")
+
+                        # We merge the currently read data with the continue file.
+                        continue_data = Dict(continue_data).merge(data, strict=False)
+
+                    # We save the continue data into its file.
+                    Dict(continue_data).to_json(self.continue_file.file)
+
                     break
 
-            # We check if an exception is present into one process
-            # and we then save the process index.
-            exception_present = [x for x, y in enumerate(processes) if y.exception]
-
-            if exception_present:
-                # One or more exception is present.
+                exception_present = False
 
                 for process in processes:
                     # We loop through the list of processes.
+
+                    if exception_present:
+                        # We kill the process.
+                        process.terminate()
 
                     if process.exception:
                         # There in an exception in the currently
@@ -609,38 +653,10 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # We print the traceback.
                         print(traceback)
 
-                    # We kill the process.
-                    process.kill()
+                        exception_present = True
 
-                # We finally exit.
-                exit(1)
-            else:
-                # There was no exception.
-
-                for process in processes:
-                    # We loop through the list of processes.
-
-                    if process.is_alive():
-                        # We then wait until all processes are done.
-                        process.join()
-
-                    # We continue the loop
-                    continue
-
-            # We initiate the future content of the
-            # continue data file.
-            continue_data = Dict.from_json(self.continue_file.read())
-
-            for data in manager_list:
-                # We loop through the list of manager entries.
-
-                logging.info("Merging processes data.")
-
-                # We merge the currently read data with the continue file.
-                continue_data = Dict(continue_data).merge(data, strict=False)
-
-            # We save the continue data into its file.
-            Dict(continue_data).to_json(self.continue_file.file)
+                if exception_present:
+                    exit(1)
 
         # We save the administration file.
         self.administation.save()
@@ -804,6 +820,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
         """
 
         logging.info("Test processes started.")
+        logging.info("Multiprocess Activated: {0}".format(self.multiprocessing))
+        logging.info("Maximal number of processes: {0}".format(self.processes))
 
         # We get the current time as start time.
         start_time = int(time())
@@ -815,12 +833,26 @@ class Core:  # pylint: disable=too-many-instance-attributes
             * 60
         )
 
-        # We get the list to test.
-        to_test = [
-            self.__extract_domains_from_line(x)
-            for x in File(Outputs.input_destination).to_list()
-            if x and not x.startswith("#")
-        ]
+        logging.info("Start time: {0}".format(start_time))
+        logging.info("End of test (push): {0}".format(end_time))
+
+        if self.multiprocessing:
+            with Pool(self.processes) as pool:
+                to_test = [
+                    x
+                    for x in pool.map(
+                        self._extract_domains_from_line,
+                        File(Outputs.input_destination).to_list(),
+                    )
+                    if x and x[0] != "#"
+                ]
+        else:
+            # We get the list to test.
+            to_test = [
+                self._extract_domains_from_line(x)
+                for x in File(Outputs.input_destination).to_list()
+                if x and not x.startswith("#")
+            ]
 
         # We save the formatted dataset
         File(Outputs.input_destination).write(
