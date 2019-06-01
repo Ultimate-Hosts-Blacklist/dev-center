@@ -35,7 +35,7 @@ License:
 from itertools import chain
 from multiprocessing import Manager, Pool, active_children
 from os import environ, path
-from time import stime
+from time import time
 
 from domain2idna import get as domain2idna
 from ultimate_hosts_blacklist.helpers import (
