@@ -38,6 +38,7 @@ from os import environ, path
 from time import time
 
 from domain2idna import get as domain2idna
+
 from ultimate_hosts_blacklist.helpers import (
     Dict,
     Download,
