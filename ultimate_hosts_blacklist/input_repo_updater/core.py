@@ -31,14 +31,14 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
+from datetime import datetime
+
 # pylint: disable=bad-continuation
 from itertools import chain
 from multiprocessing import Manager, Pool, active_children
 from os import environ, path
-from time import time
 
 from domain2idna import get as domain2idna
-
 from ultimate_hosts_blacklist.helpers import (
     Dict,
     Download,
@@ -501,7 +501,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         :param int end_time: The end time of the current process.
         """
 
-        while int(time()) < end_time:
+        while int(datetime.now().timestamp()) < end_time:
             # We loop untill the end time is in the past.
 
             try:
@@ -562,14 +562,14 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     "WHILE_STATE: {0}".format(
                         len(active) <= self.processes
                         and len(processes) <= self.processes
-                        and int(time()) < int(end_time)
+                        and int(datetime.now().timestamp()) < int(end_time)
                     )
                 )
 
                 while (
                     len(active) <= self.processes
                     and len(processes) <= self.processes
-                    and int(time()) < int(end_time)
+                    and int(datetime.now().timestamp()) < int(end_time)
                 ):
 
                     try:
@@ -615,7 +615,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
                 if (
                     not self.information["currently_under_test"]
-                    or int(time()) > end_time
+                    or int(datetime.now().timestamp()) > end_time
                 ):
 
                     # We initiate the future content of the
@@ -658,6 +658,15 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
                 if exception_present:
                     exit(1)
+
+        current_time = datetime.now()
+
+        if self.information["currently_under_test"]:
+            self.information["end_epoch"] = current_time.timestamp()
+            self.information["end_datetime"] = current_time.strftime("%c")
+        else:
+            self.information["last_autosave_epoch"] = current_time.timestamp()
+            self.information["last_autosave_datetime"] = current_time.strftime("%c")
 
         # We save the administration file.
         self.administation.save()
@@ -825,7 +834,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         logging.info("Maximal number of processes: {0}".format(self.processes))
 
         # We get the current time as start time.
-        start_time = int(time())
+        start_time = int(datetime.now().timestamp())
         # We calculate the end time in second.
         end_time = start_time + (
             InfrastructrePyFuncebleConfiguration.configuration[
@@ -881,16 +890,23 @@ class Core:  # pylint: disable=too-many-instance-attributes
             list(
                 set(to_test)
                 - set([y for x in continue_data.values() for y in x])
-                - set(self.our_pyfunceble.inactive_db["to_test"])
+                - set(self.our_pyfunceble.inactive_db.get_to_retest())
+                - set([self.our_pyfunceble.inactive_db.get_already_tested()])
             ),
-            self.our_pyfunceble.inactive_db["to_test"],
+            self.our_pyfunceble.inactive_db.get_to_retest(),
         )
 
         if not self.information["currently_under_test"]:
             # We are not currently under test.
 
+            current_time = datetime.now()
+
             # We set that we now are under test.
             self.information["currently_under_test"] = True
+
+            # We save the start epoche and datetime.
+            self.information["start_epoch"] = current_time.timestamp()
+            self.information["start_datetime"] = current_time.strftime("%c")
 
             # We save the administration data..
             self.administation.save()
