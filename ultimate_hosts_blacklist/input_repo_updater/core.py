@@ -664,7 +664,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         current_time = datetime.now()
 
-        if self.information["currently_under_test"]:
+        if not self.information["currently_under_test"]:
             self.information["end_epoch"] = current_time.timestamp()
             self.information["end_datetime"] = current_time.strftime("%c")
         else:

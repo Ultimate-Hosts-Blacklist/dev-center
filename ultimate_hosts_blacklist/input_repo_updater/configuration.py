@@ -174,7 +174,7 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
     # List indexes in the administration file and how we interpret them.
     should_be_bool = ["currently_under_test"]
     should_be_int = ["days_until_next_test", "last_test"]
-    unneeded_indexes = ["arguments", "clean_original", "stable"]
+    unneeded_indexes = ["arguments", "clean_original", "stable", "last_test"]
 
     # Save if we use the prod or dev version of the configuration file.
     stable = True
