@@ -893,8 +893,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
             list(
                 set(to_test)
                 - set([y for x in continue_data.values() for y in x])
-                - set(self.our_pyfunceble.inactive_db.get_to_retest())
-                - set([self.our_pyfunceble.inactive_db.get_already_tested()])
+                - self.our_pyfunceble.inactive_db.get_to_retest()
+                - self.our_pyfunceble.inactive_db.get_already_tested()
             ),
             self.our_pyfunceble.inactive_db.get_to_retest(),
         )
