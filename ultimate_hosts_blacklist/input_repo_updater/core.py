@@ -881,6 +881,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             list(
                 set([x for x in to_test if x not in self.our_pyfunceble.inactive_db])
                 - set([y for x in continue_data.values() for y in x])
+                - set(self.our_pyfunceble.inactive_db["to_test"])
             ),
             self.our_pyfunceble.inactive_db["to_test"],
         )
