@@ -423,32 +423,35 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         line = line.strip()
 
-        if "#" in line:
-            # A comment is present into the line.
+        if not line.startswith("#"):
+            if "#" in line:
+                # A comment is present into the line.
 
-            # We remove the comment..
-            line = line[: line.find("#")].strip()
+                # We remove the comment..
+                line = line[: line.find("#")].strip()
 
-        if " " in line or "\t" in line:
-            # * A space is present into the line.
-            # or
-            # * A tabs is present into the line.
+            if " " in line or "\t" in line:
+                # * A space is present into the line.
+                # or
+                # * A tabs is present into the line.
 
-            # We split every whitespace.
-            splited = line.split()
+                # We split every whitespace.
+                splited = line.split()
 
-            for element in splited[1:]:
-                # We loop through the list of subject starting from the second element (index 1).
+                for element in splited[1:]:
+                    # We loop through the list of subject starting from the second element (index 1).
 
-                if element:
-                    # It is a non empty subject.
+                    if element:
+                        # It is a non empty subject.
 
-                    # We keep the currenlty read element.
-                    line = element
+                        # We keep the currenlty read element.
+                        line = element
 
-                    # And we break the loop, there is nothing more
-                    # to look for.
-                    break
+                        # And we break the loop, there is nothing more
+                        # to look for.
+                        break
+        else:
+            line = None
 
         return line
 
