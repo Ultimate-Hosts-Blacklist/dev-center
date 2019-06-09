@@ -879,7 +879,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         #   * The inactive data to rested (last tested at least 1 day ago)
         to_test = chain(
             list(
-                set([x for x in to_test if x not in self.our_pyfunceble.inactive_db])
+                set(to_test)
                 - set([y for x in continue_data.values() for y in x])
                 - set(self.our_pyfunceble.inactive_db["to_test"])
             ),
