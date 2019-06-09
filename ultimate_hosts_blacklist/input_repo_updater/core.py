@@ -679,6 +679,12 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Manage what we do once all processes are stopped.
         """
 
+        if not self.information["currently_under_test"]:
+            self.information["previous_stats"] = self.information["current_stats"]
+            del self.information["current_stats"]
+
+        self.administation.save()
+
         if self.our_pyfunceble.travis.authorized:
             # We are authorized to commit/push.
 
@@ -723,6 +729,12 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         logging.info(counters)
 
+        if "current_stats" not in self.information:
+            self.information["current_stats"] = {"counter": counters, "builds": 1}
+        else:
+            self.information["current_stats"]["counter"] = counters
+            self.information["current_stats"]["builds"] += 1
+
         # We ask PyFunceble to generate the percentage file.
         self.our_pyfunceble.generate_percentage_file(counters)
 
@@ -754,6 +766,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 # We finaly save everything into the destination.
                 self.clean_file.write("\n".join(clean_list), overwrite=True)
 
+                self.information["current_stats"]["clean.list"] = len(clean_list)
+                self.information["current_stats"]["domains.list"] = self.information[
+                    "current_stats"
+                ]["counter"]["tested"]
+
             logging.info(
                 "Finished the generation of {0}".format(repr(self.clean_file.file))
             )
@@ -784,6 +801,10 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
                 # We finaly save everything into the destination.
                 self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
+
+                self.information["current_stats"]["whitelisted.list"] = len(
+                    whitelisted_list
+                )
 
             logging.info(
                 "Finished the generation of {0}".format(
@@ -822,6 +843,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
             # We finaly save everything into the destination.
             self.volatile_file.write("\n".join(volatile_list), overwrite=True)
+
+            self.information["current_stats"]["volatile.list"] = len(volatile_list)
 
             logging.info(
                 "Finished the generation of {0}".format(repr(self.volatile_file.file))
