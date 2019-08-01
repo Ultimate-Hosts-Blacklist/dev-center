@@ -31,7 +31,7 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from json import decoder, dump, loads
+from json import decoder, dump, dumps, loads
 
 from yaml import dump as yaml_dump
 from yaml import safe_load as yaml_load
@@ -61,8 +61,12 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
         :type destination: str
         """
 
-        with open(destination, "w") as file:
-            dump(self.main, file, ensure_ascii=False, indent=4, sort_keys=True)
+        if destination:
+            with open(destination, "w") as file:
+                return dump(
+                    self.main, file, ensure_ascii=False, indent=4, sort_keys=True
+                )
+        return dumps(self.main, ensure_ascii=False, indent=4, sort_keys=True)
 
     def to_yaml(self, destination, flow_style=False):
         """
