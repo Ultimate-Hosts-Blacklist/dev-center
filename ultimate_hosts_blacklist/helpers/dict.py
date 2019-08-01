@@ -73,15 +73,23 @@ class Dict:  # pylint: disable=too-few-public-methods, bad-continuation
             converted dict into a JSON format.
         """
 
-        with open(destination, "w") as file:
-            yaml_dump(
-                self.main,
-                file,
-                encoding="utf-8",
-                allow_unicode=True,
-                indent=4,
-                default_flow_style=flow_style,
-            )
+        if destination:
+            with open(destination, "w") as file:
+                return yaml_dump(
+                    self.main,
+                    stream=file,
+                    encoding="utf-8",
+                    allow_unicode=True,
+                    indent=4,
+                    default_flow_style=flow_style,
+                )
+        return yaml_dump(
+            self.main,
+            encoding="utf-8",
+            allow_unicode=True,
+            indent=4,
+            default_flow_style=flow_style,
+        )
 
     @classmethod
     def from_json(cls, json):

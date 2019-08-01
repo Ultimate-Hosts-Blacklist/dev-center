@@ -42,4 +42,4 @@ from ultimate_hosts_blacklist.helpers.our_process_wrapper import OurProcessWrapp
 from ultimate_hosts_blacklist.helpers.regex import Regex
 from ultimate_hosts_blacklist.helpers.travis_ci import TravisCI
 
-VERSION = "1.18.1"
+VERSION = "1.19.0"
