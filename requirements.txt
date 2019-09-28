@@ -1,5 +1,5 @@
 colorama
 domain2idna
 pyyaml
-ultimate-hosts-blacklist-helpers
+ultimate-hosts-blacklist-helpers>=1.20.1
 ultimate-hosts-blacklist-whitelist

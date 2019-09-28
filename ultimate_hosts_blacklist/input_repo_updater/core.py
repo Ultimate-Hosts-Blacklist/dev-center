@@ -37,8 +37,10 @@ from datetime import datetime
 from itertools import chain
 from multiprocessing import Manager, Pool, active_children
 from os import environ, path
+from shutil import rmtree
 
 from domain2idna import get as domain2idna
+
 from ultimate_hosts_blacklist.helpers import (
     Dict,
     Download,
@@ -684,6 +686,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
             del self.information["current_stats"]
 
         self.administation.save()
+
+        if path.isdir(Outputs.current_directory + "db_types"):
+            rmtree(Outputs.current_directory + "db_types")
 
         if self.our_pyfunceble.travis.authorized:
             # We are authorized to commit/push.
