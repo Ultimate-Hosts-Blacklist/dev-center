@@ -84,6 +84,7 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
         "dev-center",
         "repository-structure",
         "whitelist",
+        ".github",
     ]
 
     try:
@@ -110,7 +111,9 @@ class Output:  # pylint: disable=too-few-public-methods
     template_dir = "templates"
 
     if path.isdir("{0}{1}".format(current_directory, template_dir)):
-        templates_dir = "{0}{1}".format(current_directory, template_dir)
+        templates_dir = "{0}{1}{2}".format(
+            current_directory, template_dir, directory_separator
+        )
     else:
         templates_dir = None
 
@@ -598,7 +601,7 @@ The sources of the input data information are as follows.
 
 ---
 
-## Help Support This Project 
+## Help Support This Project
 
 #### :sparkling_heart: Buy Mitchell a Coffee :point_down:
 [<img src="https://github.com/mitchellkrogza/Ultimate.Hosts.Blacklist/blob/master/.assets/kofi5.png" alt="Buy Mitchell some Coffee" width="200"/>](https://ko-fi.com/mitchellkrog)

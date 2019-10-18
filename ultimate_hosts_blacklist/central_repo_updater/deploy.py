@@ -32,6 +32,7 @@ License:
     SOFTWARE.
 """
 from requests import get
+
 from ultimate_hosts_blacklist.central_repo_updater.configuration import (
     Infrastructure,
     environ,

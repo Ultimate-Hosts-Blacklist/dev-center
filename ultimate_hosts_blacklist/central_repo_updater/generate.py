@@ -175,7 +175,7 @@ class Generate:
         """
 
         possible_template_file_location = "{0}hostsdeny.template".format(
-            Output.current_directory
+            Output.templates_dir
         )
 
         if Output.templates_dir and path.isfile(possible_template_file_location):
@@ -209,7 +209,7 @@ class Generate:
         """
 
         possible_template_file_location = "{0}superhostsdeny.template".format(
-            Output.current_directory
+            Output.templates_dir
         )
 
         if Output.templates_dir and path.isfile(possible_template_file_location):
@@ -243,7 +243,7 @@ class Generate:
         """
 
         possible_template_file_location = "{0}hosts.template".format(
-            Output.current_directory
+            Output.templates_dir
         )
 
         if Output.templates_dir and path.isfile(possible_template_file_location):
@@ -277,7 +277,7 @@ class Generate:
         """
 
         possible_template_file_location = "{0}hosts.windows.template".format(
-            Output.current_directory
+            Output.templates_dir
         )
 
         if Output.templates_dir and path.isfile(possible_template_file_location):
@@ -316,7 +316,7 @@ class Generate:
         logging.info("Generation of {0}".format(repr(Output.readme_file)))
 
         possible_template_file_location = "{0}README_template.md".format(
-            Output.current_directory
+            Output.templates_dir
         )
 
         if Output.templates_dir and path.isfile(possible_template_file_location):

@@ -37,6 +37,7 @@ from time import sleep
 
 from PyFunceble import ipv4_syntax_check, syntax_check
 from requests import get
+
 from ultimate_hosts_blacklist.central_repo_updater import logging
 from ultimate_hosts_blacklist.central_repo_updater.clean import Clean
 from ultimate_hosts_blacklist.central_repo_updater.configuration import GitHub, Output
@@ -156,7 +157,7 @@ class Core:
                     )
                 )
             else:
-                raise Exception(
+                logging.critical(
                     "Unable to get a list from {0}.".format(
                         repr(repository_info["name"])
                     )
