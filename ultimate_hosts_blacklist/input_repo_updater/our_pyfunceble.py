@@ -67,8 +67,8 @@ class OurPyFunceble:
         self.merge_inactive_database()
 
         # We import the inactive database and Travis class.
-        from PyFunceble.inactive_db import InactiveDB
-        from PyFunceble.auto_save import Travis
+        from PyFunceble.database import Inactive as InactiveDB
+        from PyFunceble.engine import Travis
 
         # We initiate the inactive database.
         self.inactive_db = InactiveDB("api_call")
@@ -182,7 +182,7 @@ class OurPyFunceble:
         # the exist of this method.)
         PyFunceble.load_config(generate_directory_structure=False)
         # And we run the PyFunceble cleaning tool.
-        PyFunceble.Clean(None)
+        PyFunceble.output.Clean()
 
     def merge_inactive_database(self):
         """
@@ -255,7 +255,7 @@ class OurPyFunceble:
         Print the percentage on file and screen.
         """
 
-        from PyFunceble.percentage import Percentage
+        from PyFunceble.output import Percentage
 
         Percentage(init=counters).log()
 
