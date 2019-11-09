@@ -37,7 +37,7 @@ import sys
 from datetime import datetime
 from itertools import chain, repeat
 from multiprocessing import Manager, Pool, active_children
-from os import environ, path
+from os import cpu_count, environ, path
 from shutil import rmtree
 
 from domain2idna import get as domain2idna
@@ -67,7 +67,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
     :param int logging_level: Set the logging level.
     """
 
-    def __init__(self, multiprocessing=False, processes=25, logging_level=logging.INFO):
+    def __init__(self, multiprocessing=False, logging_level=logging.INFO):
         # We configurate the logging.
         logging.basicConfig(
             format="%(asctime)s - %(levelname)s -- %(message)s", level=logging_level
@@ -75,7 +75,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We share the multiprocessing.
         self.multiprocessing = multiprocessing
-        self.processes = processes
+        self.processes = cpu_count()
 
         # We configurate the repository.
         TravisCI.configure_git_repo()
