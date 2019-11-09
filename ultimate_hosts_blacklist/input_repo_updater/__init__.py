@@ -40,7 +40,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.input_repo_updater.core import Core
 
-VERSION = "1.23.1"
+VERSION = "1.23.2"
 
 
 def _command_line():
@@ -80,7 +80,7 @@ def _command_line():
             "-p",
             "--processes",
             help=argparse.SUPPRESS,
-            action="store_true",
+            type=int,
             default=False,
         )
 
