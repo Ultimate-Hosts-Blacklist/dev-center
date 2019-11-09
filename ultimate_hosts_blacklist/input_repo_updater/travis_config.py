@@ -31,8 +31,9 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-# pylint: disable=wrong-import-order
+
 import logging
+import sys
 from os import environ
 
 from yaml import safe_dump as yaml_dump
@@ -106,7 +107,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
                     )
                 ).execute()
 
-                exit(0)
+                sys.exit(0)
             except KeyError:
                 pass
 

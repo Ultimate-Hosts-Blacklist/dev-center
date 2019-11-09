@@ -31,25 +31,18 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-from datetime import datetime
-
 # pylint: disable=bad-continuation
-from itertools import chain
+
+import sys
+from datetime import datetime
+from itertools import chain, repeat
 from multiprocessing import Manager, Pool, active_children
 from os import environ, path
 from shutil import rmtree
 
 from domain2idna import get as domain2idna
 
-from ultimate_hosts_blacklist.helpers import (
-    Dict,
-    Download,
-    File,
-    List,
-    OurProcessWrapper,
-    Regex,
-    TravisCI,
-)
+from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
 from ultimate_hosts_blacklist.input_repo_updater.authorization import Authorization
@@ -413,49 +406,17 @@ class Core:  # pylint: disable=too-many-instance-attributes
             Dict(continue_data).to_json(Outputs.continue_destination)
 
     @classmethod
-    def _extract_domains_from_line(cls, line):
+    def _extract_domains_from_line(cls, line, converter):
         """
         Given a line, we return the domains.
 
         :param str line: The line to format.
 
         :return: The partially formatted line.
-        :rtype: str
+        :rtype: str, list
         """
 
-        line = line.strip()
-
-        if not line.startswith("#"):
-            if "#" in line:
-                # A comment is present into the line.
-
-                # We remove the comment..
-                line = line[: line.find("#")].strip()
-
-            if " " in line or "\t" in line:
-                # * A space is present into the line.
-                # or
-                # * A tabs is present into the line.
-
-                # We split every whitespace.
-                splited = line.split()
-
-                for element in splited[1:]:
-                    # We loop through the list of subject starting from the second element (index 1).
-
-                    if element:
-                        # It is a non empty subject.
-
-                        # We keep the currenlty read element.
-                        line = element
-
-                        # And we break the loop, there is nothing more
-                        # to look for.
-                        break
-        else:
-            line = None
-
-        return line
+        return converter(line).get_converted()
 
     def __get_subject_to_test(self, subject):
         """
@@ -538,6 +499,45 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We save the administration data.
         self.administation.save()
 
+    @classmethod
+    def __check_exception(cls, processes):
+        """
+        Check if an exception is present into the given pool of processes.
+
+        :param list processes. A list of running processes.
+        """
+
+        exception_present = False
+        traceback = None
+
+        for process in processes:
+            # We loop through the list of processes.
+
+            if exception_present:
+                # We kill the process.
+                process.terminate()
+                continue
+
+            try:
+                if process.exception and not exception_present:
+                    # There in an exception in the currently
+                    # read process.
+
+                    # We get the traceback
+                    _, traceback = process.exception
+
+                    # We print the traceback.
+                    print(traceback)
+                    logging.error(traceback)
+
+                    exception_present = True
+            except AttributeError:
+                continue
+
+        if exception_present:
+            print(traceback)
+            sys.exit(1)
+
     def __process_multiprocess(self, to_test, end_time):
         """
         Process a single process test.
@@ -545,10 +545,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
         :param itertools to_test: The list to test in a :code:`chain`.
         :param int end_time: The end time of the current process.
         """
-
-        # We create a list which will save the list of
-        # all currently running processes.
-        processes = []
 
         with Manager() as manager:
             # We process with the manager.
@@ -559,23 +555,17 @@ class Core:  # pylint: disable=too-many-instance-attributes
             while True:
                 # We loop untill the end time is in the past.
 
-                active = active_children()
-                processes = []
-
-                logging.debug("ACTIVE Children: {0}".format(active))
+                logging.debug("ACTIVE Children: {0}".format(active_children()))
                 logging.debug(
                     "WHILE_STATE: {0}".format(
-                        len(active) <= self.processes
-                        and len(processes) <= self.processes
+                        len(active_children()) <= self.processes
                         and int(datetime.now().timestamp()) < int(end_time)
                     )
                 )
 
-                while (
-                    len(active) <= self.processes
-                    and len(processes) <= self.processes
-                    and int(datetime.now().timestamp()) < int(end_time)
-                ):
+                while len(active_children()) <= self.processes and int(
+                    datetime.now().timestamp()
+                ) < int(end_time):
 
                     try:
                         # We get the subject we are going to test.
@@ -585,16 +575,13 @@ class Core:  # pylint: disable=too-many-instance-attributes
                             # We loop through the list of subject to test.
 
                             # We initiate a process which will test the current domain.
-                            process = OurProcessWrapper(
+                            process = self.our_pyfunceble.pyfunceble.core.multiprocess.OurProcessWrapper(
                                 target=self.test, args=(subject, None, manager_list)
                             )
-                            # We append the process into the "pool" of processes.
-                            processes.append(process)
 
+                            process.name = f"Ultimate {subject}"
                             # We start the process.
                             process.start()
-
-                        active = active_children()
 
                         # And we continue the loop.
                         continue
@@ -608,20 +595,34 @@ class Core:  # pylint: disable=too-many-instance-attributes
                         # test the `domains.list` file completly.
                         self.information["currently_under_test"] = False
 
-                        active = active_children()
-
                         # We break the loop.
                         break
 
-                while len(active) != 1:
-                    logging.debug("Still active: {0}".format(len(active)))
+                self.__check_exception(active_children())
 
-                    active = active_children()
+                while (
+                    len(active_children()) >= self.processes
+                    and "ultimate"
+                    in " ".join([x.name for x in reversed(active_children())]).lower()
+                ):
+                    logging.debug(
+                        "Still active: {0}".format(
+                            [x.name for x in reversed(active_children())]
+                        )
+                    )
 
                 if (
                     not self.information["currently_under_test"]
                     or int(datetime.now().timestamp()) > end_time
                 ):
+
+                    while (
+                        "ultimate"
+                        in " ".join(
+                            [x.name for x in reversed(active_children())]
+                        ).lower()
+                    ):
+                        continue
 
                     # We initiate the future content of the
                     # continue data file.
@@ -639,30 +640,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     Dict(continue_data).to_json(self.continue_file.file)
 
                     break
-
-                exception_present = False
-
-                for process in processes:
-                    # We loop through the list of processes.
-
-                    if exception_present:
-                        # We kill the process.
-                        process.terminate()
-
-                    if process.exception:
-                        # There in an exception in the currently
-                        # read process.
-
-                        # We get the traceback
-                        _, traceback = process.exception
-
-                        # We print the traceback.
-                        print(traceback)
-
-                        exception_present = True
-
-                if exception_present:
-                    exit(1)
 
         current_time = datetime.now()
 
@@ -879,18 +856,28 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         if self.multiprocessing:
             with Pool(self.processes) as pool:
-                to_test = [
-                    x
-                    for x in pool.map(
-                        self._extract_domains_from_line,
+                to_test = []
+
+                for extracted in pool.starmap(
+                    self._extract_domains_from_line,
+                    zip(
                         File(Outputs.input_destination).to_list(),
-                    )
-                    if x and x[0] != "#"
-                ]
+                        repeat(self.our_pyfunceble.pyfunceble.converter.File),
+                    ),
+                ):
+                    if not extracted:
+                        continue
+
+                    if isinstance(extracted, list):
+                        to_test.extend(extracted)
+                    else:
+                        to_test.append(extracted)
         else:
             # We get the list to test.
             to_test = [
-                self._extract_domains_from_line(x)
+                self._extract_domains_from_line(
+                    x, self.our_pyfunceble.pyfunceble.converter.File
+                )
                 for x in File(Outputs.input_destination).to_list()
                 if x and not x.startswith("#")
             ]

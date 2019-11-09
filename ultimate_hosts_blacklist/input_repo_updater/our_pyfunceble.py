@@ -42,7 +42,7 @@ from ultimate_hosts_blacklist.input_repo_updater.configuration import (
 )
 
 
-class OurPyFunceble:
+class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-object
     """
     Manage the way we work and interact with PyFunceble.
     """
@@ -66,14 +66,10 @@ class OurPyFunceble:
         # We merge older database entries into our new format.
         self.merge_inactive_database()
 
-        # We import the inactive database and Travis class.
-        from PyFunceble.database import Inactive as InactiveDB
-        from PyFunceble.engine import Travis
-
         # We initiate the inactive database.
-        self.inactive_db = InactiveDB("api_call")
+        self.inactive_db = self.pyfunceble.database.Inactive("api_call")
         # We initiate the Travis index.
-        self.travis = Travis()
+        self.travis = self.pyfunceble.engine.Travis()
 
     @classmethod
     def __install_with_pip(cls, package, allow_stdout=False):
@@ -113,7 +109,6 @@ class OurPyFunceble:
                 InfrastructrePyFuncebleConfiguration.packages["dev"], allow_stdout=True
             )
 
-        # We import PyFunceble.
         import PyFunceble
 
         # We share it accros this class.
@@ -175,14 +170,11 @@ class OurPyFunceble:
             # We delete the currently read file path.
             File(file).delete()
 
-        # We import PyFunceble.
-        import PyFunceble
-
         # We load the configuration (locally as this will disappear along with
         # the exist of this method.)
-        PyFunceble.load_config(generate_directory_structure=False)
+        self.pyfunceble.load_config(generate_directory_structure=False)
         # And we run the PyFunceble cleaning tool.
-        PyFunceble.output.Clean()
+        self.pyfunceble.output.Clean()
 
     def merge_inactive_database(self):
         """
@@ -249,15 +241,12 @@ class OurPyFunceble:
             )
             Dict(data).to_json(inactive_database_file.file)
 
-    @classmethod
-    def generate_percentage_file(cls, counters):
+    def generate_percentage_file(self, counters):
         """
         Print the percentage on file and screen.
         """
 
-        from PyFunceble.output import Percentage
-
-        Percentage(init=counters).log()
+        self.pyfunceble.output.Percentage(init=counters).log()
 
     def test(self, element, complete=False):
         """

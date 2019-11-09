@@ -74,7 +74,8 @@ class Administration:
 
                 # We continue the loop.
                 continue
-            elif index == "name":
+
+            if index == "name":
                 # The index is the name.
 
                 # We get/set the name from the repository name.
@@ -127,7 +128,8 @@ class Administration:
 
                 # We continue.
                 continue
-            elif index in Infrastructure.should_be_bool:
+
+            if index in Infrastructure.should_be_bool:
                 # The index is in the list of indexes
                 # which should be bool interpretted.
 

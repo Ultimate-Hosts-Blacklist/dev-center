@@ -49,7 +49,7 @@ def _get_requirements():
     with open("requirements.txt") as file:
         requirements = file.read().splitlines()
 
-    return requirements
+    return [x for x in requirements if "PyFunceble" not in x]
 
 
 def _get_version():
