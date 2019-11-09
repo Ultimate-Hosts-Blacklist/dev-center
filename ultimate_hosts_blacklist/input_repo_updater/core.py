@@ -531,7 +531,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     logging.error(traceback)
 
                     exception_present = True
-            except AttributeError:
+            except (AttributeError, OSError):
                 continue
 
         if exception_present:
