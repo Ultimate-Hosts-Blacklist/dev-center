@@ -38,7 +38,7 @@ from setuptools import setup
 NAMESPACE = "ultimate_hosts_blacklist"
 MODULE = "comparison"
 
-PYPI_NAME = substring(r"\_", r"\-", "{0}-{1}".format(NAMESPACE, MODULE))
+PYPI_NAME = substring(r"_", r"-", "{0}-{1}".format(NAMESPACE, MODULE))
 
 
 def _get_requirements():

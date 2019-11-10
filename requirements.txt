@@ -1,4 +1,4 @@
 colorama
-PyFunceble
+PyFunceble-dev
 ultimate-hosts_blacklist-helpers
 ultimate-hosts_blacklist-whitelist

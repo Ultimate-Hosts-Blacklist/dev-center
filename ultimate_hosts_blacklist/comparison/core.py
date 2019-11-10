@@ -36,7 +36,7 @@ License:
 import logging
 from os import path
 
-from PyFunceble import ipv4_syntax_check, syntax_check
+import PyFunceble
 
 from ultimate_hosts_blacklist.comparison.configuration import Configuration
 from ultimate_hosts_blacklist.helpers import Download, File, List
@@ -53,14 +53,8 @@ class Core:
     :type use_cache: bool
     """
 
-    def __init__(self, your_domains_and_ips, use_cache=False, verbose=False):
-        self.verbose = verbose
+    def __init__(self, your_domains_and_ips, use_cache=False):
         self.cache = use_cache
-
-        if self.verbose:
-            logging.basicConfig(format="%(asctime)s: %(levelname)s - %(message)s", level=logging.INFO)
-        else:
-            logging.basicConfig()
 
         self.data = {
             "not_present": {
@@ -90,9 +84,10 @@ class Core:
         self.data["our"]["items"]["domains"] = self.get_our_domains()
 
         if your_domains_and_ips and isinstance(your_domains_and_ips, list):
-            self.data["your"]["items"]["domains"], self.data["your"]["items"][
-                "ips"
-            ] = self.__separate_ips_from_domains(your_domains_and_ips)
+            (
+                self.data["your"]["items"]["domains"],
+                self.data["your"]["items"]["ips"],
+            ) = self.__separate_ips_from_domains(your_domains_and_ips)
         else:
             raise TypeError("`your_domains_and_ips` must be {0}".format(type(list)))
 
@@ -114,9 +109,11 @@ class Core:
         your_domains = []
 
         for element in data:
-            if ipv4_syntax_check(element):
+            if PyFunceble.is_ip(element):
+                logging.debug(f"Putting {element} to the list of domains to compare.")
                 your_ips.append(element)
-            elif syntax_check(element):
+            elif PyFunceble.is_domain(element):
+                logging.debug(f"Putting {element} to the list of ip to compare.")
                 your_domains.append(element)
 
         return your_domains, your_ips
@@ -135,26 +132,7 @@ class Core:
         :rtype: str
         """
 
-        if not line.startswith("#"):
-
-            if "#" in line:
-                line = line[: line.find("#")].strip()
-
-            if " " in line or "\t" in line:
-                splited_line = line.split()
-
-                index = 1
-                while index < len(splited_line):
-                    if splited_line[index]:
-                        break
-
-                    index += 1
-
-                return splited_line[index]
-
-            return line
-
-        return ""
+        return PyFunceble.converter.File(line).get_converted()
 
     def get_our_domains(self):
         """
@@ -204,9 +182,7 @@ class Core:
             return File(destination).to_list()
 
         logging.info(
-            "Getting our list of IPs from {0}.".format(
-                repr(Configuration.LINKS["domains"])
-            )
+            "Getting our list of IPs from {0}.".format(repr(Configuration.LINKS["ips"]))
         )
         our_ips = Download(Configuration.LINKS["ips"], None).link()
 

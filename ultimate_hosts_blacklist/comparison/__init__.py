@@ -33,18 +33,20 @@ License:
 """
 # pylint: disable=bad-continuation
 
+import logging
 import argparse
 from os import path
+
 from colorama import Fore, Style
 from colorama import init as initiate_coloration
 
-from ultimate_hosts_blacklist.comparison.core import Core
-from ultimate_hosts_blacklist.helpers import Download, File, Dict
-from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelist
 from ultimate_hosts_blacklist.comparison.configuration import Configuration
+from ultimate_hosts_blacklist.comparison.core import Core
+from ultimate_hosts_blacklist.helpers import Dict, Download, File
+from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelist
 
 # Set our version.
-VERSION = "1.0.1"
+VERSION = "1.2.0"
 
 
 def response_from_data(data):
@@ -106,16 +108,55 @@ def response_from_data(data):
     return data
 
 
-def compare_file(file_path, verbose=False, cache=False, clean=False, export=False):
+def get_to_compare(dataset, clean):
+    """
+    Given a dataset, we return the
+    list we have to compare.
+
+    :param list dataset:
+        The dataset to work with.
+    :param bool clean:
+        The whitelisting authorization.
+    :rtype: list
+    """
+
+    to_compare = []
+    for line in dataset:
+        logging.debug(f"Got line: {repr(line)}")
+
+        if not line:
+            logging.debug(f"Ignored line: {repr(line)}")
+            continue
+
+        extracted = Core.format_line(line)
+
+        logging.debug(f"Extracted: {repr(extracted)}")
+
+        if not extracted:
+            logging.debug(f"Ignored extracted: {repr(extracted)}")
+            continue
+
+        if isinstance(extracted, list):
+            to_compare.extend(extracted)
+        else:
+            to_compare.append(extracted)
+        logging.debug(f"Added to the list of subject to compare: {repr(extracted)}")
+
+    if clean and to_compare:
+        logging.debug(f"Starting whitelisting of previously extracted data.")
+        to_compare = clean_list_with_official_whitelist(to_compare)
+        logging.debug(f"Finished whitelisting of previously extracted data.")
+
+    return to_compare
+
+
+def compare_file(file_path, cache=False, clean=False, export=False):
     """
     Given a file path, we make the comparison of its
     content with our infrastructure.
 
     :param file_path: The path of the file we are comparing.
     :type file_path: str
-
-    :param verbose: Activate/Deactivate the verbosity.
-    :type verbose: bool
 
     :param cache: Activate/Deactivate the cache usage.
     :type cache bool
@@ -130,31 +171,26 @@ def compare_file(file_path, verbose=False, cache=False, clean=False, export=Fals
     :type export bool
     """
 
-    to_compare = [Core.format_line(x) for x in File(file_path).to_list()]
-
-    if clean:
-        to_compare = clean_list_with_official_whitelist(to_compare)
+    logging.debug(f"Starting extraction of {repr(file_path)}...")
+    to_compare = get_to_compare(File(file_path).to_list(), clean)
+    logging.debug(f"Finished extraction of {repr(file_path)}...")
 
     if export:
-        Dict(
-            response_from_data(
-                Core(to_compare, verbose=verbose, use_cache=cache).count()
-            )
-        ).to_json(Configuration.EXPORT)
+        Dict(response_from_data(Core(to_compare, use_cache=cache).count())).to_json(
+            Configuration.EXPORT
+        )
+        logging.debug(f"Result exported into {Configuration.EXPORT}.")
     else:
-        response_from_data(Core(to_compare, verbose=verbose, use_cache=cache).count())
+        response_from_data(Core(to_compare, use_cache=cache).count())
 
 
-def compare_link(link, verbose=False, cache=False, clean=False, export=False):
+def compare_link(link, cache=False, clean=False, export=False):
     """
     Given a link, we make the comparison of its
     content with our infrastructure.
 
     :param link: The link we are going to download and compare.
     :type link: str
-
-    :param verbose: Activate/Deactivate the verbosity.
-    :type verbose: bool
 
     :param cache: Activate/Deactivate the cache usage.
     :type cache bool
@@ -172,34 +208,26 @@ def compare_link(link, verbose=False, cache=False, clean=False, export=False):
     data = Download(link, None).link()
 
     if isinstance(data, str):
-        to_compare = [Core.format_line(x) for x in data.split("\n")]
 
-        if clean:
-            to_compare = clean_list_with_official_whitelist(to_compare)
+        logging.debug(f"Starting extraction of {repr(link)}...")
+        to_compare = get_to_compare(data.split("\n"), clean)
+        logging.debug(f"Finished extraction of {repr(link)}...")
 
         if export:
-            Dict(
-                response_from_data(
-                    Core(to_compare, verbose=verbose, use_cache=cache).count()
-                )
-            ).to_json(Configuration.EXPORT)
-        else:
-            response_from_data(
-                Core(to_compare, verbose=verbose, use_cache=cache).count()
+            Dict(response_from_data(Core(to_compare, use_cache=cache).count())).to_json(
+                Configuration.EXPORT
             )
+            logging.debug(f"Result exported into {Configuration.EXPORT}.")
+        else:
+            response_from_data(Core(to_compare, use_cache=cache).count())
     else:
         raise Exception("Could not download {0}".format(repr(link)))
 
 
-def compare_with_administration_file(
-    verbose=False, cache=False, clean=False, export=False
-):
+def compare_with_administration_file(cache=False, clean=False, export=False):
     """
     Look for the adminsitration file in the current
     directory, and execute based on the given info.
-
-    :param verbose: Activate/Deactivate the verbosity.
-    :type verbose: bool
 
     :param cache: Activate/Deactivate the cache usage.
     :type cache bool
@@ -218,13 +246,9 @@ def compare_with_administration_file(
 
     if data and isinstance(data, dict):
         if "link" in data and data["link"]:
-            compare_link(
-                data["link"], verbose=verbose, cache=cache, clean=clean, export=export
-            )
+            compare_link(data["link"], cache=cache, clean=clean, export=export)
         elif "file" in data and data["file"]:
-            compare_file(
-                data["file"], verbose=verbose, cache=cache, clean=clean, export=export
-            )
+            compare_file(data["file"], cache=cache, clean=clean, export=export)
 
 
 def _command_line():
@@ -273,27 +297,25 @@ def _command_line():
 
         args = parser.parse_args()
 
+        if args.verbose:
+            logging.basicConfig(
+                format="%(asctime)s: %(levelname)s - %(message)s", level=logging.DEBUG
+            )
+        else:
+            logging.basicConfig(
+                format="%(asctime)s: %(levelname)s - %(message)s", level=logging.INFO
+            )
+
         if args.file:
             compare_file(
-                args.file,
-                verbose=args.verbose,
-                cache=args.cache,
-                clean=args.clean,
-                export=args.export,
+                args.file, cache=args.cache, clean=args.clean, export=args.export,
             )
         elif args.link:
             compare_link(
-                args.link,
-                verbose=args.verbose,
-                cache=args.cache,
-                clean=args.clean,
-                export=args.export,
+                args.link, cache=args.cache, clean=args.clean, export=args.export,
             )
         else:
             compare_with_administration_file(
-                verbose=args.verbose,
-                cache=args.cache,
-                clean=args.clean,
-                export=args.export,
+                cache=args.cache, clean=args.clean, export=args.export,
             )
 
