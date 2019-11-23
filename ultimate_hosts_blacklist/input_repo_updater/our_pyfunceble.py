@@ -33,6 +33,9 @@ License:
 """
 from ultimate_hosts_blacklist.helpers import Command, Dict, Download, File
 from ultimate_hosts_blacklist.input_repo_updater import logging
+from ultimate_hosts_blacklist.input_repo_updater.configuration import (
+    Infrastructure as InfrastructureConfiguration,
+)
 from ultimate_hosts_blacklist.input_repo_updater.configuration import Outputs
 from ultimate_hosts_blacklist.input_repo_updater.configuration import (
     PyFunceble as InfrastructrePyFuncebleConfiguration,
@@ -127,7 +130,7 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
         Download all complementary files.
         """
 
-        for _, data in InfrastructrePyFuncebleConfiguration.links.items():
+        for data in InfrastructrePyFuncebleConfiguration.links.values():
             # We loop through the list of file to download.
 
             # We construct the destination of the file we are
@@ -150,6 +153,26 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
 
                 # We raise an exception, what if that file is important ?
                 raise Exception("Unable to download {0}".format(repr(link)))
+
+        for data in InfrastructureConfiguration.links.values():
+            # We loop through the list of file to download.
+
+            if (
+                "cross_destination" not in data
+                and "destination" in data
+                and "link" in data
+            ):
+                # We construct the destination of the file we are
+                # going to download.
+                file_path = "{0}{1}".format(
+                    Outputs.current_directory, data["destination"]
+                )
+
+                if not Download(data["link"], file_path).text():
+                    # We could not download the link.
+
+                    # We raise an exception, what if that file is important ?
+                    raise Exception("Unable to download {0}".format(repr(link)))
 
     def clean(self):
         """

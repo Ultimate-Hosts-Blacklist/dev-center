@@ -157,6 +157,10 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
         "travis_config": {
             "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/.travis.yml"  # pylint: disable=line-too-long
         },
+        "requirements": {
+            "link": "https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/requirements.txt",  # pylint: disable=line-too-long
+            "destination": "requirements.txt",
+        },
     }
 
     # Set our makers list.
