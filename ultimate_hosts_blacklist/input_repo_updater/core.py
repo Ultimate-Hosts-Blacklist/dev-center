@@ -42,6 +42,7 @@ from shutil import rmtree
 
 from domain2idna import get as domain2idna
 
+import ultimate_hosts_blacklist.input_repo_updater as launcher
 from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
@@ -128,6 +129,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
                 # We process the cleaning of the output directory.
                 self.our_pyfunceble.clean()
+
+            logging.info("Launcher version: {0}".format(launcher.VERSION))
+            logging.info(
+                "PyFunceble version: {0}".format(self.our_pyfunceble.pyfunceble.VERSION)
+            )
 
     @classmethod
     def update_cross_pyfunceble_configuration_file(cls):
@@ -753,9 +759,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     "current_stats"
                 ]["counter"]["tested"]
 
-            logging.info(
-                "Finished the generation of {0}".format(repr(self.clean_file.file))
-            )
+                logging.info(
+                    "Finished the generation of {0}".format(repr(self.clean_file.file))
+                )
 
     def update_whitelisted_list(self):
         """
@@ -788,11 +794,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
                     whitelisted_list
                 )
 
-            logging.info(
-                "Finished the generation of {0}".format(
-                    repr(self.whitelisted_file.file)
+                logging.info(
+                    "Finished the generation of {0}".format(
+                        repr(self.whitelisted_file.file)
+                    )
                 )
-            )
 
     def update_volatile_list(self):
         """
@@ -837,7 +843,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Processes the whole logic.
         """
 
-        logging.info("Test processes started.")
+        logging.info("Starting process...")
         logging.info("Multiprocess Activated: {0}".format(self.multiprocessing))
         logging.info("Maximal number of processes: {0}".format(self.processes))
 
@@ -943,7 +949,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # We run a multiprocess test.
             self.__process_multiprocess(to_test, end_time)
 
-        logging.info("Test processes stopped.")
+        logging.info("Finished process")
 
         # We set/create the percentage file.
         self.set_percentage()

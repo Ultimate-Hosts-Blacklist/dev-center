@@ -81,7 +81,8 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
         """
 
         Command(
-            "pip3 install --upgrade {0}".format(package), allow_stdout=allow_stdout
+            f"pip3 install --upgrade {package} || pip install --upgrade {package}",
+            allow_stdout=allow_stdout,
         ).execute()
 
     def install(self):

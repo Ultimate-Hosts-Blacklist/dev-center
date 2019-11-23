@@ -40,7 +40,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.input_repo_updater.core import Core
 
-VERSION = "1.23.2"
+VERSION = "1.24.0"
 
 
 def _command_line():
@@ -77,14 +77,6 @@ def _command_line():
         )
 
         parser.add_argument(
-            "-p",
-            "--processes",
-            help=argparse.SUPPRESS,
-            type=int,
-            default=False,
-        )
-
-        parser.add_argument(
             "-v",
             "--version",
             help="Show the version end exist.",
@@ -100,5 +92,5 @@ def _command_line():
             logging_level = logging.INFO
 
         Core(
-            logging_level=logging_level, multiprocessing=arguments.multiprocess,
+            logging_level=logging_level, multiprocessing=arguments.multiprocess
         ).process()
