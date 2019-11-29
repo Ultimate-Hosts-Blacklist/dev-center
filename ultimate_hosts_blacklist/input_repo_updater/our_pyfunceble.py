@@ -72,7 +72,7 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
         # We initiate the inactive database.
         self.inactive_db = self.pyfunceble.database.Inactive("api_call")
         # We initiate the Travis index.
-        self.travis = self.pyfunceble.engine.Travis()
+        self.travis = self.pyfunceble.engine.ci.TravisCI()
 
     @classmethod
     def __install_with_pip(cls, package, allow_stdout=False):

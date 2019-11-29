@@ -196,12 +196,12 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
                 # We extract the branch we are working with
                 # from the GIT_BRANCH environment variable.
-                travis_branch = environ["GIT_BRANCH"]
+                ci_branch = environ["GIT_BRANCH"]
             except KeyError:
                 # We are not under Travis CI.
 
                 # We set the branch as master.
-                travis_branch = "master"
+                ci_branch = "master"
 
             # We get the content of the PyFunceble production configuration file.
             cross_config = Dict.from_yaml(File(destination).read())
@@ -210,7 +210,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             )
 
             # We set the travis branch.
-            cross_config["travis_branch"] = travis_branch
+            cross_config["ci_branch"] = ci_branch
 
             logging.debug(
                 "Cross configuration file content: \n {0}".format(cross_config)
@@ -851,9 +851,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
         start_time = int(datetime.now().timestamp())
         # We calculate the end time in second.
         end_time = start_time + (
-            InfrastructrePyFuncebleConfiguration.configuration[
-                "travis_autosave_minutes"
-            ]
+            InfrastructrePyFuncebleConfiguration.configuration["ci_autosave_minutes"]
             * 60
         )
 
