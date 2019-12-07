@@ -310,10 +310,12 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # We get it from the file.
             continue_data = Dict.from_json(self.continue_file.read())
 
-        for status in continue_data:
+        for status, subjects in continue_data.items():
             # We loop through the list of status.
 
-            if subject in continue_data[status]:
+            print(f"{subject} in {subjects}")
+
+            if subject in subjects:
                 # The status is in the currently read
                 # status index.
 
@@ -455,13 +457,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
             else:
                 result.append(pre_result)
 
-        i = 0
-
-        while i < len(result):
-            if self.__is_in_continue_data(result[i]):
-                del result[i]
-
-            i += 1
+        for index, res in enumerate(result):
+            if self.__is_in_continue_data(res):
+                del result[index]
 
         return result
 
@@ -672,6 +670,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         if path.isdir(Outputs.current_directory + "db_types"):
             rmtree(Outputs.current_directory + "db_types")
+
+        self.our_pyfunceble.pyfunceble.core.CLI.sort_generated_files()
 
         if self.our_pyfunceble.travis.authorized:
             # We are authorized to commit/push.
