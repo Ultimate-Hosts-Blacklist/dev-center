@@ -43,7 +43,7 @@ from shutil import rmtree
 from domain2idna import get as domain2idna
 
 import ultimate_hosts_blacklist.input_repo_updater as launcher
-from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex, TravisCI
+from ultimate_hosts_blacklist.helpers import Dict, Download, File, List, Regex
 from ultimate_hosts_blacklist.input_repo_updater import Fore, Style, logging
 from ultimate_hosts_blacklist.input_repo_updater.administration import Administration
 from ultimate_hosts_blacklist.input_repo_updater.authorization import Authorization
@@ -78,14 +78,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
         self.multiprocessing = multiprocessing
         self.processes = cpu_count()
 
-        # We configurate the repository.
-        TravisCI.configure_git_repo()
-        # We fix the permissions of the repository.
-        TravisCI.fix_permissions()
-
-        # We update the travis configuration file if needed.
-        TravisConfig()
-
         # We initiate our administration logic.
         self.administation = Administration()
         # We get our administration data.
@@ -98,6 +90,14 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We initiate PyFunceble
         self.our_pyfunceble = OurPyFunceble()
+
+        # We manually initiate the environment
+        self.our_pyfunceble.travis.init()
+        self.our_pyfunceble.travis.bypass()
+        self.our_pyfunceble.travis.permissions()
+
+        # We update the travis configuration file if needed.
+        TravisConfig()
 
         # We get the global authorization.
         #

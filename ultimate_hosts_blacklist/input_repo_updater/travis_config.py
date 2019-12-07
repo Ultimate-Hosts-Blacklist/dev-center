@@ -203,7 +203,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
                 if index in flattened:
                     del flattened[index]
 
-            self.local_version = Dict(flattened).unflatten(separato=".")
+            self.local_version = Dict(flattened).unflatten(separator=".")
         except KeyError:
             pass
 
