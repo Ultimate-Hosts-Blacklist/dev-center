@@ -313,8 +313,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
         for status, subjects in continue_data.items():
             # We loop through the list of status.
 
-            print(f"{subject} in {subjects}")
-
             if subject in subjects:
                 # The status is in the currently read
                 # status index.
