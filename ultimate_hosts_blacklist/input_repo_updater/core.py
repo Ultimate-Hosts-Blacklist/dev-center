@@ -83,21 +83,16 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We get our administration data.
         self.information = self.administation.data
 
+        # We initiate PyFunceble
+        self.our_pyfunceble = OurPyFunceble()
+
+        # We update the travis configuration file if needed.
+        TravisConfig()
+
         # We update the cross repository file.
         self.update_cross_pyfunceble_configuration_file()
         # We install the repository file.
         self.install_cross_pyfunceble_configuration_file()
-
-        # We initiate PyFunceble
-        self.our_pyfunceble = OurPyFunceble()
-
-        # We manually initiate the environment
-        self.our_pyfunceble.travis.init()
-        self.our_pyfunceble.travis.bypass()
-        self.our_pyfunceble.travis.permissions()
-
-        # We update the travis configuration file if needed.
-        TravisConfig()
 
         # We get the global authorization.
         #
@@ -310,7 +305,7 @@ class Core:  # pylint: disable=too-many-instance-attributes
             # We get it from the file.
             continue_data = Dict.from_json(self.continue_file.read())
 
-        for status, subjects in continue_data.items():
+        for subjects in continue_data.values():
             # We loop through the list of status.
 
             if subject in subjects:

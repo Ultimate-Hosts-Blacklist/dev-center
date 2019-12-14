@@ -74,6 +74,11 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
         # We initiate the Travis index.
         self.travis = self.pyfunceble.engine.ci.TravisCI()
 
+        # We manually initiate the environment
+        self.travis.init()
+        self.travis.bypass()
+        self.travis.permissions()
+
     @classmethod
     def __install_with_pip(cls, package, allow_stdout=False):
         """
