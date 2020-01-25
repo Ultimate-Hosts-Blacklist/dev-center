@@ -9,9 +9,9 @@ License:
 
     MIT License
 
-    Copyright (c) 2019 Ultimate-Hosts-Blacklist
-    Copyright (c) 2019 Nissar Chababy
-    Copyright (c) 2019 Mitchell Krog
+    Copyright (c) 2019, 2020  Ultimate-Hosts-Blacklist
+    Copyright (c) 2019, 2020  Nissar Chababy
+    Copyright (c) 2019, 2020  Mitchell Krog
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -83,16 +83,17 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We get our administration data.
         self.information = self.administation.data
 
-        # We initiate PyFunceble
-        self.our_pyfunceble = OurPyFunceble()
-
         # We update the travis configuration file if needed.
         TravisConfig()
 
         # We update the cross repository file.
         self.update_cross_pyfunceble_configuration_file()
+
         # We install the repository file.
         self.install_cross_pyfunceble_configuration_file()
+
+        # We initiate PyFunceble
+        self.our_pyfunceble = OurPyFunceble()
 
         # We get the global authorization.
         #
