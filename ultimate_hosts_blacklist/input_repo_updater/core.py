@@ -83,6 +83,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
         # We get our administration data.
         self.information = self.administation.data
 
+        # We initiate PyFunceble
+        self.our_pyfunceble = OurPyFunceble()
+
         # We update the travis configuration file if needed.
         TravisConfig()
 
@@ -91,9 +94,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We install the repository file.
         self.install_cross_pyfunceble_configuration_file()
-
-        # We initiate PyFunceble
-        self.our_pyfunceble = OurPyFunceble()
 
         # We get the global authorization.
         #
