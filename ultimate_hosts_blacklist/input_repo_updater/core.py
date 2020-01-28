@@ -286,10 +286,6 @@ class Core:  # pylint: disable=too-many-instance-attributes
                 destination,
                 commit_message=Infrastructure.pyfunceble_config_update_message,
             )
-            TravisConfig.check_changes_and_commit(
-                config_destination,
-                commit_message=Infrastructure.pyfunceble_config_update_message,
-            )
         else:
             logging.info("Cross repository file not installed: Already present.")
 
