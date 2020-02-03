@@ -9,9 +9,9 @@ License:
 
     MIT License
 
-    Copyright (c) 2019 Ultimate-Hosts-Blacklist
-    Copyright (c) 2019 Nissar Chababy
-    Copyright (c) 2019 Mitchell Krog
+    Copyright (c) 2019, 2020 Ultimate-Hosts-Blacklist
+    Copyright (c) 2019, 2020 Nissar Chababy
+    Copyright (c) 2019, 2020 Mitchell Krog
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.central_repo_updater.core import Core
 
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 
 
 def _command_line():
