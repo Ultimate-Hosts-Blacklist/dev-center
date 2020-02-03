@@ -101,7 +101,7 @@ class PyFunceble:  # pylint: disable=too-few-public-methods
     }
 
     # Tell us if we have to install the stable version.
-    stable = False
+    stable = True
 
     # The configuration indexes to update
     configuration = {
