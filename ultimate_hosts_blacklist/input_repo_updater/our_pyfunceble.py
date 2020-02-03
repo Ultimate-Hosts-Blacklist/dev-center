@@ -123,11 +123,19 @@ class OurPyFunceble:  # pylint: disable=import-outside-toplevel,unsubscriptable-
         # We share it accros this class.
         self.pyfunceble = PyFunceble
 
-        # and we load the configuration file.
-        self.pyfunceble.load_config(
-            generate_directory_structure=True,
-            custom=InfrastructrePyFuncebleConfiguration.api_configuration,
-        )
+        try:
+            # and we load the configuration file.
+            self.pyfunceble.load_config(
+                generate_directory_structure=True,
+                custom=InfrastructrePyFuncebleConfiguration.api_configuration,
+            )
+        except:
+            self.pyfunceble.cconfig.Merge(self.pyfunceble.CONFIG_DIRECTORY)
+
+            self.pyfunceble.load_config(
+                generate_directory_structure=True,
+                custom=InfrastructrePyFuncebleConfiguration.api_configuration,
+            )
 
     @classmethod
     def download_complementary_files(cls):
