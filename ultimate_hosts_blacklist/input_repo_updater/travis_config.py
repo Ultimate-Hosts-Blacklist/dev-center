@@ -181,7 +181,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
 
                 self.local_version[index] = self.upstream_version[index]
 
-            flattened = Dict(self.local_version).flatten(separator=".")
+            flattened = Dict(self.local_version).flatten()
 
             for index in self.to_delete:
                 logging.info(
@@ -193,7 +193,7 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
                 if index in flattened:
                     del flattened[index]
 
-            self.local_version = Dict(flattened).unflatten(separator=".")
+            self.local_version = Dict(flattened).unflatten()
         except KeyError:
             pass
 
