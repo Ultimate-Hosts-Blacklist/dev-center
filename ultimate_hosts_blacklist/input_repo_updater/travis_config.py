@@ -54,25 +54,15 @@ class TravisConfig:  # pylint: disable=bad-continuation, logging-format-interpol
     # Saves the upstream (central) version of the travis configuration file.
     upstream_version = {}
     # Tell us which index we have to delete.
-    to_delete = []
+    to_delete = ["addons", "cache", "matrix", "python", "sudo"]
     # Tell us which index we have to update.
-    to_update = [
-        "install",
-        "notifications",
-        "addons",
-        "cache",
-        "dist",
-        "language",
-        "matrix",
-        "python",
-        "script",
-        "sudo",
-    ]
+    to_update = ["dist", "install", "language", "notifications", "script"]
 
     def __init__(self):
         if not File(Infrastructure.admin_file).exists():
             self.get_current_local_version()
             self.get_central_version()
+            self.merge()
             self.save()
             self.check_changes_and_commit(
                 Infrastructure.travis_config_file,
