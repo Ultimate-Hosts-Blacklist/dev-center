@@ -32,10 +32,13 @@ License:
     SOFTWARE.
 """
 # pylint: disable=bad-continuation, inconsistent-return-statements
+
+
 from os import cpu_count
 from time import sleep
 
-from PyFunceble import ipv4_syntax_check, syntax_check
+from PyFunceble import is_domain, is_ipv4
+from PyFunceble.core.multiprocess import Manager, OurProcessWrapper, active_children
 from requests import get
 
 from ultimate_hosts_blacklist.central_repo_updater import logging
@@ -59,52 +62,27 @@ class Core:
     # Will save what we write into repos.json
     repos = []
 
-    def __init__(self, multiprocessing=True, processes=None):
+    def __init__(self, multiprocessing=False, processes=None):
         TravisCI().configure_git_repo()
         TravisCI().fix_permissions()
 
+        self.repositories = Repositories().get()
+
         self.multiprocessing = multiprocessing
+        self.processes = cpu_count() if not processes else processes
 
-        if self.multiprocessing:
-            logging.info("multiprocessing activated.")
-            self.repositories = list(Repositories().get())
-
-            if not processes:
-                cpu_numbers = cpu_count()
-
-                if cpu_numbers is not None:
-                    self.processes = cpu_numbers
-                else:
-                    self.processes = len(self.repositories) // 2 % 10
-            else:
-                self.processes = processes
-            logging.info(
-                "Using {0} simultaneous processes.".format(repr(self.processes))
-            )
-        else:
-            self.repositories = Repositories().get()
+        logging.info("Multiprocessing: %s", self.multiprocessing)
+        logging.info("Processes: %s", self.processes)
 
         if self.multiprocessing:
             self.whitelisting_core = WhitelistCore(
-                multiprocessing=True, processes=self.processes // 2
+                multiprocessing=True, processes=self.processes * 2
             )
         else:
             self.whitelisting_core = WhitelistCore()
 
     @classmethod
-    def __separate_domains_from_ip(cls, cleaned_list):
-        """
-        Given a cleaned list, we separate domains from IP.
-        """
-
-        logging.info("Getting the list of domains.")
-        domains = [x for x in set(cleaned_list) if x and syntax_check(x)]
-        temp = set(cleaned_list) - set(domains)
-
-        logging.info("Getting the list of IPs.")
-        return (domains, [x for x in temp if x and ipv4_syntax_check(x)])
-
-    def get_list(self, repository_info):
+    def get_list(cls, repository_info, whitelisting_core, manager):
         """
         Get the list from the input source.
         """
@@ -128,9 +106,7 @@ class Core:
             logging.info(
                 "Starting whitelisting of {0}.".format(repr(repository_info["name"]))
             )
-            result = self.whitelisting_core.filter(
-                string=req.text, already_formatted=True
-            )
+            result = whitelisting_core.filter(string=req.text, already_formatted=True)
             logging.info(
                 "Finished whitelisting of {0}.".format(repr(repository_info["name"]))
             )
@@ -148,7 +124,7 @@ class Core:
                         repr(repository_info["name"])
                     )
                 )
-                result = self.whitelisting_core.filter(
+                result = whitelisting_core.filter(
                     string=req.text, already_formatted=True
                 )
                 logging.info(
@@ -163,24 +139,69 @@ class Core:
                     )
                 )
 
-        return result
+        ips = []
+        domains = []
+        if result:
+            logging.info(
+                "Getting the list of domains and IPs of %s.",
+                repr(repository_info["name"]),
+            )
+            for subject in set(result):
+                if not subject:
+                    continue
 
-    def process_simple(self):
+                if is_domain(subject):
+                    logging.debug(f"{subject} is a valid domain.")
+                    domains.append(subject)
+                elif is_ipv4(subject):
+                    logging.debug(f"{subject} is a IPv4 domain.")
+                    ips.append(subject)
+                else:
+                    logging.debug(f"{subject} is a not valid domain nor IPv4.")
+            logging.info(
+                "Got the list of domains and IPs of %s.", repr(repository_info["name"])
+            )
+
+        manager.append((domains, ips))
+
+    def clean_them(self):
         """
         Process the repository update in a simple way.
         """
 
         all_domains = []
         all_ips = []
-
         repos = []
+        finished = False
 
-        for data in self.repositories:
-            logging.debug(data)
-            domains, ips = self.__separate_domains_from_ip(self.get_list(data))
-            all_domains.extend(domains)
-            all_ips.extend(ips)
-            repos.append(data)
+        with Manager() as manager:
+            manager_data = manager.list()
+            while True:
+                while len(active_children()) <= self.processes:
+                    try:
+                        repository = next(self.repositories)
+                        process = OurProcessWrapper(
+                            target=self.get_list,
+                            args=(repository, self.whitelisting_core, manager_data),
+                        )
+                        process.name = f'Cleaning of {repository["name"]}'
+                        process.start()
+                        repos.append(repository)
+
+                        continue
+                    except StopIteration:
+                        finished = True
+                        break
+
+                if finished:
+                    while "Cleaning" in " ".join([x.name for x in active_children()]):
+                        continue
+
+                    break
+
+            for domains, ips in manager_data:
+                all_domains.extend(domains)
+                all_ips.extend(ips)
 
         logging.info("Saving the list of repositories.")
         Dict(repos).to_json(Output.repos_file)
@@ -195,7 +216,7 @@ class Core:
         Process the repository update.
         """
 
-        domains, ips = self.process_simple()
+        domains, ips = self.clean_them()
 
         Generate.dotted(domains)
         Generate.plain_text_domain(domains)

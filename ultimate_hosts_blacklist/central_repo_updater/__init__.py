@@ -39,7 +39,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.central_repo_updater.core import Core
 
-VERSION = "1.5.1"
+VERSION = "1.6.0"
 
 
 def _command_line():
@@ -50,10 +50,6 @@ def _command_line():
     if __name__ == "ultimate_hosts_blacklist.central_repo_updater":
         initiate_coloration(autoreset=True)
 
-        logging.basicConfig(
-            format="%(asctime)s - %(levelname)s -- %(message)s", level=logging.INFO
-        )
-
         parser = argparse.ArgumentParser(
             description="The tool to update the central repository of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
             epilog="Crafted with %s by %s"
@@ -61,6 +57,14 @@ def _command_line():
                 Fore.RED + "♥" + Fore.RESET,
                 Style.BRIGHT + Fore.CYAN + "Nissar Chababy (Funilrys)",
             ),
+        )
+
+        parser.add_argument(
+            "-d",
+            "--debug",
+            action="store_true",
+            default=False,
+            help="Activate the debug mode.",
         )
 
         parser.add_argument(
@@ -88,6 +92,15 @@ def _command_line():
         )
 
         arguments = parser.parse_args()
+
+        if arguments.debug:
+            logging.basicConfig(
+                format="%(asctime)s - %(levelname)s -- %(message)s", level=logging.DEBUG
+            )
+        else:
+            logging.basicConfig(
+                format="%(asctime)s - %(levelname)s -- %(message)s", level=logging.INFO
+            )
 
         Core(
             multiprocessing=arguments.multiprocessing, processes=arguments.processes
