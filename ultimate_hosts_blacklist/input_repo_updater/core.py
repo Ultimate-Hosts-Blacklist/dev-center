@@ -767,37 +767,36 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Update the content of the whitelisted list.
         """
 
-        if not self.information["currently_under_test"]:
-            logging.info(
-                "Started the generation of {0}".format(repr(self.whitelisted_file.file))
+        logging.info(
+            "Started the generation of {0}".format(repr(self.whitelisted_file.file))
+        )
+
+        if self.clean_file.exists():
+            # The input file exists.
+
+            # We get its content into list format.
+            clean_list = self.clean_file.to_list()
+
+            # We whitelist its content.
+            whitelisted_list = clean_list_with_official_whitelist(
+                clean_list, multiprocessing=True, processes=60
             )
 
-            if self.clean_file.exists():
-                # The input file exists.
+            # We remove any duplicated.
+            whitelisted_list = List(whitelisted_list).format(delete_empty=True)
 
-                # We get its content into list format.
-                clean_list = self.clean_file.to_list()
+            # We finaly save everything into the destination.
+            self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
 
-                # We whitelist its content.
-                whitelisted_list = clean_list_with_official_whitelist(
-                    clean_list, multiprocessing=True, processes=60
+            self.information["current_stats"]["whitelisted.list"] = len(
+                whitelisted_list
+            )
+
+            logging.info(
+                "Finished the generation of {0}".format(
+                    repr(self.whitelisted_file.file)
                 )
-
-                # We remove any duplicated.
-                whitelisted_list = List(whitelisted_list).format(delete_empty=True)
-
-                # We finaly save everything into the destination.
-                self.whitelisted_file.write("\n".join(whitelisted_list), overwrite=True)
-
-                self.information["current_stats"]["whitelisted.list"] = len(
-                    whitelisted_list
-                )
-
-                logging.info(
-                    "Finished the generation of {0}".format(
-                        repr(self.whitelisted_file.file)
-                    )
-                )
+            )
 
     def update_volatile_list(self):
         """
