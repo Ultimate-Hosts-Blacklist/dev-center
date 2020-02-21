@@ -803,10 +803,11 @@ class Core:  # pylint: disable=too-many-instance-attributes
         Update the content of the volatile list.
         """
 
+        logging.info(
+            "Started the generation of {0}".format(repr(self.volatile_file.file))
+        )
+
         if not self.information["currently_under_test"]:
-            logging.info(
-                "Started the generation of {0}".format(repr(self.volatile_file.file))
-            )
 
             volatile_list = []
 
@@ -818,23 +819,24 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
             # We append the content of the previously whitelisted list.
             volatile_list.extend(self.whitelisted_file.to_list())
+        else:
+            volatile_list = self.volatile_file.to_list()
 
-            # We whitelist the finale content content.
-            volatile_list = clean_list_with_official_whitelist(
-                volatile_list, multiprocessing=True, processes=60
-            )
+        # We whitelist the final content content.
+        volatile_list = clean_list_with_official_whitelist(
+            volatile_list, multiprocessing=True, processes=60
+        )
 
-            # We remove any duplicated.
-            volatile_list = List(volatile_list).format(delete_empty=True)
+        # We remove any duplicated.
+        volatile_list = List(volatile_list).format(delete_empty=True)
+        # We finaly save everything into the destination.
+        self.volatile_file.write("\n".join(volatile_list), overwrite=True)
 
-            # We finaly save everything into the destination.
-            self.volatile_file.write("\n".join(volatile_list), overwrite=True)
+        self.information["current_stats"]["volatile.list"] = len(volatile_list)
 
-            self.information["current_stats"]["volatile.list"] = len(volatile_list)
-
-            logging.info(
-                "Finished the generation of {0}".format(repr(self.volatile_file.file))
-            )
+        logging.info(
+            "Finished the generation of {0}".format(repr(self.volatile_file.file))
+        )
 
     def process(self):
         """
