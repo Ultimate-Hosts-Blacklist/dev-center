@@ -84,6 +84,12 @@ class Authorization:  # pylint: disable=too-few-public-methods
         Provide or deny the authorization.
         """
 
+        # We download/format the raw link/domains.list file.
+        DomainsList(
+            self._administration_data["raw_link"],
+            shared_pyfunceble=self.shared_pyfunceble,
+        )
+
         if self.__launch_test():
             # The launch test marker was send by a maintainer or
             # member of the team.
@@ -94,11 +100,6 @@ class Authorization:  # pylint: disable=too-few-public-methods
             # And we "force" the cleaning.
             self.clean = True
 
-            # We download/format the raw link/domains.list file.
-            DomainsList(
-                self._administration_data["raw_link"],
-                shared_pyfunceble=self.shared_pyfunceble,
-            )
             logging.info(
                 "Test authorized by: {0}.".format(
                     repr(Infrastructure.markers["launch_test"])
@@ -121,11 +122,6 @@ class Authorization:  # pylint: disable=too-few-public-methods
             # We "force" the cleaning.
             self.clean = True
 
-            # We download/format the raw link/domains.list file.
-            DomainsList(
-                self._administration_data["raw_link"],
-                shared_pyfunceble=self.shared_pyfunceble,
-            )
             logging.info("Test authorized by: Not currently under test.")
         elif (
             int(self._administration_data["days_until_next_test"]) >= 1
@@ -148,11 +144,6 @@ class Authorization:  # pylint: disable=too-few-public-methods
                 # We "force" the cleaning.
                 self.clean = True
 
-                # We download/format the raw link/domains.list file.
-                DomainsList(
-                    self._administration_data["raw_link"],
-                    shared_pyfunceble=self.shared_pyfunceble,
-                )
                 logging.info("Test authorized by: Restest time in the past.")
             else:
                 # The expected retest date is in th efuture.
