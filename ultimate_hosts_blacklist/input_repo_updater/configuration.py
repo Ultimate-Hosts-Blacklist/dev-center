@@ -52,6 +52,8 @@ class Outputs:  # pylint: disable=too-few-public-methods
     whitelisted_filename = "whitelisted.list"
     # The name of the volatile list.
     volatile_filename = "volatile.list"
+    # The name of the ips list.
+    ip_filename = "ip.list"
     # The name of the continue file.
     continue_filename = "continue.json"
 
@@ -67,6 +69,9 @@ class Outputs:  # pylint: disable=too-few-public-methods
     # The location of the volatile file.
     volatile_destination = "{0}{1}".format(current_directory, volatile_filename)
 
+    # The location of the ip file
+    ip_destination = "{0}{1}".format(current_directory, ip_filename)
+
     # The location of the temporary volatile file.
     temp_volatile_destination = "{0}output{1}{2}".format(
         current_directory, directory_separator, volatile_filename
@@ -79,6 +84,11 @@ class Outputs:  # pylint: disable=too-few-public-methods
 
     # The location of the list of ACTIVE domains.
     active_subjects_destination = "{0}output{1}domains{1}ACTIVE{1}list".format(
+        current_directory, directory_separator
+    )
+
+    # The location of the IP list.
+    ip_subjects_destination = "{0}output{1}hosts{1}ACTIVE{1}ips".format(
         current_directory, directory_separator
     )
 

@@ -38,7 +38,7 @@ from datetime import datetime
 from itertools import chain, repeat
 from multiprocessing import Manager, Pool, active_children
 from os import cpu_count, environ, path
-from shutil import rmtree
+from shutil import move, rmtree
 
 from domain2idna import get as domain2idna
 
@@ -112,6 +112,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
         self.temp_volatile_file = File(Outputs.temp_volatile_destination)
         # Same for the official volatile file.
         self.volatile_file = File(Outputs.volatile_destination)
+        # Same for the official ip file.
+        self.ip_file = File(Outputs.ip_destination)
         # Same for the official clean file.
         self.clean_file = File(Outputs.clean_destination)
         # Same fot the official whitelisted file.
@@ -838,6 +840,62 @@ class Core:  # pylint: disable=too-many-instance-attributes
             "Finished the generation of {0}".format(repr(self.volatile_file.file))
         )
 
+    def update_ip_list(self):
+        """
+        Update the content of the ip list.
+        """
+
+        input_file = File(Outputs.ip_subjects_destination)
+
+        if not self.information["currently_under_test"] and input_file.exists():
+            logging.info(
+                "Started the generation of {0}".format(repr(self.ip_file.file))
+            )
+            ip_count = 0
+            clean_count = 0
+            clean_backup_location = self.clean_file.file + ".bak"
+            self.ip_file.write("", overwrite=True)
+
+            with open(input_file.file, "r", encoding="utf-8") as file_stream:
+                for line in file_stream:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    if line.startswith("#"):
+                        continue
+
+                    self.ip_file.write(line.split()[-1] + "\n")
+                    ip_count += 1
+
+            with open(
+                self.clean_file.file, "r", encoding="utf-8"
+            ) as clean_filestream, open(
+                clean_backup_location, "w", encoding="utf-8"
+            ) as backed_clean_filestream, open(
+                self.ip_file.file, "r", encoding="utf-8"
+            ) as ip_filestream:
+                for ip_line in ip_filestream:
+                    ip_line = ip_line.strip()
+
+                    for clean_line in clean_filestream:
+                        clean_line = clean_line.strip()
+
+                        if clean_line == ip_line:
+                            continue
+
+                        backed_clean_filestream.write(f"{clean_line}\n")
+                        clean_count += 1
+
+            move(clean_backup_location, self.clean_file.file)
+
+            self.information["current_stats"]["ip.list"] = ip_count
+            self.information["current_stats"]["clean.list"] = clean_count
+
+            logging.info(
+                "Finished the generation of {0}".format(repr(self.ip_file.file))
+            )
+
     def process(self):
         """
         Processes the whole logic.
@@ -960,6 +1018,9 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         # We update/create the whitelisted list.
         self.update_volatile_list()
+
+        # We update/create the ip list.
+        self.update_ip_list()
 
         # And we manage the end of the tool.
         self.end_management()
