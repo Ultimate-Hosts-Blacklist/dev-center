@@ -165,51 +165,44 @@ class Core:
             file_stream.write(result)
 
     @classmethod
-    def split_list(cls, filename, temp):
+    def __write_it(cls, line, filename, temp):
+        """
+        Write the line at its final location.
+        """
+
+        line = line.strip()
+
+        if PyFunceble.is_domain(line):
+            temp["domain_file"].write(f"{line}\n".encode())
+            logging.debug("Wrote %s inside %s.", repr(line), temp["domain_file"].name)
+        elif PyFunceble.is_ipv4(line):
+            temp["ip_file"].write(f"{line}\n".encode())
+            logging.debug("Wrote %s inside %s.", repr(line), temp["domain_file"].name)
+        else:
+            logging.debug("Could not define %s final location.", filename)
+
+    def split_list(self, filename):
         """
         Split the IPs from the domains.
         """
 
         logging.info("Splitting domains and IPs of %s.", filename)
         with open(
-            f"{temp['dir'].name}{directory_separator}{filename}", "r"
+            f"{self.temp['dir'].name}{directory_separator}{filename}", "r"
         ) as file_stream:
-            for line in file_stream:
-                line = line.strip()
-
-                if not line:
-                    continue
-
-                if PyFunceble.is_domain(line):
-                    temp["domain_file"].write(f"{line}\n".encode())
-                    logging.debug("Wrote %s inside %s.", line, temp["domain_file"].name)
-                elif PyFunceble.is_ipv4(line):
-                    temp["ip_file"].write(f"{line}\n".encode())
-                    logging.debug("Wrote %s inside %s.", line, temp["domain_file"].name)
-                else:
-                    logging.debug("Could not define %s location.", filename)
-
-        logging.info("Finished split of domains and IPs of %s.", filename)
-
-    def split_them(self):
-        """
-        Read all the input files and split the IPs from the domains.
-        """
-
-        for _, _, files in walk(self.temp["dir"].name):
+            file_content = chain(file_stream)
             finished = False
-            files = chain(files)
 
             if self.multiprocessing:
                 while True:
                     while len(active_children()) < self.processes:
                         try:
-                            file = next(files)
+                            line = next(file_content)
                             process = OurProcessWrapper(
-                                target=self.split_list, args=(file, self.temp)
+                                target=self.__write_it, args=(line, filename, self.temp)
                             )
 
-                            process.name = f"Split {file}"
+                            process.name = f"Split {filename}:{line}"
                             process.start()
 
                         except StopIteration:
@@ -221,8 +214,19 @@ class Core:
                             continue
                         break
             else:
-                for file in files:
-                    self.split_list(file, self.temp)
+                for line in file_content:
+                    self.__write_it(line, filename, self.temp)
+
+        logging.info("Finished split of domains and IPs of %s.", filename)
+
+    def split_them(self):
+        """
+        Read all the input files and split the IPs from the domains.
+        """
+
+        for _, _, files in walk(self.temp["dir"].name):
+            for file in files:
+                self.split_list(file)
 
     def get_them(self):
         """
