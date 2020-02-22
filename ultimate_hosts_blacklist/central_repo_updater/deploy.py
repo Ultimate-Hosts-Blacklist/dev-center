@@ -33,11 +33,7 @@ License:
 """
 from requests import get
 
-from ultimate_hosts_blacklist.central_repo_updater.configuration import (
-    Infrastructure,
-    environ,
-)
-from ultimate_hosts_blacklist.helpers import Command, TravisCI
+from ultimate_hosts_blacklist.central_repo_updater.configuration import Infrastructure
 
 
 class Deploy:
@@ -45,25 +41,15 @@ class Deploy:
     Provide the deployement logic.
     """
 
-    @classmethod
-    def github(cls):
+    def __init__(self, ci_engine):
+        self.ci_engine = ci_engine
+
+    def github(self):
         """
         Deploy to GitHub.
         """
 
-        try:
-            _ = environ["TRAVIS_BUILD_DIR"]
-            commit_message = "%s [ci skip]" % Infrastructure.version
-
-            TravisCI().fix_permissions()
-
-            Command(
-                "git add --all && git commit -a -m '%s' && git push origin %s"
-                % (commit_message, environ["GIT_BRANCH"]),
-                False,
-            ).execute()
-        except KeyError:
-            pass
+        self.ci_engine.end_commit()
 
     @classmethod
     def hosts_ubuntu101_co_za(cls):

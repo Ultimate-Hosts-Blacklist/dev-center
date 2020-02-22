@@ -35,7 +35,7 @@ License:
 
 
 from itertools import chain
-from os import cpu_count
+from os import cpu_count, environ
 from os import sep as directory_separator
 from os import walk
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -48,10 +48,14 @@ from requests import get
 
 from ultimate_hosts_blacklist.central_repo_updater import logging
 from ultimate_hosts_blacklist.central_repo_updater.clean import Clean
-from ultimate_hosts_blacklist.central_repo_updater.configuration import GitHub, Output
 from ultimate_hosts_blacklist.central_repo_updater.deploy import Deploy
 from ultimate_hosts_blacklist.central_repo_updater.generate import Generate
-from ultimate_hosts_blacklist.central_repo_updater.repositories import Repositories
+from ultimate_hosts_blacklist.central_repo_updater.repositories import (
+    GitHub,
+    Infrastructure,
+    Output,
+    Repositories,
+)
 from ultimate_hosts_blacklist.helpers import Dict
 from ultimate_hosts_blacklist.whitelist.core import Core as WhitelistCore
 
@@ -68,6 +72,15 @@ class Core:
     repos = []
 
     def __init__(self, multiprocessing=False, processes=None):
+        environ["PYFUNCEBLE_CONFIG_DIR"] = TemporaryDirectory().name
+        PyFunceble.load_config(
+            custom={
+                "ci": True,
+                "dns_server": ["one.one.one.one"],
+                "ci_autosave_final_commit": Infrastructure.version,
+            }
+        )
+
         self.ci_engine = ci.TravisCI()
         self.ci_engine.init()
         self.ci_engine.permissions()
@@ -273,6 +286,8 @@ class Core:
         self.temp["dir"].cleanup()
         Clean()
 
-        Deploy().github()
+        deployment = Deploy(self.ci_engine)
+
+        deployment.github()
         sleep(3)
-        Deploy().hosts_ubuntu101_co_za()
+        deployment.hosts_ubuntu101_co_za()
