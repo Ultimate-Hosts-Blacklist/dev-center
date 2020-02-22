@@ -41,7 +41,7 @@ from ultimate_hosts_blacklist.central_repo_updater.configuration import (
     Templates,
     directory_separator,
 )
-from ultimate_hosts_blacklist.helpers import File, Regex
+from ultimate_hosts_blacklist.helpers import File, List, Regex
 
 
 class Generate:
@@ -80,6 +80,8 @@ class Generate:
         :param endline: The last line to write.
         :type endline: str
         """
+
+        subject = List(subject).format(delete_empty=True)
 
         if path.isdir(directory_path):
             for root, _, files in walk(directory_path):

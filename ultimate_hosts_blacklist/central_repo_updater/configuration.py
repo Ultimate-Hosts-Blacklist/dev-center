@@ -85,6 +85,7 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
         "repository-structure",
         "whitelist",
         ".github",
+        "template",
     ]
 
     try:

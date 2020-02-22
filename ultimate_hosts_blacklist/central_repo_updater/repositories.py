@@ -51,13 +51,10 @@ class Repositories:  # pylint: disable=too-few-public-methods
     regex_next_url = r"(?:.*\<(.*?)\>\;\s?rel\=\"next\")"
 
     def __init__(self):
-        self.first_url_to_get = "{0}/repos?sort=created&direction=desc".format(
-            GitHub.complete_api_orgs_url
+        self.first_url_to_get = (
+            f"{GitHub.complete_api_orgs_url}/repos?sort=created&direction=desc"
         )
-        self.headers = {
-            "Accept": "application/vnd.github.v3+json",
-            "Authorization": "token %s",
-        }
+        self.headers = {"Accept": "application/vnd.github.v3+json"}
 
         if path.isfile(Output.etags_file):
             self.etags = Dict.from_json(File(Output.etags_file).read())
@@ -65,9 +62,7 @@ class Repositories:  # pylint: disable=too-few-public-methods
             self.etags = {}
 
         if GitHub.api_token:
-            self.headers["Authorization"] %= GitHub.api_token
-        else:
-            del self.headers["Authorization"]
+            self.headers["Authorization"] = f"token {GitHub.api_token}"
 
     def get(self, url_to_get=None):  # pylint: disable=too-many-branches
         """
