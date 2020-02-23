@@ -847,51 +847,47 @@ class Core:  # pylint: disable=too-many-instance-attributes
 
         input_file = File(Outputs.ip_subjects_destination)
 
-        if not self.information["currently_under_test"] and input_file.exists():
+        if not self.information["currently_under_test"]:
             logging.info(
                 "Started the generation of {0}".format(repr(self.ip_file.file))
             )
 
-            ip_count = 0
             clean_count = 0
+            ip_list = []
             clean_backup_location = self.clean_file.file + ".bak"
             self.ip_file.write("", overwrite=True)
 
-            with open(input_file.file, "r", encoding="utf-8") as file_stream:
-                for line in file_stream:
-                    line = line.strip()
-                    if not line:
-                        continue
+            if input_file.exists():
+                with open(input_file.file, "r", encoding="utf-8") as file_stream:
+                    for line in file_stream:
+                        line = line.strip()
+                        if not line:
+                            continue
 
-                    if line.startswith("#"):
-                        continue
+                        if line.startswith("#"):
+                            continue
 
-                    self.ip_file.write(line.split()[-1] + "\n")
-                    ip_count += 1
+                        ip_list.append(line.split()[-1])
+                        self.ip_file.write(ip_list[-1] + "\n")
 
-            with open(
-                self.clean_file.file, "r", encoding="utf-8"
-            ) as clean_filestream, open(
-                clean_backup_location, "w", encoding="utf-8"
-            ) as backed_clean_filestream, open(
-                self.ip_file.file, "r", encoding="utf-8"
-            ) as ip_filestream:
-                for ip_line in ip_filestream:
-                    ip_line = ip_line.strip()
-
+                with open(
+                    self.clean_file.file, "r", encoding="utf-8"
+                ) as clean_filestream, open(
+                    clean_backup_location, "w", encoding="utf-8"
+                ) as backed_clean_filestream:
                     for clean_line in clean_filestream:
                         clean_line = clean_line.strip()
 
-                        if clean_line == ip_line:
+                        if clean_line in ip_list:
                             continue
 
                         backed_clean_filestream.write(f"{clean_line}\n")
                         clean_count += 1
 
-            move(clean_backup_location, self.clean_file.file)
+                move(clean_backup_location, self.clean_file.file)
+                self.information["current_stats"]["clean.list"] = clean_count
 
-            self.information["current_stats"]["ip.list"] = ip_count
-            self.information["current_stats"]["clean.list"] = clean_count
+            self.information["current_stats"]["ip.list"] = len(ip_list)
 
             logging.info(
                 "Finished the generation of {0}".format(repr(self.ip_file.file))
