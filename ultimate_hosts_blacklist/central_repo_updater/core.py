@@ -101,7 +101,8 @@ class Core:
             self.whitelisting_core = WhitelistCore()
 
         self.temp = {
-            "dir": TemporaryDirectory(),
+            "ip_dir": TemporaryDirectory(),
+            "domain_dir": TemporaryDirectory(),
             "ip_file": NamedTemporaryFile(),
             "domain_file": NamedTemporaryFile(),
         }
@@ -125,17 +126,25 @@ class Core:
 
         url_base = GitHub.partial_raw_link % repository_info["name"]
 
+        ip_url = f"{url_base}ip.list"
         whitelisted_url = f"{url_base}whitelisted.list"
         input_url = "{url_base}whitelisted.list"
 
-        req = get(whitelisted_url)
+        req_white = get(whitelisted_url)
+        req_ip = get(ip_url)
 
-        if req.status_code == 200:
+        ip_result = []
+        domain_result = []
+
+        if req_ip.status_code == 200:
+            ip_result = req_ip.text.splitlines()
+
+        if req_white.status_code == 200:
             logging.info(
                 "Could get `whitelisted.list` of %s.", repr(repository_info["name"])
             )
 
-            result = req.text
+            domain_result = req.text.splitlines()
         else:
             req = get(input_url)
 
@@ -147,9 +156,9 @@ class Core:
                     "Starting whitelisting of %s", repr(repository_info["name"])
                 )
 
-                result = whitelisting_core.filter(
+                domain_result = whitelisting_core.filter(
                     string=req.text, already_formatted=True
-                )
+                ).splitlines()
 
                 logging.info(
                     "Finished whitelisting of %s.", repr(repository_info["name"])
@@ -159,74 +168,21 @@ class Core:
                     "Unable to get a list from %s.", repr(repository_info["name"])
                 )
 
+        if ip_result:
+            for index, line in enumerate(domain_result):
+                if line in ip_result:
+                    del domain_result[index]
+
         with open(
-            f'{temp["dir"].name}{directory_separator}{repository_info["name"]}', "w"
+            f'{temp["domain_dir"].name}{directory_separator}{repository_info["name"]}',
+            "w",
         ) as file_stream:
-            file_stream.write(result)
+            file_stream.write("\n".join(domain_result))
 
-    @classmethod
-    def __write_it(cls, line, filename, temp):
-        """
-        Write the line at its final location.
-        """
-
-        line = line.strip()
-
-        if PyFunceble.is_domain(line):
-            temp["domain_file"].write(f"{line}\n".encode())
-            logging.debug("Wrote %s inside %s.", repr(line), temp["domain_file"].name)
-        elif PyFunceble.is_ipv4(line):
-            temp["ip_file"].write(f"{line}\n".encode())
-            logging.debug("Wrote %s inside %s.", repr(line), temp["domain_file"].name)
-        else:
-            logging.debug("Could not define %s final location.", filename)
-
-    def split_list(self, filename):
-        """
-        Split the IPs from the domains.
-        """
-
-        logging.info("Splitting domains and IPs of %s.", filename)
         with open(
-            f"{self.temp['dir'].name}{directory_separator}{filename}", "r"
+            f'{temp["ip_dir"].name}{directory_separator}{repository_info["name"]}', "w"
         ) as file_stream:
-            file_content = chain(file_stream)
-            finished = False
-
-            if self.multiprocessing:
-                while True:
-                    while len(active_children()) < self.processes:
-                        try:
-                            line = next(file_content)
-                            process = OurProcessWrapper(
-                                target=self.__write_it, args=(line, filename, self.temp)
-                            )
-
-                            process.name = f"Split {filename}:{line}"
-                            process.start()
-
-                        except StopIteration:
-                            finished = True
-                            break
-
-                    if finished:
-                        while "Split" in " ".join([x.name for x in active_children()]):
-                            continue
-                        break
-            else:
-                for line in file_content:
-                    self.__write_it(line, filename, self.temp)
-
-        logging.info("Finished split of domains and IPs of %s.", filename)
-
-    def split_them(self):
-        """
-        Read all the input files and split the IPs from the domains.
-        """
-
-        for _, _, files in walk(self.temp["dir"].name):
-            for file in files:
-                self.split_list(file)
+            file_stream.write("\n".join(ip_result))
 
     def get_them(self):
         """
