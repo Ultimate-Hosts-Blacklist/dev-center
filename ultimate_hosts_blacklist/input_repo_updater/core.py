@@ -846,9 +846,8 @@ class Core:  # pylint: disable=too-many-instance-attributes
         """
 
         input_file = File(Outputs.ip_subjects_destination)
-        final_seq = not self.information["currently_under_test"] and input_file.exists()
 
-        if final_seq or self.clean_file.exists():
+        if not self.information["currently_under_test"] and input_file.exists():
             logging.info(
                 "Started the generation of {0}".format(repr(self.ip_file.file))
             )
@@ -858,18 +857,17 @@ class Core:  # pylint: disable=too-many-instance-attributes
             clean_backup_location = self.clean_file.file + ".bak"
             self.ip_file.write("", overwrite=True)
 
-            if final_seq:
-                with open(input_file.file, "r", encoding="utf-8") as file_stream:
-                    for line in file_stream:
-                        line = line.strip()
-                        if not line:
-                            continue
+            with open(input_file.file, "r", encoding="utf-8") as file_stream:
+                for line in file_stream:
+                    line = line.strip()
+                    if not line:
+                        continue
 
-                        if line.startswith("#"):
-                            continue
+                    if line.startswith("#"):
+                        continue
 
-                        self.ip_file.write(line.split()[-1] + "\n")
-                        ip_count += 1
+                    self.ip_file.write(line.split()[-1] + "\n")
+                    ip_count += 1
 
             with open(
                 self.clean_file.file, "r", encoding="utf-8"
@@ -878,26 +876,13 @@ class Core:  # pylint: disable=too-many-instance-attributes
             ) as backed_clean_filestream, open(
                 self.ip_file.file, "r", encoding="utf-8"
             ) as ip_filestream:
-                if final_seq:
-                    for ip_line in ip_filestream:
-                        ip_line = ip_line.strip()
+                for ip_line in ip_filestream:
+                    ip_line = ip_line.strip()
 
-                        for clean_line in clean_filestream:
-                            clean_line = clean_line.strip()
-
-                            if clean_line == ip_line:
-                                continue
-
-                            backed_clean_filestream.write(f"{clean_line}\n")
-                            clean_count += 1
-                else:
                     for clean_line in clean_filestream:
                         clean_line = clean_line.strip()
 
-                        if self.our_pyfunceble.pyfunceble.is_ipv4(clean_line):
-                            self.ip_file.write(f"{clean_line}\n")
-                            ip_count += 1
-
+                        if clean_line == ip_line:
                             continue
 
                         backed_clean_filestream.write(f"{clean_line}\n")
