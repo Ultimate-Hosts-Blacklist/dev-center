@@ -34,7 +34,6 @@ License:
 # pylint: disable=bad-continuation, inconsistent-return-statements
 
 
-from itertools import chain
 from os import cpu_count, environ
 from os import sep as directory_separator
 from os import walk
@@ -107,7 +106,8 @@ class Core:
             "domain_file": NamedTemporaryFile(),
         }
 
-        logging.info("Temporary Dir: %s", self.temp["dir"].name)
+        logging.info("Temporary IP Dir: %s", self.temp["ip_dir"].name)
+        logging.info("Temporary Domain Dir: %s", self.temp["domain_dir"].name)
         logging.info("Temporary IP file: %s", self.temp["ip_file"].name)
         logging.info("Temporary Domain file: %s", self.temp["domain_file"].name)
 
@@ -128,23 +128,29 @@ class Core:
 
         ip_url = f"{url_base}ip.list"
         whitelisted_url = f"{url_base}whitelisted.list"
-        input_url = "{url_base}whitelisted.list"
+        input_url = f"{url_base}domains.list"
 
         req_white = get(whitelisted_url)
         req_ip = get(ip_url)
 
-        ip_result = []
+        ip_result = None
         domain_result = []
 
         if req_ip.status_code == 200:
+            logging.info("Could get `ip.list` of %s.", repr(repository_info["name"]))
+
             ip_result = req_ip.text.splitlines()
+        else:
+            logging.critical(
+                "Unable to get `ip.list` from %s.", repr(repository_info["name"])
+            )
 
         if req_white.status_code == 200:
             logging.info(
                 "Could get `whitelisted.list` of %s.", repr(repository_info["name"])
             )
 
-            domain_result = req.text.splitlines()
+            domain_result = req_white.text.splitlines()
         else:
             req = get(input_url)
 
@@ -158,7 +164,7 @@ class Core:
 
                 domain_result = whitelisting_core.filter(
                     string=req.text, already_formatted=True
-                ).splitlines()
+                )
 
                 logging.info(
                     "Finished whitelisting of %s.", repr(repository_info["name"])
@@ -168,21 +174,66 @@ class Core:
                     "Unable to get a list from %s.", repr(repository_info["name"])
                 )
 
-        if ip_result:
+        if ip_result is None:
+            ip_result = []
+            api = PyFunceble.core.API(None)
+
             for index, line in enumerate(domain_result):
-                if line in ip_result:
+                api.subject = line
+                if line in ip_result or api.ipv4_syntax():
+                    ip_result.append(line)
                     del domain_result[index]
 
+            if ip_result:
+                logging.info(
+                    "Found some IPs in the domain list of %s.",
+                    repr(repository_info["name"]),
+                )
+
+        logging.info(
+            "Starting whitelisting of the IP list of %s.", repr(repository_info["name"])
+        )
+        ip_result = whitelisting_core.filter(items=ip_result, already_formatted=True)
+        logging.info(
+            "Finished whitelisting of the IP list of %s.", repr(repository_info["name"])
+        )
+
+        logging.info(
+            "Starting whitelisting of the domain list of %s.",
+            repr(repository_info["name"]),
+        )
+        domain_result = whitelisting_core.filter(
+            items=domain_result, already_formatted=True
+        )
+        logging.info(
+            "Finished whitelisting of the ip list of %s.", repr(repository_info["name"])
+        )
+
+        logging.info(
+            "Starting backup of the list of domains of %s.",
+            repr(repository_info["name"]),
+        )
         with open(
             f'{temp["domain_dir"].name}{directory_separator}{repository_info["name"]}',
             "w",
         ) as file_stream:
-            file_stream.write("\n".join(domain_result))
+            file_stream.write("\n".join(domain_result) + "\n")
+        logging.info(
+            "Finished backup of the list of domains of %s.",
+            repr(repository_info["name"]),
+        )
 
+        logging.info(
+            "Starting backup of the list of ip of %s.", repr(repository_info["name"])
+        )
         with open(
             f'{temp["ip_dir"].name}{directory_separator}{repository_info["name"]}', "w"
         ) as file_stream:
-            file_stream.write("\n".join(ip_result))
+            file_stream.write("\n".join(ip_result) + "\n")
+        logging.info(
+            "Finished backup of the list of domains of %s.",
+            repr(repository_info["name"]),
+        )
 
     def get_them(self):
         """
@@ -223,18 +274,57 @@ class Core:
         logging.info("Saving the list of repositories.")
         Dict(repos).to_json(Output.repos_file)
 
+    def merge_them(self):
+        """
+        Merge all lists.
+        """
+
+        for root, _, files in walk(self.temp["ip_dir"].name):
+            for file in files:
+                with open(f"{root}{directory_separator}{file}", "rb") as file_stream:
+                    self.temp["ip_file"].write(file_stream.read())
+                    logging.info(
+                        "Merged %s into %s (ip_file)", file, self.temp["ip_file"].name
+                    )
+
+        for root, _, files in walk(self.temp["domain_dir"].name):
+            for file in files:
+                with open(f"{root}{directory_separator}{file}", "rb") as file_stream:
+                    self.temp["domain_file"].write(file_stream.read())
+                    logging.info(
+                        "Merged %s into %s (domain_file)",
+                        file,
+                        self.temp["domain_file"].name,
+                    )
+
     def process(self):
         """
         Process the repository update.
         """
 
         self.get_them()
-        self.split_them()
+        self.merge_them()
 
-        domains = self.temp["domain_file"].read().splitlines()
-        ips = self.temp["ip_file"].read().splitlines()
+        with open(self.temp["domain_file"].name, "r") as domain_filestream, open(
+            self.temp["ip_file"].name, "r"
+        ) as ip_filestream:
+            domains = [
+                x
+                for x in PyFunceble.helpers.List(
+                    domain_filestream.read().splitlines()
+                ).custom_format(PyFunceble.engine.Sort.standard)
+                if x
+            ]
 
-        Generate.dotted(self.temp)
+            ips = [
+                x
+                for x in PyFunceble.helpers.List(
+                    ip_filestream.read().splitlines()
+                ).custom_format(PyFunceble.engine.Sort.standard)
+                if x
+            ]
+
+        Generate.dotted(domains)
         Generate.plain_text_domain(domains)
         Generate.plain_text_ip(ips)
         Generate.unix_hosts(domains)
@@ -243,7 +333,8 @@ class Core:
         Generate.superhosts_deny(domains + ips)
         Generate.readme_md(len(domains), len(ips))
 
-        self.temp["dir"].cleanup()
+        self.temp["ip_dir"].cleanup()
+        self.temp["domain_dir"].cleanup()
         Clean()
 
         deployment = Deploy(self.ci_engine)
