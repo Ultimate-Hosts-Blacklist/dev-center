@@ -162,7 +162,7 @@ class TesterBase:
 
         return api_core.domain_and_ip()
 
-    def test(self, subject, api_core, auto_continue, inactive_db):
+    def test(self, subject, api_core, auto_continue, inactive_db, whois_db):
         """
         Do the test and generate what needs to be geneated.
         """
@@ -186,6 +186,9 @@ class TesterBase:
 
         if test_result["status"] != "ACTIVE":
             inactive_db.add(subject, test_result["status"])
+
+        if test_result["expiration_date"] or test_result["whois_record"]:
+            whois_db.add(subject, test_result["expiration_date"])
 
     @classmethod
     def check_exception(cls, processes):
@@ -231,6 +234,10 @@ class TesterBase:
         self.api_core.inactive_db.parent = True
         self.api_core.inactive_db.save()
         self.api_core.inactive_db.parent = False
+
+        self.api_core.whois_db.parent = True
+        self.api_core.whois_db.save()
+        self.api_core.whois_db.parent = False
 
         if self.administration.currently_under_test:
             self.auto_continue.parent = True

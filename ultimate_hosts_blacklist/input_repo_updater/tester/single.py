@@ -54,7 +54,11 @@ class Single(TesterBase):
             subject, self.auto_continue, self.api_core.inactive_db
         ):
             self.test(
-                subject, self.api_core, self.auto_continue, self.api_core.inactive_db
+                subject,
+                self.api_core,
+                self.auto_continue,
+                self.api_core.inactive_db,
+                self.api_core.whois_db,
             )
         else:
             print(".", end="")

@@ -116,26 +116,51 @@ class InactiveDB:
         return self.inactive_db.database
 
 
+class WhoisDB:
+    """
+    Provides our shared instance of the WhoisDB subsystem of
+    PyFunceble.
+    """
+
+    def __init__(self):
+        self.whois_db = PyFunceble.database.Whois(parent_process=False)
+
+    def add(self, subject, expiration_date):
+        """
+        A wrapper of the :code:`add` method
+        """
+
+        self.whois_db.add(subject, expiration_date)
+
+    def get_database(self):
+        """
+        Provides the database.
+        """
+
+        return self.whois_db.database
+
+
 class Multiprocess(TesterBase):
     """
     Provides the multiprocessing testing mode.
     """
 
-    def __process_test(self, subject, api_core, auto_continue, inactive_db):
+    def __process_test(self, subject, api_core, auto_continue, inactive_db, whois_db):
         """
         Process the actual test.
         """
 
         if not self.should_it_be_ignored(subject, auto_continue, inactive_db):
             process = PyFunceble.core.multiprocess.OurProcessWrapper(
-                target=self.test, args=(subject, api_core, auto_continue, inactive_db)
+                target=self.test,
+                args=(subject, api_core, auto_continue, inactive_db, whois_db),
             )
             process.name = f"Ultimate {subject}"
             process.start()
         else:
             print(".", end="")
 
-    def test_file(self, file_stream, auto_continue, inactive_db):
+    def test_file(self, file_stream, auto_continue, inactive_db, whois_db):
         """
         Tests the given file stream.
         """
@@ -150,7 +175,7 @@ class Multiprocess(TesterBase):
                         next(file_stream).strip(), include_given=True
                     ):
                         self.__process_test(
-                            subject, self.api_core, auto_continue, inactive_db
+                            subject, self.api_core, auto_continue, inactive_db, whois_db
                         )
                 except StopIteration:
                     self.administration.currently_under_test = False
@@ -179,30 +204,12 @@ class Multiprocess(TesterBase):
 
                 break
 
-    def start(self):
+        self.merge_data(auto_continue, inactive_db, whois_db)
+
+    def merge_data(self, auto_continue, inactive_db, whois_db):
         """
-        Starts the process.
+        Merges the data into the central one.
         """
-
-        BaseManager.register("AutoContinue", AutoContinue)
-        BaseManager.register("InactiveDB", InactiveDB)
-        manager = BaseManager()
-
-        manager.start()
-
-        auto_continue = manager.AutoContinue()  # pylint: disable=no-member
-        inactive_db = manager.InactiveDB()  # pylint: disable=no-member
-
-        with open(
-            Outputs.input_destination, "r", encoding="utf-8"
-        ) as input_file_stream:
-            self.test_file(input_file_stream, auto_continue, inactive_db)
-
-        if not self.administration.currently_under_test:
-            self.administration.currently_under_test = True
-            self.test_file(
-                chain(inactive_db.get_to_retest()), auto_continue, inactive_db
-            )
 
         self.auto_continue.database = PyFunceble.helpers.Merge(
             auto_continue.get_database()
@@ -210,3 +217,34 @@ class Multiprocess(TesterBase):
         self.api_core.inactive_db.database = PyFunceble.helpers.Merge(
             inactive_db.get_database()
         ).into(self.api_core.inactive_db.database)
+
+        self.api_core.whois_db.database = PyFunceble.helpers.Merge(
+            whois_db.get_database()
+        ).into(self.api_core.whois_db.database)
+
+    def start(self):
+        """
+        Starts the process.
+        """
+
+        BaseManager.register("AutoContinue", AutoContinue)
+        BaseManager.register("InactiveDB", InactiveDB)
+        BaseManager.register("WhoisDB", WhoisDB)
+        manager = BaseManager()
+
+        manager.start()
+
+        auto_continue = manager.AutoContinue()  # pylint: disable=no-member
+        inactive_db = manager.InactiveDB()  # pylint: disable=no-member
+        whois_db = manager.WhoisDB()  # pylint: disable=no-member
+
+        with open(
+            Outputs.input_destination, "r", encoding="utf-8"
+        ) as input_file_stream:
+            self.test_file(input_file_stream, auto_continue, inactive_db, whois_db)
+
+        if not self.administration.currently_under_test:
+            self.administration.currently_under_test = True
+            self.test_file(
+                chain(inactive_db.get_to_retest()), auto_continue, inactive_db, whois_db
+            )
