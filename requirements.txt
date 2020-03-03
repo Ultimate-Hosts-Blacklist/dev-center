@@ -1,5 +1,6 @@
 colorama
 domain2idna
+PyFunceble
 pyyaml
 ultimate-hosts-blacklist-helpers>=1.20.1
 ultimate-hosts-blacklist-whitelist

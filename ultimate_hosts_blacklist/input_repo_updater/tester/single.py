@@ -1,8 +1,7 @@
 """
 The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.
 
-Gets, formats and saves the upstream source.
-It basically construct the `domains.list´ file.
+Provides everything around the single mode tester.
 
 License:
 ::
@@ -32,63 +31,59 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-import logging
+
+from itertools import chain
 
 import PyFunceble
 
-from ultimate_hosts_blacklist.helpers import Download, File
-
-from .config import Outputs
-from .exceptions import CouldNotDownload
+from ..config import Outputs
+from .base import TesterBase
 
 
-class DomainsList:
+class Single(TesterBase):
     """
-    Get, format and save the upstream source into `domains.list`.
+    Provides the single mode tester.
     """
 
-    raw_link = None
-
-    @classmethod
-    def __init__(cls, raw_link):
-        cls.raw_link = raw_link
-
-    @classmethod
-    def get_subject(cls, line):
+    def __process_test(self, subject):
         """
-        Provides the subject to test from the given line.
+        Process the actual test.
         """
 
-        return PyFunceble.converter.File(line).get_converted()
+        if not self.should_it_be_ignored(
+            subject, self.auto_continue, self.api_core.inactive_db
+        ):
+            self.test(
+                subject, self.api_core, self.auto_continue, self.api_core.inactive_db
+            )
+        else:
+            print(".", end="")
 
-    def format_for_engine(self, file, data):
+    def test_file(self, file_stream):
         """
-        For the given data into something our infrastructure understand.
-        """
-
-        file.write("", overwrite=True)
-
-        for line in data.splitlines():
-            line = line.strip()
-
-            if not line:
-                continue
-
-            file.write(f"{self.get_subject(line)}\n")
-
-    def generate(self):
-        """
-        Get the upstream version.
+        Tests the content of the given file.
         """
 
-        logging.info("Starting the generation of %s", Outputs.input_destination)
+        while self.are_we_allowed_to_continue():
+            try:
+                for subject in PyFunceble.get_complements(
+                    next(file_stream).strip(), include_given=True
+                ):
+                    self.__process_test(subject)
+            except StopIteration:
+                self.administration.currently_under_test = False
+                break
 
-        file = File(Outputs.input_destination)
+    def start(self):
+        """
+        Starts the process.
+        """
 
-        if self.raw_link and not Download(self.raw_link, file.file).text():
-            raise CouldNotDownload(self.raw_link)
+        with open(
+            Outputs.input_destination, "r", encoding="utf-8"
+        ) as input_file_stream:
+            self.test_file(input_file_stream)
 
-        if file.exists():
-            self.format_for_engine(file, file.read())
-
-        logging.info("Finished the generation of %s", Outputs.input_destination)
+        if not self.administration.currently_under_test:
+            self.administration.currently_under_test = True
+            self.test_file(chain(self.api_core.inactive_db.get_to_retest()))

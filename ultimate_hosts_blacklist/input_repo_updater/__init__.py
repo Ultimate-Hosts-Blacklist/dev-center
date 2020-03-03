@@ -1,7 +1,7 @@
 """
 The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.
 
-The main entry of the tool.
+The main entrypoint.
 
 License:
 ::
@@ -37,10 +37,13 @@ import logging
 
 from colorama import Fore, Style
 from colorama import init as initiate_coloration
+from PyFunceble import VERSION as PyFuncebleVersion
 
-from ultimate_hosts_blacklist.input_repo_updater.core import Core
+from .authorization import Authorization
+from .pre_loader import PreLoader
+from .tester import Tester
 
-VERSION = "1.34.3"
+VERSION = "2.0.0"
 
 
 def _command_line():
@@ -52,7 +55,8 @@ def _command_line():
         initiate_coloration(autoreset=True)
 
         parser = argparse.ArgumentParser(
-            description="The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
+            description="The tool to update the input repositories of "
+            "the Ultimate-Hosts-Blacklist project.",
             epilog="Crafted with %s by %s"
             % (
                 Fore.RED + "♥" + Fore.RESET,
@@ -91,6 +95,19 @@ def _command_line():
         else:
             logging_level = logging.INFO
 
-        Core(
-            logging_level=logging_level, multiprocessing=arguments.multiprocess
-        ).process()
+        logging.basicConfig(
+            format="[%(asctime)s::%(levelname)s] %(message)s", level=logging_level
+        )
+
+        logging.info("Launcher version: %s", VERSION)
+        logging.info("PyFunceble version: %s", PyFuncebleVersion)
+
+        authorization = Authorization()
+
+        if authorization.get_authorization():
+            PreLoader(authorization)
+            Tester(arguments.multiprocess)
+
+        # Core(
+        #     logging_level=logging_level, multiprocessing=arguments.multiprocess
+        # ).process()

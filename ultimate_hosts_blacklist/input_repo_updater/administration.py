@@ -1,7 +1,7 @@
 """
 The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.
 
-Provide an interface to get or edit the administration file.
+Provides an interface to get or edit the administration file.
 
 License:
 ::
@@ -32,9 +32,14 @@ License:
     SOFTWARE.
 """
 
-from ultimate_hosts_blacklist.helpers import Command, Dict, File
-from ultimate_hosts_blacklist.input_repo_updater import logging
-from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
+import logging
+from datetime import datetime
+
+from PyFunceble.helpers import Dict, File
+
+from ultimate_hosts_blacklist.helpers import Command
+
+from .config import Infrastructure, Outputs
 
 
 class Administration:
@@ -42,13 +47,33 @@ class Administration:
     Provide the information of the administration file.
     """
 
-    # This is the location of the administration file.
-    location = File(Infrastructure.administration_file)
-    # Saves the administration file.
+    location = File(Outputs.admin_destination)
     data = {}
 
     def __init__(self):
-        self.data.update(self.get())
+        self.data.update(self.__get_them_all())
+
+    def __contains__(self, item):
+        return item in self.data
+
+    def __getitem__(self, name):
+        if name in self.data:
+            return self.data[name]
+
+        return None
+
+    def __getattr__(self, name):
+        if name in self.data:
+            return self.data[name]
+
+        raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        self.data[name] = value
+
+    def __delattr__(self, name):
+        if name in self.data:
+            del self.data[name]
 
     @classmethod
     def __convert_into_understandable(cls, data):
@@ -61,24 +86,13 @@ class Administration:
         :rtype: dict
         """
 
-        # We initiate a variable which will save the final
-        # output.
         result = {}
 
         for index, value in data.items():
-            # We loop through the keys and values
-            # of the given data.
-
             if index in Infrastructure.unneeded_indexes:
-                # The currenctly needed index is not needed.
-
-                # We continue the loop.
                 continue
 
             if index == "name":
-                # The index is the name.
-
-                # We get/set the name from the repository name.
                 result[index] = (
                     Command(
                         "basename `git rev-parse --show-toplevel`", allow_stdout=False
@@ -87,19 +101,18 @@ class Administration:
                     .strip()
                 )
             elif index in Infrastructure.should_be_bool:
-                # The index is in the list of indexes
-                # which should be bool interpretted.
-
-                # We convert the value to bool and append
-                # the result into the result.
                 result[index] = bool(int(value))
             elif index in Infrastructure.should_be_int:
-                # The index is in the list of indexes
-                # which should be int interpretted.
-
-                # We conver the value to int and append
-                # the result into the result.
                 result[index] = int(value)
+            elif index in Infrastructure.should_be_dict:
+                result[index] = dict(value)
+            elif index in Infrastructure.should_be_datetime:
+                try:
+                    result[index] = datetime.fromisoformat(value)
+                except ValueError:
+                    result[index] = datetime.now()
+            elif index in Infrastructure.should_be_epoch_datetime:
+                result[index] = datetime.fromtimestamp(value)
             else:
                 result[index] = value
 
@@ -116,51 +129,34 @@ class Administration:
         :rtype: dict
         """
 
-        # We initiate a variable which will save the final
-        # output.
         result = {}
         for index, value in data.items():
-            # We loop through the keys and values
-            # of the given data.
-
             if index in Infrastructure.unneeded_indexes:
-                # The currenctly needed index is not needed.
-
-                # We continue.
                 continue
 
             if index in Infrastructure.should_be_bool:
-                # The index is in the list of indexes
-                # which should be bool interpretted.
-
-                # We convert the value to bool then to str and append
-                # the result into the result.
-                result[index] = str(int(bool(value)))
+                result[index] = bool(value)
             elif index in Infrastructure.should_be_int:
-                # The index is in the list of indexes
-                # which should be int interpretted.
-
-                # We conver the value to int and append
-                # the result into the result.
                 result[index] = int(value)
+            elif index in Infrastructure.should_be_datetime:
+                result[index] = value.isoformat()
+            elif index in Infrastructure.should_be_epoch_datetime:
+                result[index] = value.timestamp()
             else:
                 result[index] = value
 
         return result
 
-    def get(self):
+    def __get_them_all(self):
         """
         Read and return the content of teh administration file.
         """
 
-        # We get the content of the administration file.
         content = self.location.read()
-        logging.debug("Administration file content: \n{0}".format(content))
+        logging.debug("Administration file content: \n%s", content)
 
-        # We convert it to a dict.
         data = Dict.from_json(content)
 
-        # And we return the understable version of it.
         return self.__convert_into_understandable(data)
 
     def save(self, data=None):
@@ -171,4 +167,6 @@ class Administration:
         if data is None:
             data = self.data
 
-        Dict(self.__convert_into_not_understandable(data)).to_json(self.location.file)
+        Dict(self.__convert_into_not_understandable(data)).to_json_file(
+            self.location.path
+        )

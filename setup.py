@@ -80,12 +80,20 @@ if __name__ == "__main__":
         name=PYPI_NAME,
         version=_get_version(),
         install_requires=_get_requirements(),
-        description="The tool to update the input source repositories of the Ultimate-Hosts-Blacklist project.",  # pylint: disable=line-too-long
+        description="The tool to update the input source "
+        "repositories of the Ultimate-Hosts-Blacklist project.",
         long_description=_get_long_description(),
         license="MIT",
         url="https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/input-repo-updater",
         platforms=["any"],
-        packages=["ultimate_hosts_blacklist.{0}".format(MODULE)],
+        packages=[
+            "ultimate_hosts_blacklist.{0}".format(MODULE),
+            "ultimate_hosts_blacklist.{0}.cleaner".format(MODULE),
+            "ultimate_hosts_blacklist.{0}.config".format(MODULE),
+            "ultimate_hosts_blacklist.{0}.installer".format(MODULE),
+            "ultimate_hosts_blacklist.{0}.tester".format(MODULE),
+            "ultimate_hosts_blacklist.{0}.updater".format(MODULE),
+        ],
         keywords=["Python", "hosts", "hosts file"],
         classifiers=[
             "Environment :: Console",
@@ -104,9 +112,8 @@ if __name__ == "__main__":
                 "uhb-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(
                     MODULE
                 ),
-                "ultimate-hosts-blacklist-input-repo-updater=ultimate_hosts_blacklist.{0}:_command_line".format(  # pylint: disable=line-too-long
-                    MODULE
-                ),
+                "ultimate-hosts-blacklist-input-repo-updater="
+                "ultimate_hosts_blacklist.{0}:_command_line".format(MODULE),
             ]
         },
     )

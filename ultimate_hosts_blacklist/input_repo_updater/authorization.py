@@ -1,7 +1,7 @@
 """
 The tool to update the input repositories of the Ultimate-Hosts-Blacklist project.
 
-Provide the authorization logic.
+Provides the global authorization logic.
 
 License:
 ::
@@ -31,16 +31,20 @@ License:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 """
-# pylint: disable=bad-continuation
-from time import time
+import logging
+from datetime import datetime, timedelta
 
-from ultimate_hosts_blacklist.helpers import Command, Regex
-from ultimate_hosts_blacklist.input_repo_updater import logging
-from ultimate_hosts_blacklist.input_repo_updater.configuration import Infrastructure
-from ultimate_hosts_blacklist.input_repo_updater.domains_list import DomainsList
+from PyFunceble.helpers import Regex
+
+from ultimate_hosts_blacklist.helpers import Command
+
+from .administration import Administration
+from .config import Infrastructure
+from .domains_list import DomainsList
+from .exceptions import UnableToAuthorize
 
 
-class Authorization:  # pylint: disable=too-few-public-methods
+class Authorization:
     """
     Provide the authorization for a test.
 
@@ -50,15 +54,14 @@ class Authorization:  # pylint: disable=too-few-public-methods
     :param dict administration data: The fomatted content of the administration file.
     """
 
-    # Save the authorization to run.
     authorized = False
-    # Save the cleaning part.
     clean = False
 
-    def __init__(self, administration_data, shared_pyfunceble=None):
-        self._administration_data = administration_data
-        self.shared_pyfunceble = shared_pyfunceble
-        self.get()
+    def __init__(self):
+        self.adminstration = Administration()
+        self.authorized, self.clean = self.__get()
+
+        del self.adminstration
 
     @classmethod
     def __launch_test(cls):
@@ -66,92 +69,69 @@ class Authorization:  # pylint: disable=too-few-public-methods
         Provide the launch test handler.
         """
 
-        return Regex(
-            Command("git log -1", allow_stdout=False).execute(),
-            Infrastructure.markers["launch_test"],
-            return_data=False,
-        ).match()
+        return Regex(Infrastructure.markers["launch_test"]).match(
+            Command("git log -1", allow_stdout=False).execute(), return_match=False
+        )
 
     def __is_currently_under_test(self):
         """
         Provide the currently under test handler.
         """
 
-        return self._administration_data["currently_under_test"]
+        return self.adminstration.currently_under_test
 
-    def get(self):
+    def __get(self):
         """
         Provide or deny the authorization.
         """
 
-        # We download/format the raw link/domains.list file.
-        DomainsList(
-            self._administration_data["raw_link"],
-            shared_pyfunceble=self.shared_pyfunceble,
-        )
+        DomainsList(self.adminstration.raw_link).generate()
 
         if self.__launch_test():
-            # The launch test marker was send by a maintainer or
-            # member of the team.
-
-            # We authorize the test.
-            self.authorized = True
-
-            # And we "force" the cleaning.
-            self.clean = True
+            authorized = True
+            clean = True
 
             logging.info(
-                "Test authorized by: {0}.".format(
-                    repr(Infrastructure.markers["launch_test"])
-                )
+                "Test authorized by: %s.", repr(Infrastructure.markers["launch_test"])
             )
         elif self.__is_currently_under_test():
-            # We are still under test.
-
-            # We authorize the test.
-            self.authorized = True
-            # But we do not authorize the cleaning.
-            self.clean = False
+            authorized = True
+            clean = False
 
             logging.info("Test authorized by: Still under test.")
         elif not self.__is_currently_under_test():
-            # We are not under test.
-
-            # We authorize the test.
-            self.authorized = True
-            # We "force" the cleaning.
-            self.clean = True
+            authorized = True
+            clean = True
 
             logging.info("Test authorized by: Not currently under test.")
-        elif (
-            int(self._administration_data["days_until_next_test"]) >= 1
-            and int(self._administration_data["last_test"]) >= 0
-        ):
-            # * The given days until next next is >= 1.
-            # and
-            # * The last test time is >= 0
-
-            # We calculate the expected retest date.
-            expected_retest_date = (
-                24 * self._administration_data["days_until_next_test"] * 3600
+        elif int(self.adminstration.days_until_next_test) >= 1:
+            expected_retest_date = datetime.now() + timedelta(
+                days=self.adminstration.days_until_next_test
             )
 
-            if int(time()) >= expected_retest_date:
-                # The expected retest date is in the past.
-
-                # We authorize the test.
-                self.authorized = True
-                # We "force" the cleaning.
-                self.clean = True
+            if datetime.now() >= expected_retest_date:
+                authorized = True
+                clean = True
 
                 logging.info("Test authorized by: Restest time in the past.")
             else:
-                # The expected retest date is in th efuture.
-
-                # We do not authorize the test.
-                self.authorized = self.clean = False
+                authorized = clean = False
                 logging.info("Test not authorized by: Retest time in the future.")
         else:
-            raise Exception("Unable to determine authorization.")
+            raise UnableToAuthorize()
+
+        return authorized, clean
+
+    def get_cleaning_authorization(self):
+        """
+        Provides the cleaning authorization
+        """
+
+        return self.clean
+
+    def get_authorization(self):
+        """
+        Provides the authorizsation to launch a test.
+        """
 
         return self.authorized
