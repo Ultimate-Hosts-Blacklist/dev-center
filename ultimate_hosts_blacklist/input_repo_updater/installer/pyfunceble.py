@@ -58,7 +58,7 @@ class PyFuncebleInstaller(InstallerBase):
             logging.info("Starting installation of %s.", self.pyfunceble_destination)
 
             link = getattr(Infrastructure, f"links_{self.infrastructure_version}")[
-                "production_config"
+                "config"
             ]["link"]
 
             logging.info(
