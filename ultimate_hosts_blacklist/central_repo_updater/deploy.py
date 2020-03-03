@@ -57,4 +57,7 @@ class Deploy:
         Deploy to our mirror: hosts.ubuntu101.co.za.
         """
 
-        get(Infrastructure.links["deploy"])
+        get(
+            Infrastructure.links["deploy"],
+            headers={"User-Agent": "Ultimate-Hosts-Blacklist/central-repo-updaters"},
+        )

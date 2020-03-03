@@ -340,5 +340,5 @@ class Core:
         deployment = Deploy(self.ci_engine)
 
         deployment.github()
-        sleep(3)
+        sleep(30)
         deployment.hosts_ubuntu101_co_za()
