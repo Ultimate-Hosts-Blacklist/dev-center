@@ -43,7 +43,7 @@ from .authorization import Authorization
 from .pre_loader import PreLoader
 from .tester import Tester
 
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 
 
 def _command_line():
@@ -107,7 +107,3 @@ def _command_line():
         if authorization.get_authorization():
             PreLoader(authorization)
             Tester(arguments.multiprocess)
-
-        # Core(
-        #     logging_level=logging_level, multiprocessing=arguments.multiprocess
-        # ).process()
