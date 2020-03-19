@@ -86,6 +86,8 @@ class Infrastructure:  # pylint: disable=too-few-public-methods
         "whitelist",
         ".github",
         "template",
+        "smed79_blacklist_nsfw",
+        "smed79_blocklist_facebook",
     ]
 
     try:
