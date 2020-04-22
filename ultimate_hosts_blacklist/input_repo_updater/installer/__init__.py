@@ -32,6 +32,7 @@ License:
     SOFTWARE.
 """
 from .base import InstallerBase
+from .domains_list import DomainsListInstaller
 from .exceptions import InstallerException
 from .infrastructure import InfrastructureInstaller
 from .pyfunceble import PyFuncebleInstaller

@@ -40,7 +40,6 @@ from ultimate_hosts_blacklist.helpers import Command
 
 from .administration import Administration
 from .config import Infrastructure
-from .domains_list import DomainsList
 from .exceptions import UnableToAuthorize
 
 
@@ -84,8 +83,6 @@ class Authorization:
         """
         Provide or deny the authorization.
         """
-
-        DomainsList(self.adminstration.raw_link).generate()
 
         if self.__launch_test():
             authorized = True

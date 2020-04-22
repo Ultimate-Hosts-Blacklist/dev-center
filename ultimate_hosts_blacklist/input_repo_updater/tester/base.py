@@ -44,6 +44,7 @@ from ultimate_hosts_blacklist.whitelist import clean_list_with_official_whitelis
 
 from ..administration import Administration
 from ..config import OurPyFuncebleConfig, Outputs
+from ..installer import DomainsListInstaller
 
 
 class TesterBase:
@@ -73,6 +74,8 @@ class TesterBase:
             self.administration = Administration()
             self.multiprocessing = False
             self.processes = cpu_count()
+
+            DomainsListInstaller(self.administration.raw_link, processes=self.processes)
 
         if not hasattr(self, "auto_continue"):
             self.auto_continue = PyFunceble.engine.AutoContinue(
@@ -162,7 +165,9 @@ class TesterBase:
 
         return api_core.domain_and_ip()
 
-    def test(self, subject, api_core, auto_continue, inactive_db, whois_db):
+    def test(
+        self, subject, api_core, auto_continue, inactive_db, whois_db
+    ):  # pylint: disable=too-many-arguments
         """
         Do the test and generate what needs to be geneated.
         """

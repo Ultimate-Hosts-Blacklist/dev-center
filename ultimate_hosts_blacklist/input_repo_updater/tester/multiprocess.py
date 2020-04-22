@@ -145,7 +145,9 @@ class Multiprocess(TesterBase):
     Provides the multiprocessing testing mode.
     """
 
-    def __process_test(self, subject, api_core, auto_continue, inactive_db, whois_db):
+    def __process_test(
+        self, subject, api_core, auto_continue, inactive_db, whois_db
+    ):  # pylint: disable=too-many-arguments
         """
         Process the actual test.
         """
