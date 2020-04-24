@@ -4,11 +4,11 @@
 
 Want to compare a list with the current state of the Ultimate Hosts Blacklist ? Simply move to the [`compare-with-system`](https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/compare-with-system) branch.
 
-## Whitelisting script
+## Whitelisting program
 
-Want to use our whitelist system and list again your list or hosts file ? Simply move to the [`whitelisting`](https://github.com/Ultimate-Hosts-Blacklist/dev-center/tree/whitelisting) branch.
+We created a whitelisting program for the world to use! [Read more about it](https://github.com/Ultimate-Hosts-Blacklist/whitelist/tree/script).
 
-## How does our backend work ?
+## How does our backend work?
 
 Here is a graph!
 
