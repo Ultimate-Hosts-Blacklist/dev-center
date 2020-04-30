@@ -35,6 +35,7 @@ License:
 import logging
 import sys
 
+import PyFunceble
 from PyFunceble.helpers import EnvironmentVariable
 
 from ultimate_hosts_blacklist.helpers import Command
@@ -87,6 +88,17 @@ class InstallerBase:
         raise NotImplementedError()
 
     @classmethod
+    def init_ci(cls):
+        """
+        Initiates the CI environment.
+        """
+
+        ci_engine = PyFunceble.engine.AutoSave.get_current_ci()
+
+        if ci_engine:
+            ci_engine.init()
+
+    @classmethod
     def check_changes_and_commit(cls, file_to_check, commit_message=None):
         """
         Checks if the given :code:`file_to_check` has been changed and process
@@ -102,6 +114,7 @@ class InstallerBase:
                 .startswith("M")
             ):
                 logging.info("Stopping instance: %s", commit_message)
+                cls.init_ci()
 
                 Command(
                     "git add {0} && git commit -m '{1}' && git push origin {2}".format(
