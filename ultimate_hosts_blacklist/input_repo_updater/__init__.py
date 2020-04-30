@@ -43,7 +43,7 @@ from .authorization import Authorization
 from .pre_loader import PreLoader
 from .tester import Tester
 
-VERSION = "2.6.1"
+VERSION = "2.6.2"
 
 
 def _command_line():

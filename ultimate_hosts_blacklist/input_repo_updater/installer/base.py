@@ -93,11 +93,15 @@ class InstallerBase:
         Initiates the CI environment.
         """
 
-        PyFunceble.load_config(generate_directory_structure=False)
-        ci_engine = PyFunceble.engine.AutoSave.get_current_ci()
+        if EnvironmentVariable("TRAVIS_BUILD_DIR").exists():
 
-        if ci_engine:
-            ci_engine.init()
+            PyFunceble.load_config(
+                generate_directory_structure=False, custom={"ci": True}
+            )
+            ci_engine = PyFunceble.engine.AutoSave.get_current_ci()
+
+            if ci_engine:
+                ci_engine.init()
 
     @classmethod
     def check_changes_and_commit(cls, file_to_check, commit_message=None):
@@ -107,7 +111,7 @@ class InstallerBase:
         """
 
         branch = EnvironmentVariable("GIT_BRANCH")
-        if branch.exists() and EnvironmentVariable("TRAVIS_BUILD_DIR"):
+        if branch.exists() and EnvironmentVariable("TRAVIS_BUILD_DIR").exists():
             if (
                 Command(f"git status --porcelain {file_to_check}", allow_stdout=False)
                 .execute()
