@@ -93,6 +93,7 @@ class InstallerBase:
         Initiates the CI environment.
         """
 
+        PyFunceble.load_config(generate_directory_structure=False)
         ci_engine = PyFunceble.engine.AutoSave.get_current_ci()
 
         if ci_engine:
