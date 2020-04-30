@@ -208,8 +208,7 @@ class DomainsListInstaller(InstallerBase):
         kept, removed, new = self.get_diff(downloaded)
 
         to_write = kept.copy()
-        to_write.add(new)
-        to_write.update({None})
+        to_write.update(new)
 
         # Safety.
         to_write.remove(None)
