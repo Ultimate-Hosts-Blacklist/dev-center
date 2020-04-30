@@ -210,8 +210,11 @@ class DomainsListInstaller(InstallerBase):
         to_write = kept.copy()
         to_write.update(new)
 
-        # Safety.
-        to_write.remove(None)
+        try:
+            # Safety.
+            to_write.remove(None)
+        except KeyError:
+            pass
 
         logging.info(
             "Started to write the new version of %s",
