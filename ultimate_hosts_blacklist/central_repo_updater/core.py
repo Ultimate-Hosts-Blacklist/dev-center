@@ -133,13 +133,13 @@ class Core:
         req_white = get(whitelisted_url)
         req_ip = get(ip_url)
 
-        ip_result = None
-        domain_result = []
+        ip_result = set()
+        domain_result = set()
 
         if req_ip.status_code == 200:
             logging.info("Could get `ip.list` of %s.", repr(repository_info["name"]))
 
-            ip_result = req_ip.text.splitlines()
+            ip_result.update(set(req_ip.text.splitlines()))
         else:
             logging.critical(
                 "Unable to get `ip.list` from %s.", repr(repository_info["name"])
@@ -150,7 +150,7 @@ class Core:
                 "Could get `whitelisted.list` of %s.", repr(repository_info["name"])
             )
 
-            domain_result = req_white.text.splitlines()
+            domain_result.update(set(req_white.text.splitlines()))
         else:
             req = get(input_url)
 
@@ -162,8 +162,12 @@ class Core:
                     "Starting whitelisting of %s", repr(repository_info["name"])
                 )
 
-                domain_result = whitelisting_core.filter(
-                    string=req.text, already_formatted=True
+                domain_result.update(
+                    set(
+                        whitelisting_core.filter(
+                            string=req.text, already_formatted=True
+                        )
+                    )
                 )
 
                 logging.info(
@@ -174,26 +178,36 @@ class Core:
                     "Unable to get a list from %s.", repr(repository_info["name"])
                 )
 
-        if ip_result is None:
-            ip_result = []
-            api = PyFunceble.core.API(None)
+        try:
+            ip_result.remove(None)
+        except KeyError:
+            pass
 
-            for index, line in enumerate(domain_result):
-                api.subject = line
-                if line in ip_result or api.ipv4_syntax():
-                    ip_result.append(line)
-                    del domain_result[index]
+        try:
+            domain_result.remove(None)
+        except KeyError:
+            pass
 
-            if ip_result:
-                logging.info(
-                    "Found some IPs in the domain list of %s.",
-                    repr(repository_info["name"]),
-                )
+        api = PyFunceble.core.API(None)
+        shadow_copy = domain_result.copy()
+
+        for line in shadow_copy:
+            api.subject = line
+
+            if line in ip_result or api.ipv4_syntax():
+                ip_result.add(line)
+
+                try:
+                    domain_result.remove(line)
+                except KeyError:
+                    pass
 
         logging.info(
             "Starting whitelisting of the IP list of %s.", repr(repository_info["name"])
         )
-        ip_result = whitelisting_core.filter(items=ip_result, already_formatted=True)
+        ip_result = whitelisting_core.filter(
+            items=list(ip_result), already_formatted=True
+        )
         logging.info(
             "Finished whitelisting of the IP list of %s.", repr(repository_info["name"])
         )
@@ -203,7 +217,7 @@ class Core:
             repr(repository_info["name"]),
         )
         domain_result = whitelisting_core.filter(
-            items=domain_result, already_formatted=True
+            items=list(domain_result), already_formatted=True
         )
         logging.info(
             "Finished whitelisting of the ip list of %s.", repr(repository_info["name"])

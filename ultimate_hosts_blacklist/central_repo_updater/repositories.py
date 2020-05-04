@@ -130,7 +130,7 @@ class Repositories:  # pylint: disable=too-few-public-methods
             raise Exception("Bad GitHub credentials.")
         else:
             raise NotImplementedError(
-                "Something went wrong while communicating with {0}".format(
-                    repr(url_to_get)
+                "Something went wrong while communicating with {0} ({1})".format(
+                    repr(url_to_get), req.status_code
                 )
             )
