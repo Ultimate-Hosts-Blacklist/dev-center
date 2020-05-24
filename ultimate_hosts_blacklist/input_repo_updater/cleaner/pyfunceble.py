@@ -69,5 +69,9 @@ class PyFuncebleCleaner(CleanerBase):
             PyFunceble.helpers.File(file).delete()
 
         # We now clean everything actually related to PyFunceble
-        PyFunceble.load_config(generate_directory_structure=False)
+        PyFunceble.load_config(
+            generate_directory_structure=not PyFunceble.helpers.Directory(
+                Outputs.output_destination
+            ).exists()
+        )
         PyFunceble.output.Clean()

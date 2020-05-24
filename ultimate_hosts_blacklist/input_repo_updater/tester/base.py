@@ -60,7 +60,12 @@ class TesterBase:
         self.__dict__ = self._shared_state
 
         if not PyFunceble.CONFIGURATION:
-            PyFunceble.load_config(custom=OurPyFuncebleConfig.api_configuration)
+            PyFunceble.load_config(
+                generate_directory_structure=not PyFunceble.helpers.Directory(
+                    Outputs.output_destination
+                ).exists(),
+                custom=OurPyFuncebleConfig.api_configuration,
+            )
 
         if not hasattr(self, "start_time"):
             self.start_time = datetime.now()

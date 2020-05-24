@@ -96,7 +96,10 @@ class InstallerBase:
         if EnvironmentVariable("TRAVIS_BUILD_DIR").exists():
 
             PyFunceble.load_config(
-                generate_directory_structure=False, custom={"ci": True}
+                generate_directory_structure=not PyFunceble.helpers.Directory(
+                    Outputs.output_destination
+                ).exists(),
+                custom={"ci": True},
             )
             ci_engine = PyFunceble.engine.AutoSave.get_current_ci()
 
