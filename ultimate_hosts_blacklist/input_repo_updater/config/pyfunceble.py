@@ -76,7 +76,7 @@ class PyFunceble:
         "auto_continue": True,
         "ci_autosave_commit": "[Autosave] Testing for Ultimate Hosts Blacklist",
         "ci_autosave_final_commit": "[Results] Testing for Ultimate Hosts Blacklist",
-        "ci_autosave_minutes": 10,
+        "ci_autosave_minutes": 15,
         "idna_conversion": True,
         "dns_server": ["1.1.1.1", "1.0.0.1"],
     }
