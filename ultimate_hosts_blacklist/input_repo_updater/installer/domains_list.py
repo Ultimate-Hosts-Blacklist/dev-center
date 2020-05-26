@@ -34,7 +34,7 @@ License:
 
 import logging
 from tempfile import NamedTemporaryFile
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import PyFunceble
 from PyFunceble.helpers import Download, EnvironmentVariable, File
@@ -51,10 +51,10 @@ class DomainsListInstaller(InstallerBase):
     Provides everything related to our infrastructure.
     """
 
-    raw_link: int = None
+    raw_link: Optional[str] = None
     processes: int = 1
 
-    def __init__(self, raw_link: Union[str, None], processes: int = 1) -> None:
+    def __init__(self, raw_link: Optional[str], processes: int = 1) -> None:
 
         self.raw_link = raw_link
         self.processes = processes
@@ -62,9 +62,13 @@ class DomainsListInstaller(InstallerBase):
         self.domains_list_destination = Outputs.input_destination
 
         self.files_to_clean = [
+            Outputs.active_subjects_destination,
             Outputs.clean_destination,
-            Outputs.whitelisted_destination,
+            Outputs.ip_destination,
+            Outputs.ip_subjects_destination,
+            Outputs.temp_volatile_destination,
             Outputs.volatile_destination,
+            Outputs.whitelisted_destination,
         ]
 
         super().__init__()
@@ -104,7 +108,7 @@ class DomainsListInstaller(InstallerBase):
             return file.name
         return None
 
-    def get_diff_data(self, current_content, subjects) -> Tuple[set, set, set]:
+    def get_diff_data(self, current_content, subjects) -> Tuple[set, set]:
         """
         Provides the difference data.
         """
