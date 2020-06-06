@@ -163,11 +163,15 @@ class Core:
                 )
 
                 domain_result.update(
-                    set(
-                        whitelisting_core.filter(
-                            string=req.text, already_formatted=True
+                    {
+                        x
+                        for x in set(
+                            whitelisting_core.filter(
+                                string=req.text, already_formatted=True
+                            )
                         )
-                    )
+                        if PyFunceble.is_domain(x) or PyFunceble.is_ip(x)
+                    }
                 )
 
                 logging.info(

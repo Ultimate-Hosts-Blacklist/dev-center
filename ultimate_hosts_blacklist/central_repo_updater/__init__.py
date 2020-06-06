@@ -39,7 +39,7 @@ from colorama import init as initiate_coloration
 
 from ultimate_hosts_blacklist.central_repo_updater.core import Core
 
-VERSION = "1.10.0"
+VERSION = "1.11.0"
 
 
 def _command_line():
