@@ -374,7 +374,10 @@ class TesterBase:
             if self.whitelited_file.exists():
                 volatile_list.extend(self.whitelited_file.read().splitlines())
         else:
-            volatile_list = self.volatile_file.read().splitlines()
+            try:
+                volatile_list = self.volatile_file.read().splitlines()
+            except AttributeError:
+                volatile_list = []
 
         volatile_list = PyFunceble.helpers.List(
             clean_list_with_official_whitelist(
