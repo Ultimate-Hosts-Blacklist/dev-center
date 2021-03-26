@@ -10,6 +10,7 @@ deployment-launcher
 webservice
 comparison-tool
 helpers-tools
+arch-linux-gh-actions-runner
 
 # Input sources
 smed79_blacklist_nsfw
