@@ -1,0 +1,16 @@
+# Core components.
+dev-center
+template
+repository-structure
+Ultimate.Hosts.Blacklist
+.github
+whitelist
+test-launcher
+deployment-launcher
+webservice
+comparison-tool
+helpers-tools
+
+# Input sources
+smed79_blacklist_nsfw
+smed79_blocklist_facebook
