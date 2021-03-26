@@ -1,9 +1,9 @@
 # DNS
 
-The Ultimate Hosts Blacklist project offers 2 DNS server that are updated
+The Ultimate Hosts Blacklist project offers 2 DNS servers that are updated
 daily. They are free to use and can be used instead of the other list we offer.
 
-Both DNS servers are location in Germany. They are configurated to answer DNS
+Both DNS servers are located in Germany. They are configured to answer DNS
 queries with the [bind](https://www.isc.org/bind/) DNS implementation software.
 
 Our project follows a Zero-Logging policy. Meaning that we don't store any
