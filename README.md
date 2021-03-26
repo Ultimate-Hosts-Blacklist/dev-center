@@ -1,4 +1,9 @@
-# Ultimate Hosts Blacklist dev-center
+# Ultimate Hosts Blacklist - dev-center
+
+## DNS Server
+
+For everything regarding the DNS server, please move into the `dns` folder.
+
 
 ## Comparison system
 
