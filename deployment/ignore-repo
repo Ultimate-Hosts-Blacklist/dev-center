@@ -11,6 +11,7 @@ webservice
 comparison-tool
 helpers-tools
 arch-linux-gh-actions-runner
+whitelist-tool
 
 # Input sources
 smed79_blacklist_nsfw
