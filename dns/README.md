@@ -13,10 +13,10 @@ information about your queries nor their answers.
 
 Our servers are reachable
 
-| DNS Name | safedns.allover.co.za   | safedns2.allover.co.za  |
-| -------- | ----------------------- | ----------------------- |
-| IPv4     | `88.198.70.38`          | `88.198.70.39`          |
-| IPv6     | `2a01:4f8:140:5021::38` | `2a01:4f8:140:5021::39` |
+| DNS Name | safedns.allover.co.za   | safedns2.allover.co.za  | Ports        |
+| -------- | ----------------------- | ----------------------- | ------------ |
+| IPv4     | `88.198.70.38`          | `88.198.70.39`          | `53`, `5353` |
+| IPv6     | `2a01:4f8:140:5021::38` | `2a01:4f8:140:5021::39` | `53`, `5353` |
 
 ### Testing
 
